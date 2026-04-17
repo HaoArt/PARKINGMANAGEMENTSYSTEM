@@ -12,6 +12,6 @@ namespace VisionPark.API.Models
         [Required]
         public string TypeName { get; set; }= string.Empty;
 
-        public string Description {  get; set; } 
+        public string? Description {  get; set; } 
     }
 }

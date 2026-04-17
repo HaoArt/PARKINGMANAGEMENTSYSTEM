@@ -11,7 +11,8 @@ namespace VisionPark.API.Models
          public int VehicleTypeID { get; set; }
         [ForeignKey("VehicleTypeID")]
 
-        public VehicleType VehicleType { get; set; }
+
+        public required VehicleType VehicleType { get; set; }
 
         [Required]
         public string RuleType {  get; set; } = string.Empty;

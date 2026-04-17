@@ -7,7 +7,7 @@ namespace VisionPark.API.Models
     public class SystemConfig
     {
         [Key]
-        public string ConfigKey { get; set; } 
+        public string ConfigKey { get; set; } = string.Empty;
 
         [Required]
         public string ConfigValue { get; set; } = string.Empty;
