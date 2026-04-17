@@ -1,0 +1,21 @@
+<ion-menu contentId="main-content" >
+  <ion-content class="ion-padding-top">
+    <ion-list lines="none">
+      <ion-list-header>
+        <ion-label color="primary"><h1>VisionPark</h1></ion-label>
+      </ion-list-header>
+
+      <ion-menu-toggle auto-hide="false" *ngFor="let p of adminPages">
+        <ion-item [routerLink]="[p.url]" routerLinkActive="selected" detail="false">
+          <ion-icon slot="start" [name]="p.icon"></ion-icon>
+          <ion-label>{{ p.title }}</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+
+      <ion-item button routerLink="/login" lines="none" class="logout-item">
+        <ion-icon slot="start" name="log-out-outline" color="danger"></ion-icon>
+        <ion-label color="danger">Đăng xuất</ion-label>
+      </ion-item>
+    </ion-list>
+  </ion-content>
+</ion-menu>

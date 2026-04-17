@@ -1,0 +1,122 @@
+<ion-content class="ion-padding">
+  <div class="table-header-actions">
+    <h2>Quản lý xe ra vào</h2>
+    <ion-button color="success" fill="solid">
+      <ion-icon slot="start" name="download-outline"></ion-icon> Xuất Excel
+    </ion-button>
+  </div>
+
+  <div class="filter-bar">
+    <ion-grid>
+      <ion-row class="ion-align-items-center">
+        <ion-col size="12" size-md="2">
+          <ion-item lines="none" class="filter-item">
+            <ion-input
+              label="Biển số"
+              label-placement="floating"
+              placeholder="Tìm 75A..."
+              [(ngModel)]="filterConfig.plateNumber"
+              (ionInput)="applyFilters()"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+
+        <ion-col size="12" size-md="2">
+          <ion-item lines="none" class="filter-item">
+            <ion-select
+              label="Trạng thái"
+              label-placement="floating"
+              [(ngModel)]="filterConfig.status"
+              (ionChange)="applyFilters()"
+            >
+              <ion-select-option value="all">Tất cả</ion-select-option>
+              <ion-select-option value="In">Trong bãi</ion-select-option>
+              <ion-select-option value="Out">Đã ra</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-col>
+
+        <ion-col size="6" size-md="2">
+          <ion-item lines="none" class="filter-item">
+            <ion-input
+              type="date"
+              label="Từ ngày"
+              label-placement="floating"
+              [(ngModel)]="filterConfig.dateFrom"
+              (ionChange)="applyFilters()"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+
+        <ion-col size="6" size-md="2">
+          <ion-item lines="none" class="filter-item">
+            <ion-input
+              type="date"
+              label="Đến ngày"
+              label-placement="floating"
+              [(ngModel)]="filterConfig.dateTo"
+              (ionChange)="applyFilters()"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+
+        <ion-col size="12" size-md="2">
+          <ion-item lines="none" class="filter-item">
+            <ion-select
+              label="Sắp xếp tiền"
+              label-placement="floating"
+              [(ngModel)]="filterConfig.sortByCost"
+              (ionChange)="applyFilters()"
+            >
+              <ion-select-option value="none">Mặc định</ion-select-option>
+              <ion-select-option value="asc">Thấp -> Cao</ion-select-option>
+              <ion-select-option value="desc">Cao -> Thấp</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-col>
+
+        <ion-col size="12" size-md="2">
+          <ion-button
+            fill="clear"
+            color="medium"
+            (click)="resetFilters()"
+            expand="block"
+          >
+            Làm mới
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <div class="table-container ion-margin-top">
+    <ion-grid>
+      <ion-row class="header-row">
+        <ion-col size="1">Trạng thái</ion-col>
+        <ion-col size="2">Mã thẻ NFC</ion-col>
+        <ion-col size="2">Biển số</ion-col>
+        <ion-col size="2">Loại xe</ion-col>
+        <ion-col size="3">Thời gian vào</ion-col>
+        <ion-col size="2">Thanh toán</ion-col>
+      </ion-row>
+
+      <ion-row *ngFor="let item of filteredHistory" class="data-row">
+        <ion-col size="1">
+          <ion-badge [color]="getBadgeColor(item.status)"
+            >{{ item.status }}</ion-badge
+          >
+        </ion-col>
+        <ion-col size="2"><strong>{{ item.nfcId }}</strong></ion-col>
+        <ion-col size="2">{{ item.plateNumber }}</ion-col>
+        <ion-col size="2">{{ item.vehicleType }}</ion-col>
+        <ion-col size="3"
+          >{{ item.checkInTime | date:'dd/MM/yyyy HH:mm' }}</ion-col
+        >
+        <ion-col size="2">{{ (item.totalCost | number) || 0 }} đ</ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+  <div *ngIf="filteredHistory.length === 0" class="ion-text-center ion-padding">
+    <p>Không tìm thấy xe nào khớp với bộ lọc!</p>
+  </div>
+</ion-content>

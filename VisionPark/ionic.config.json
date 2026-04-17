@@ -1,0 +1,7 @@
+{
+  "name": "VisionPark",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
