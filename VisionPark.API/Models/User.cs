@@ -10,10 +10,19 @@ namespace VisionPark.API.Models
         public int UsertId { get; set; }
 
         [Required]
-        public String UserName { get; set; }
+        public String UserName { get; set; } = String.Empty;
 
         [Required]
+        public string PasswordHash { get; set; } = String.Empty;
 
+        [Required]
+        public string FullName {  get; set; } = String.Empty;
+
+        public string Role { get; set; } = "Security";
+
+        public bool IsActive { get; set; } = true;
+
+        public DateTime CreateAt { get; set; }= DateTime.Now;
 
     }
 }
