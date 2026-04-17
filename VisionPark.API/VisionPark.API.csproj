@@ -19,7 +19,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="DTos\Requests\" />
 		<Folder Include="Migrations\" />
 	</ItemGroup>
 

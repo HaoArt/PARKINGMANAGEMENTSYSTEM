@@ -9,7 +9,8 @@ namespace VisionPark.API.Models
         [Key]
         public int CardID { get; set; }
 
-        public string CardUID { get; set; } = "Guest";
+        public string CardUID { get; set; } = string.Empty;
+        public string CardType { get; set; } = "Guest";
 
         public string Status { get; set; } = "Active";
     }

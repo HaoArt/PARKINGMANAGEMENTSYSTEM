@@ -12,7 +12,7 @@ namespace VisionPark.API.Models
         public int UserID { get; set; }
         [ForeignKey("UserID")]
         [Required]
-        public required User User { get; set; }
+        public  User User { get; set; }
 
         [Required]
         public string ActionType { get; set; } = string.Empty;

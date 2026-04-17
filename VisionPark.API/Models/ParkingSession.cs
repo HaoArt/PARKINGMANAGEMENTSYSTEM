@@ -11,27 +11,27 @@ namespace VisionPark.API.Models
 
         public int CardID { get; set; }
         [ForeignKey("CardID")]
-        public required NfcCard Card { get; set; }
+        public  NfcCard Card { get; set; }
 
         public int VehicleTypeID { get; set; }
         [ForeignKey("VehicleTypeID")]
-        public required VehicleType VehicleType { get; set; }
+        public  VehicleType VehicleType { get; set; }
 
         public int? TicketID { get; set; }
         [ForeignKey("TicketID")]
-        public MonthlyTicket? MonthlyTicket { get; set; } // Dấu ? vì có thể là khách lẻ (không có vé tháng)
+        public MonthlyTicket? MonthlyTicket { get; set; } 
 
-        // --- Thông tin Check-in ---
+    
         public DateTime TimeIn { get; set; } = DateTime.Now;
         public string? PlateNumberIn { get; set; }
         public string? ImageInPath { get; set; }
 
         public int UserInID { get; set; }
         [ForeignKey("UserInID")]
-        public required User UserIn { get; set; }
+        public  User UserIn { get; set; }
 
-        // --- Thông tin Check-out ---
-        public DateTime? TimeOut { get; set; } // Dấu ? vì lúc mới vào chưa có giờ ra
+       
+        public DateTime? TimeOut { get; set; } 
         public string? PlateNumberOut { get; set; }
         public string? ImageOutPath { get; set; }
 

@@ -11,11 +11,11 @@ namespace VisionPark.API.Models
 
         public int CardID { get; set; }
         [ForeignKey("CardID")]
-        public required NfcCard Card { get; set; }
+        public  NfcCard Card { get; set; }
 
         public int VehicleTypeID { get; set; }
         [ForeignKey("VehicleTypeID")]
-        public required VehicleType VehicleType { get; set; }
+        public  VehicleType VehicleType { get; set; }
 
         [Required]
         public string CustomerName { get; set; } = string.Empty;
