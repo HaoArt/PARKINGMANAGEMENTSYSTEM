@@ -1,0 +1,16 @@
+# --- Frontend (VisionPark) ---
+node_modules/
+dist/
+www/
+.angular/
+
+# --- Backend C# (VisionPark.API) ---
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+appsettings.Development.json
+
+# --- OS Files ---
+.DS_Store
+Thumbs.db
