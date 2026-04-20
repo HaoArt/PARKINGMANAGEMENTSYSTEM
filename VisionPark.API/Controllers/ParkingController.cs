@@ -1,7 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 using VisionPark.API.Data;
-using System.Text.Json;
+using VisionPark.API.DTOs.Requests;
+using VisionPark.API.Models;
 
 namespace VisionPark.API.Controllers
 {
@@ -10,86 +14,114 @@ namespace VisionPark.API.Controllers
     public class ParkingController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        // Sử dụng IHttpClientFactory để gọi API ngoài (Best Practice của C#)
-        private readonly IHttpClientFactory _httpClientFactory;
 
-        public ParkingController(ApplicationDbContext context, IHttpClientFactory httpClientFactory)
+        public ParkingController(ApplicationDbContext context)
         {
             _context = context;
-            _httpClientFactory = httpClientFactory;
         }
+        [HttpPost("scan-card")]
 
-        [HttpPost("check-in-monthly")]
-        public async Task<IActionResult> CheckInMonthly(IFormFile vehicleImage, [FromForm] string cardUID)
+        public async Task<IActionResult> ScanCard([FromBody] ScanCardRequest request)
         {
-            if (vehicleImage == null || vehicleImage.Length == 0)
-                return BadRequest("Vui lòng cung cấp ảnh xe!");
+            var card = await _context.NfcCards.FirstOrDefaultAsync(c => c.CardUID == request.CardUID);
 
-            // ==========================================
-            // 1. GỬI ẢNH SANG PYTHON ĐỂ NHẬN DIỆN BIỂN SỐ
-            // ==========================================
-            string plateFromAI = "";
+            if (card == null) return BadRequest("Thẻ này chưa được khởi tạo trên hệ thống!");
 
-            using (var client = _httpClientFactory.CreateClient())
+            var ticket = await _context.MonthlyTickets.Include(t => t.VehicleType).FirstOrDefaultAsync(t=>t.CardID == card.CardID);
+            if (ticket == null) return BadRequest(new { Message = "Thẻ này chưa được đăng ký vé tháng!" });
+            var isExpired = DateTime.Now > ticket.EndDate;
+            var ticketStatus = isExpired ? "Đã hết hạn" : "Hợp lệ";
+            var displayInfo = new
             {
-                using var content = new MultipartFormDataContent();
-
-                // Đọc file ảnh thành luồng byte
-                using var stream = vehicleImage.OpenReadStream();
-                var streamContent = new StreamContent(stream);
-                content.Add(streamContent, "image", vehicleImage.FileName);
-
-                // Gửi POST Request sang Python (Port 8000)
-                var aiResponse = await client.PostAsync("http://localhost:8000/api/recognize-plate", content);
-
-                if (aiResponse.IsSuccessStatusCode)
-                {
-                    var resultString = await aiResponse.Content.ReadAsStringAsync();
-                    // Đọc file JSON từ Python trả về
-                    var resultDoc = JsonDocument.Parse(resultString);
-                    if (resultDoc.RootElement.GetProperty("success").GetBoolean())
-                    {
-                        plateFromAI = resultDoc.RootElement.GetProperty("plateNumber").GetString() ?? "";
-                    }
-                }
-                else
-                {
-                    return StatusCode(500, "Không thể kết nối đến AI Service.");
-                }
-            }
-
-            // ==========================================
-            // 2. XỬ LÝ LOGIC NGHIỆP VỤ (VÉ THÁNG)
-            // ==========================================
-
-            // Tìm thẻ trong kho
-            var card = await _context.NfcCards.FirstOrDefaultAsync(c => c.CardUID == cardUID);
-            if (card == null) return BadRequest("Thẻ không hợp lệ!");
-
-            // Tìm vé tháng tương ứng với thẻ này
-            var monthlyTicket = await _context.MonthlyTickets.FirstOrDefaultAsync(t => t.CardID == card.CardID && t.IsActive);
-            if (monthlyTicket == null) return BadRequest("Thẻ này chưa đăng ký vé tháng hoặc đã hết hạn!");
-
-            // ĐỐI CHIẾU AI: Biển số AI đọc được CÓ KHỚP với biển số đăng ký không?
-            if (monthlyTicket.RegisterPlate.Replace("-", "").Replace(".", "") != plateFromAI.Replace("-", "").Replace(".", ""))
+                CustomerName = ticket.CustomerName,
+                PlateNumber = ticket.RegisterPlate,
+                VehicaleType = ticket.VehicleType,
+                ExpiryDate = ticket.EndDate.ToString("dd/mm/yy"),
+                Status = ticketStatus
+            };
+            if (isExpired && !ticket.IsActive)
             {
-                return BadRequest(new
+                return Ok(new
                 {
-                    Message = "CẢNH BÁO: Biển số không khớp!",
-                    RegisteredPlate = monthlyTicket.RegisterPlate,
-                    DetectedPlate = plateFromAI
+                    Action = "BLOCK",
+                    Message = "Vé tháng đã hết hạn vui lònggia hạn"
+                    
+                });
+                
+            };
+            var activeSession = await _context.ParkingSessions
+                .FirstOrDefaultAsync(s => s.CardID == card.CardID && s.CheckOutTime == null);
+            if(activeSession == null)
+            {
+                var newSession = new ParkingSession
+                {
+                    CardID = card.CardID,
+                    LicensePlateIn = ticket.RegisterPlate,
+                    CheckInTime = DateTime.Now,
+                    VehicleTypeID = ticket.VehicleTypeID
+                };
+                _context.ParkingSessions.Add(newSession);
+                await _context.SaveChangesAsync();
+                return Ok(new
+                {
+                    Action = "CHECK_IN",
+                    Message = "Xe VÀO bãi thành công. Mở Barie!",
+                    Data = displayInfo
                 });
             }
+            else
+            {
+                activeSession.CheckOutTime = DateTime.Now;
+            
+                activeSession.LicensePlateOut= ticket.RegisterPlate;
+                {
+                    await _context.SaveChangesAsync();
 
-            // Nếu khớp 100%, tiến hành mở Barie (Lưu dữ liệu vào bảng ParkingSession...)
-            // ... (Code lưu lịch sử vào đây) ...
+                    return Ok(new
+                    {
+                        Action = "CHECK_OUT",
+                        Message = "Xe RA bãi thành công. Mở Barie!",
+                        Data = displayInfo
+                    });
+                }
+            }
 
+
+
+        }
+
+        [HttpGet("history")]
+        public async Task<IActionResult> GetParkingHistory()
+        {
+            var sessions = await _context.ParkingSessions.OrderByDescending(s => s.CheckInTime).Select(s => new
+            {
+                SessionID = s.SessionID,
+                CardID = s.CardID,
+                VehicleTypeID= s.VehicleTypeID,
+                LicensePlateIn= s.LicensePlateIn,
+                LicensePlateOut= s.LicensePlateOut??"N/A",
+                CheckInTime = s.CheckInTime.ToString("dd/MM/yyyy HH:mm:ss"),
+                CheckOutTime = s.CheckOutTime.HasValue
+                        ? s.CheckOutTime.Value.ToString("dd/MM/yyyy HH:mm:ss")
+                        : "Chưa ra khỏi bãi",
+                Status = s.CheckOutTime == null ? "Đang đỗ" : "Đã rời đi"
+            }).ToListAsync();
+            if (sessions.Count == 0)
+            {
+                return Ok(new
+                {
+                    Message = "Chưa có dữ liệu ra vào bãi.",
+                    TotalCount = 0,
+                    Data = sessions
+                });
+            }
             return Ok(new
             {
-                Message = "Check-in vé tháng thành công! Mở Barie.",
-                Customer = monthlyTicket.CustomerName,
-                Plate = plateFromAI
+                Message = "Lấy lịch sử ra vào thành công!",
+                TotalCount = sessions.Count,
+                Data = sessions
             });
         }
+
     }
 }
