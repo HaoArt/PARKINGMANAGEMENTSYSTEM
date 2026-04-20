@@ -1,8 +1,102 @@
+<ion-content class="ion-padding" style="--background: #f4f6f8;">
+  <div class="mb-5 flex justify-between items-center">
+    <h2 class="text-2xl font-bold text-gray-800 m-0">Quản lý Xe Vào</h2>
+  </div>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">check-in</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <ion-grid class="p-0">
+    <ion-row>
+      <ion-col size="12" size-md="5" size-lg="4">
+        <ion-card class="rounded-xl shadow-sm m-0 border border-gray-100">
+          <ion-card-header class="bg-white border-b border-gray-100 pb-3">
+            <ion-card-title class="text-lg font-bold text-[#0040a1] flex items-center">
+              <ion-icon name="add-outline" class="mr-2 text-xl"></ion-icon>
+              Ghi nhận thẻ mới
+            </ion-card-title>
+          </ion-card-header>
+
+          <ion-card-content class="pt-5 bg-white">
+            
+            <ion-item lines="none" class="mb-4 bg-gray-50 rounded-lg border border-gray-200">
+              <ion-icon name="id-card-outline" slot="start" class="text-gray-400"></ion-icon>
+              <ion-input
+                label="Mã thẻ NFC"
+                label-placement="floating"
+                placeholder="Chạm thẻ vào đầu đọc..."
+                [(ngModel)]="CheckInData.CardUid"
+              ></ion-input>
+            </ion-item>
+
+            <ion-item lines="none" class="mb-4 bg-gray-50 rounded-lg border border-gray-200">
+              <ion-icon name="car-outline" slot="start" class="text-gray-400"></ion-icon>
+              <ion-input
+                label="Biển số nhận diện"
+                label-placement="floating"
+                placeholder="VD: 75A-123.45"
+                [(ngModel)]="CheckInData.PlateNumber"
+              ></ion-input>
+            </ion-item>
+
+            <ion-item lines="none" class="mb-6 bg-gray-50 rounded-lg border border-gray-200">
+              <ion-select
+                label="Loại phương tiện"
+                label-placement="floating"
+                [(ngModel)]="CheckInData.VehicleType"
+                interface="popover"
+              >
+                <ion-select-option value="Xe máy">Xe máy</ion-select-option>
+                <ion-select-option value="Ô tô">Ô tô</ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            <ion-button expand="block" class="font-bold h-12 rounded-lg" style="--border-radius: 8px; --background: #0040a1;" (click)="onSubmit()">
+              <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+              Xác nhận vào bãi
+            </ion-button>
+
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="12" size-md="7" size-lg="8" class="mt-4 md:mt-0">
+        <ion-card class="rounded-xl shadow-sm m-0 h-full border border-gray-100">
+          <ion-card-header class="bg-white border-b border-gray-100 pb-3">
+            <ion-card-title class="text-lg font-bold text-gray-700 flex items-center">
+              <ion-icon name="time-outline" class="mr-2 text-xl"></ion-icon>
+              Lịch sử tạo thẻ
+            </ion-card-title>
+          </ion-card-header>
+
+          <ion-card-content class="p-0 bg-white">
+            <ion-list lines="full" class="bg-transparent m-0">
+              
+              <div *ngIf="RecentCheckIns.length === 0" class="text-center p-10 text-gray-400 flex flex-col items-center">
+                <ion-icon name="id-card-outline" class="text-5xl mb-2 text-gray-200"></ion-icon>
+                <p>Chưa có dữ liệu quẹt thẻ gần đây.</p>
+              </div>
+
+              <ion-item *ngFor="let item of RecentCheckIns" class="hover:bg-gray-50 transition-colors cursor-pointer">
+                <div slot="start" class="flex flex-col items-center justify-center w-12 h-12 bg-blue-50 rounded-full mr-3">
+                  <ion-icon 
+                    [name]="item.VehicleType === 'Ô tô' ? 'car-outline' : 'bicycle-outline'" 
+                    class="text-[#0040a1] text-2xl">
+                  </ion-icon>
+                </div>
+                
+                <ion-label>
+                  <h2 class="font-bold text-[17px] text-gray-800 tracking-wider font-mono">{{ item.PlateNumber }}</h2>
+                  <p class="text-gray-500 text-sm mt-1">Mã thẻ: <span class="font-medium text-gray-700">{{ item.CardUid }}</span></p>
+                </ion-label>
+                
+                <div slot="end" class="flex flex-col items-end">
+                  <ion-badge color="success" class="mb-2 px-2 py-1 rounded">Trong bãi</ion-badge>
+                  <p class="text-[13px] text-gray-400 m-0 font-medium">{{ item.TimeIn | date:'HH:mm - dd/MM' }}</p>
+                </div>
+              </ion-item>
+
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>

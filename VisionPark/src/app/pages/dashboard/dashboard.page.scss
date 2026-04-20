@@ -1,0 +1,59 @@
+:host {
+  display: block;
+  height: 100%;
+
+  /* 1. Tối ưu hiển thị Font chữ: Giúp chữ cực kỳ sắc nét, không bị nhòe / gai */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* 2. Ép phần nền của trang không bị nhiễu màu */
+ion-content {
+  --background: #f4f6f8;
+}
+
+/* 3. Tối ưu các thẻ Card Thống Kê (chống mờ khi hover/scroll) */
+.bg-white.rounded-2xl {
+  /* Kích hoạt Hardware Acceleration (GPU) để hiệu ứng mượt và không bị mờ */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  will-change: transform, box-shadow;
+  
+  /* Tạo bóng đổ (shadow) sắc nét hơn, không bị mờ nhòe lan man */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  
+  /* Chuyển động mượt mà (Cubic-bezier giúp animation tự nhiên hơn) */
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    /* Khi hover đẩy thẻ lên trên nhưng giữ nguyên độ sắc nét */
+    transform: translateY(-4px) translateZ(0);
+    box-shadow: 0 12px 20px rgba(0, 64, 161, 0.08); 
+    border-color: rgba(0, 64, 161, 0.1);
+  }
+}
+
+/* 4. Tối ưu thanh Tab Bar Mobile (Footer) */
+ion-footer {
+  /* Đảm bảo Footer trên mobile không bị mờ nhòe do nền trong suốt */
+  .bg-white {
+    /* Hiệu ứng kính mờ (Glassmorphism) chuẩn Apple */
+    background-color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    
+    /* Box shadow đẩy lên trên rõ nét */
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.04) !important;
+  }
+}
+
+/* 5. Tối ưu các icon bên trong thẻ */
+ion-icon {
+  /* Ngăn chặn icon SVG bị nhòe pixel trên màn hình độ phân giải cao */
+  transform: translateZ(0);
+}

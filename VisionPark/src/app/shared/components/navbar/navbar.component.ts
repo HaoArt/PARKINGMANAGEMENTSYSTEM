@@ -11,12 +11,11 @@ import {
   IonSearchbar,
   IonMenuButton,
 } from '@ionic/angular/standalone';
+
+// Import thư viện icon
 import { addIcons } from 'ionicons';
 import {
-  homeOutline,
-  statsChartOutline,
-  logOutOutline,
-  carOutline,
+  searchOutline,
   notificationsOutline,
   personCircleOutline,
 } from 'ionicons/icons';
@@ -40,9 +39,11 @@ import {
 })
 export class NavbarComponent {
   constructor() {
+    // Khai báo icon một lần duy nhất bằng cú pháp ngắn gọn
     addIcons({
-      'notifications-outline': notificationsOutline,
-      'person-circle-outline': personCircleOutline,
+      searchOutline,
+      notificationsOutline,
+      personCircleOutline
     });
   }
 }

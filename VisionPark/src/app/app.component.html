@@ -1,3 +1,9 @@
 <ion-app>
-  <ion-router-outlet></ion-router-outlet>
+  <ion-split-pane [when]="showMenu ? 'md' : false" contentId="main-content">
+    
+    <app-sidebar *ngIf="showMenu"></app-sidebar>
+    
+    <ion-router-outlet id="main-content"></ion-router-outlet>
+    
+  </ion-split-pane>
 </ion-app>
