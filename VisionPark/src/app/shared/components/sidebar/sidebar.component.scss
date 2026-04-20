@@ -81,3 +81,38 @@ ion-item.menu-item {
     color: #ba1a1a;
   }
 }
+:host {
+  display: block;
+  height: 100%;
+}
+
+ion-menu {
+  --width: 260px;
+  --background: #ffffff;
+}
+
+.menu-item {
+  --padding-start: 14px;
+  --min-height: 44px;
+  --border-radius: 12px;
+  margin: 4px 0;
+}
+
+/* Style cho mục đang được chọn (Active) */
+.active-menu {
+  --background: #ffffff;
+  --color: #0040a1;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Tạo hiệu ứng thẻ nổi lên */
+  border: 1px solid #f3f4f6;
+}
+
+/* Style cho mục bình thường */
+.inactive-menu {
+  --background: transparent;
+  --color: #6b7280;
+  
+  &:hover {
+    --background: #f9fafb;
+    --color: #111827;
+  }
+}

@@ -1,137 +1,158 @@
-<ion-content class="ion-padding custom-bg" style="--background: #f4f6f8;">
+<ion-content class="custom-bg">
   
-  <div class="page-header mb-4 flex justify-between items-center">
-    <h2 class="page-title text-2xl font-bold text-gray-800 m-0">Vận hành Bãi xe</h2>
-  </div>
+  <app-navbar></app-navbar>
 
-  <ion-grid class="p-0 mb-6">
-    <ion-row>
-      
-      <ion-col size="12" size-md="6">
-        <ion-card class="m-0 h-full border border-blue-100 shadow-sm rounded-xl">
-          <ion-card-header class="bg-blue-50 border-b border-blue-100 py-3">
-            <ion-card-title class="text-[#0040a1] font-bold text-lg flex items-center">
-              <ion-icon name="log-in-outline" class="mr-2 text-xl"></ion-icon> Ghi nhận Xe Vào
-            </ion-card-title>
-          </ion-card-header>
-          <ion-card-content class="pt-4">
-            <ion-item lines="none" class="mb-3 bg-gray-50 rounded-lg border border-gray-200">
-              <ion-icon name="id-card-outline" slot="start" class="text-gray-400"></ion-icon>
-              <ion-input label="Mã thẻ NFC" label-placement="floating" placeholder="Chạm thẻ vào..." [(ngModel)]="CheckInData.NfcId"></ion-input>
-            </ion-item>
-
-            <ion-item lines="none" class="mb-3 bg-gray-50 rounded-lg border border-gray-200">
-              <ion-icon name="car-outline" slot="start" class="text-gray-400"></ion-icon>
-              <ion-input label="Biển số" label-placement="floating" placeholder="VD: 75A-123.45" [(ngModel)]="CheckInData.PlateNumber"></ion-input>
-            </ion-item>
-
-            <ion-item lines="none" class="mb-4 bg-gray-50 rounded-lg border border-gray-200">
-              <ion-select label="Loại xe" label-placement="floating" [(ngModel)]="CheckInData.VehicleType">
-                <ion-select-option value="Xe máy">Xe máy</ion-select-option>
-                <ion-select-option value="Ô tô">Ô tô</ion-select-option>
-              </ion-select>
-            </ion-item>
-
-            <ion-button expand="block" (click)="onCheckIn()" style="--border-radius: 8px; --background: #0040a1;">
-              <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon> Cho phép vào
-            </ion-button>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-
-      <ion-col size="12" size-md="6" class="mt-4 md:mt-0">
-        <ion-card class="m-0 h-full border border-green-100 shadow-sm rounded-xl">
-          <ion-card-header class="bg-green-50 border-b border-green-100 py-3">
-            <ion-card-title class="text-green-700 font-bold text-lg flex items-center">
-              <ion-icon name="log-out-outline" class="mr-2 text-xl"></ion-icon> Ghi nhận Xe Ra
-            </ion-card-title>
-          </ion-card-header>
-          <ion-card-content class="pt-4">
-            <ion-item lines="none" class="mb-3 bg-gray-50 rounded-lg border border-gray-200">
-              <ion-icon name="id-card-outline" slot="start" class="text-gray-400"></ion-icon>
-              <ion-input label="Mã thẻ NFC cần thanh toán" label-placement="floating" placeholder="Chạm thẻ ra..." [(ngModel)]="CheckOutData.NfcId" (ionInput)="findVehicleOut()"></ion-input>
-            </ion-item>
-
-            <div class="bg-gray-50 p-3 rounded-lg border border-gray-200 mb-4 min-h-[120px]">
-              <p class="text-sm text-gray-500 m-0 mb-1">Biển số: <strong class="text-gray-800 text-base">{{ CheckOutData.PlateNumber }}</strong></p>
-              <p class="text-sm text-gray-500 m-0 mb-1">Giờ vào: <strong class="text-gray-800">{{ CheckOutData.TimeIn || '--' }}</strong></p>
-              <p class="text-sm text-gray-500 m-0">Thành tiền: <strong class="text-red-600 text-lg">{{ (CheckOutData.TotalCost | number) || 0 }} đ</strong></p>
-            </div>
-
-            <ion-button expand="block" color="success" (click)="onCheckOut()" style="--border-radius: 8px;">
-              Thanh toán & Mở barrier
-            </ion-button>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-
-    </ion-row>
-  </ion-grid>
-
-  <ion-card class="filter-card ion-no-margin mb-4 rounded-xl shadow-sm border border-gray-100">
-    <ion-card-content class="p-2">
-      <ion-grid>
-        <ion-row class="items-center">
-          <ion-col size="12" size-md="2">
-            <ion-input fill="solid" label="Biển số" label-placement="floating" placeholder="Nhập biển số..." [(ngModel)]="FilterConfig.PlateNumber" (ionInput)="applyFilters()" class="custom-input"></ion-input>
-          </ion-col>
-          <ion-col size="12" size-md="2">
-            <ion-select fill="solid" label="Trạng thái" label-placement="floating" [(ngModel)]="FilterConfig.Status" (ionChange)="applyFilters()" class="custom-input">
-              <ion-select-option value="all">Tất cả</ion-select-option>
-              <ion-select-option value="In">Trong bãi</ion-select-option>
-              <ion-select-option value="Out">Đã ra</ion-select-option>
-            </ion-select>
-          </ion-col>
-          <ion-col size="6" size-md="2">
-            <ion-input fill="solid" type="date" label="Từ ngày" label-placement="floating" [(ngModel)]="FilterConfig.DateFrom" (ionChange)="applyFilters()" class="custom-input"></ion-input>
-          </ion-col>
-          <ion-col size="6" size-md="2">
-            <ion-input fill="solid" type="date" label="Đến ngày" label-placement="floating" [(ngModel)]="FilterConfig.DateTo" (ionChange)="applyFilters()" class="custom-input"></ion-input>
-          </ion-col>
-          <ion-col size="12" size-md="2">
-            <ion-select fill="solid" label="Sắp xếp tiền" label-placement="floating" [(ngModel)]="FilterConfig.SortByCost" (ionChange)="applyFilters()" class="custom-input">
-              <ion-select-option value="none">Mặc định</ion-select-option>
-              <ion-select-option value="asc">Thấp -> Cao</ion-select-option>
-              <ion-select-option value="desc">Cao -> Thấp</ion-select-option>
-            </ion-select>
-          </ion-col>
-          <ion-col size="12" size-md="2" class="text-center">
-            <ion-button fill="clear" color="medium" (click)="resetFilters()">
-              <ion-icon slot="start" name="filter-outline"></ion-icon> Làm mới
-            </ion-button>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </ion-card-content>
-  </ion-card>
-
-  <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-    <ion-grid class="p-0">
-      <ion-row class="bg-gray-50 border-b border-gray-200 font-bold text-gray-600 p-3 hidden md:flex">
-        <ion-col size="1.5">Trạng thái</ion-col>
-        <ion-col size="2">Mã thẻ NFC</ion-col>
-        <ion-col size="2">Biển số</ion-col>
-        <ion-col size="1.5">Loại xe</ion-col>
-        <ion-col size="3">Giờ vào</ion-col>
-        <ion-col size="2">Thanh toán</ion-col>
-      </ion-row>
-
-      <ion-row *ngFor="let item of FilteredHistory" class="p-3 border-b border-gray-100 hover:bg-gray-50 items-center">
-        <ion-col size="12" size-md="1.5">
-          <ion-badge [color]="getBadgeColor(item.Status)" class="px-2 py-1 rounded">{{ item.Status === 'In' ? 'Trong bãi' : 'Đã ra' }}</ion-badge>
-        </ion-col>
-        <ion-col size="12" size-md="2" class="text-gray-500 font-medium">{{ item.NfcId }}</ion-col>
-        <ion-col size="12" size-md="2"><span class="bg-gray-800 text-white px-2 py-1 rounded font-mono tracking-wider">{{ item.PlateNumber }}</span></ion-col>
-        <ion-col size="12" size-md="1.5" class="text-gray-700">{{ item.VehicleType }}</ion-col>
-        <ion-col size="12" size-md="3" class="text-gray-600"><ion-icon name="time-outline" class="mr-1"></ion-icon> {{ item.CheckInTime | date:'dd/MM/yyyy HH:mm' }}</ion-col>
-        <ion-col size="12" size-md="2" class="font-bold text-red-500">{{ (item.TotalCost | number) || 0 }} đ</ion-col>
-      </ion-row>
-    </ion-grid>
+  <div class="px-6 md:px-10 py-4 max-w-[1400px] mx-auto pb-12">
     
-    <div *ngIf="FilteredHistory.length === 0" class="text-center p-10 text-gray-400">
-      <ion-icon name="search-outline" class="text-4xl"></ion-icon>
-      <p>Không tìm thấy dữ liệu.</p>
+    <div class="mb-8">
+      <h2 class="text-[26px] font-extrabold text-[#0a192f] mb-1 tracking-tight">Vận hành Bãi xe</h2>
+      <p class="text-gray-500 text-[13px] font-medium">Terminal Active Control</p>
     </div>
-  </div>
 
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      
+      <div class="bg-white rounded-[24px] p-7 shadow-[0_2px_15px_rgba(0,0,0,0.02)]">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-full bg-[#eff6ff] flex items-center justify-center text-[#3b82f6]">
+            <ion-icon name="log-in-outline" class="text-xl"></ion-icon>
+          </div>
+          <h3 class="text-[18px] font-bold text-[#111827] m-0">Check-in</h3>
+        </div>
+
+        <div class="space-y-5">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Mã thẻ NFC</label>
+            <div class="relative">
+              <ion-icon name="id-card-outline" class="absolute left-3 top-3.5 text-gray-400 text-[18px]"></ion-icon>
+              <input type="text" placeholder="Quẹt thẻ hoặc nhập mã..." class="w-full bg-[#f4f6f8] text-[#111827] text-[13px] border-none rounded-[12px] pl-10 pr-4 py-3.5 outline-none font-medium transition focus:ring-2 focus:ring-blue-100" [(ngModel)]="checkInData.nfcId">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Biển số</label>
+              <input type="text" placeholder="51H-12345" class="w-full bg-[#f4f6f8] text-[#111827] text-[13px] border-none rounded-[12px] px-4 py-3.5 outline-none font-bold text-center uppercase transition focus:ring-2 focus:ring-blue-100" [(ngModel)]="checkInData.plateNumber">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Loại xe</label>
+              <div class="relative">
+                <select class="w-full bg-[#f4f6f8] text-[#111827] text-[13px] border-none rounded-[12px] pl-4 pr-10 py-3.5 outline-none font-medium appearance-none cursor-pointer transition focus:ring-2 focus:ring-blue-100" [(ngModel)]="checkInData.vehicleType">
+                  <option value="Xe máy">Xe máy</option>
+                  <option value="Ô tô">Ô tô</option>
+                </select>
+                <ion-icon name="chevron-down-outline" class="absolute right-3.5 top-4 text-gray-400 text-sm"></ion-icon>
+              </div>
+            </div>
+          </div>
+
+          <button class="w-full mt-2 bg-[#003399] hover:bg-[#002277] text-white font-bold text-[14px] py-4 rounded-[12px] transition-colors flex items-center justify-center gap-2 shadow-md shadow-blue-900/20 cursor-pointer" (click)="onCheckIn()">
+            <ion-icon name="car-outline" class="text-lg"></ion-icon>
+            Cho phép vào
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-[24px] p-7 shadow-[0_2px_15px_rgba(0,0,0,0.02)]">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-full bg-[#f8f9fa] flex items-center justify-center text-gray-600 border border-gray-100">
+            <ion-icon name="log-out-outline" class="text-xl"></ion-icon>
+          </div>
+          <h3 class="text-[18px] font-bold text-[#111827] m-0">Check-out</h3>
+        </div>
+
+        <div class="space-y-5">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Mã thẻ NFC</label>
+            <div class="relative">
+              <ion-icon name="id-card-outline" class="absolute left-3 top-3.5 text-gray-400 text-[18px]"></ion-icon>
+              <input type="text" placeholder="Quẹt thẻ thu hồi..." class="w-full bg-[#f4f6f8] text-[#111827] text-[13px] border-none rounded-[12px] pl-10 pr-4 py-3.5 outline-none font-medium transition focus:ring-2 focus:ring-gray-200" [(ngModel)]="checkOutData.nfcId" (input)="findVehicleOut()">
+            </div>
+          </div>
+
+          <div class="bg-[#fcfcfd] border border-gray-100 rounded-[12px] p-5 space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Biển số</span>
+              <span class="text-[13px] font-bold text-[#111827] bg-gray-100 px-3 py-1 rounded-md tracking-wider">{{ checkOutData.plateNumber }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Giờ vào</span>
+              <span class="text-[13px] font-medium text-gray-500">{{ checkOutData.timeIn || '--:--' }}</span>
+            </div>
+            
+            <div class="pt-4 border-t border-gray-100 flex justify-between items-center mt-2">
+              <span class="text-[12px] font-bold text-gray-600">Thành tiền</span>
+              <span class="text-[22px] font-black text-[#003399]">{{ (checkOutData.totalCost | number) || 0 }} đ</span>
+            </div>
+          </div>
+
+          <button class="w-full mt-2 bg-[#f8f9fa] hover:bg-[#e2e8f0] text-gray-500 font-bold text-[14px] py-4 rounded-[12px] transition-colors flex items-center justify-center gap-2 border border-gray-200 cursor-pointer" (click)="onCheckOut()">
+            <ion-icon name="cash-outline" class="text-lg"></ion-icon>
+            Thanh toán & Mở barrier
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="bg-white p-7 rounded-[24px] shadow-[0_2px_15px_rgba(0,0,0,0.02)]">
+      
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <h3 class="text-[16px] font-bold text-[#111827] m-0">Lịch sử Giao dịch</h3>
+        
+        <div class="flex gap-3 w-full md:w-auto">
+          <div class="relative">
+            <select class="bg-[#f4f6f8] text-gray-600 text-[12px] border-none rounded-[10px] pl-4 pr-9 py-2.5 outline-none font-medium appearance-none cursor-pointer" [(ngModel)]="filterConfig.status" (change)="applyFilters()">
+              <option value="all">Tất cả trạng thái</option>
+              <option value="In">Trong bãi</option>
+              <option value="Out">Đã ra</option>
+            </select>
+            <ion-icon name="chevron-down-outline" class="absolute right-3 top-3 text-gray-400 text-[14px]"></ion-icon>
+          </div>
+
+          <div class="relative w-full md:w-[220px]">
+            <input type="text" placeholder="Tìm biển số..." class="w-full bg-[#f4f6f8] text-gray-700 text-[12px] border-none rounded-[10px] pl-9 pr-3 py-2.5 outline-none font-medium" [(ngModel)]="filterConfig.plateNumber" (input)="applyFilters()">
+            <ion-icon name="search-outline" class="absolute left-3 top-2.5 text-gray-400 text-[16px]"></ion-icon>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="filteredHistory.length === 0" class="py-16 flex flex-col items-center justify-center text-center">
+        <div class="w-16 h-16 bg-[#f4f6f8] rounded-full flex items-center justify-center mb-4 text-gray-400">
+          <ion-icon name="document-text-outline" class="text-3xl"></ion-icon>
+        </div>
+        <h4 class="text-[15px] font-bold text-[#111827] m-0 mb-1.5">Chưa có giao dịch</h4>
+        <p class="text-[13px] text-gray-500 m-0">Quẹt thẻ để bắt đầu phiên kiểm soát xe ra vào.</p>
+      </div>
+
+      <div *ngIf="filteredHistory.length > 0" class="overflow-x-auto">
+        <table class="w-full text-left border-collapse whitespace-nowrap">
+          <thead>
+            <tr>
+              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider w-1/5 pl-2">Mã NFC</th>
+              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider w-1/5 text-center">Biển số</th>
+              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider w-1/5 text-center">Loại xe</th>
+              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider w-1/5 text-center">Thời gian</th>
+              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider w-1/5 text-center pr-2">Trạng thái</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of filteredHistory" class="border-b border-gray-50 hover:bg-[#f4f6f8]/50 transition-colors">
+              <td class="py-4 text-[12px] font-bold text-[#374151] pl-2">{{ item.nfcId }}</td>
+              <td class="py-4 text-[12px] font-bold text-[#111827] text-center">{{ item.plateNumber }}</td>
+              <td class="py-4 text-[12px] font-medium text-gray-500 text-center">{{ item.vehicleType }}</td>
+              <td class="py-4 text-[12px] font-medium text-gray-500 text-center">{{ item.checkInTime | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td class="py-4 text-center pr-2">
+                <span [class]="item.status === 'In' 
+                  ? 'bg-[#eff6ff] text-[#3b82f6] px-3 py-1.5 rounded-full text-[10px] font-bold inline-block min-w-[70px] text-center' 
+                  : 'bg-[#f0fdf4] text-[#22c55e] px-3 py-1.5 rounded-full text-[10px] font-bold inline-block min-w-[70px] text-center'">
+                  {{ item.status === 'In' ? 'Trong bãi' : 'Đã ra' }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
 </ion-content>

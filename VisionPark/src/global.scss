@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Xóa viền dọc phân cách mặc định của Ionic Split Pane */
+ion-split-pane {
+  --border: 0;
+}

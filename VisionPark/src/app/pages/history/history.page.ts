@@ -9,19 +9,20 @@ import {
 import { addIcons } from 'ionicons';
 import { 
   downloadOutline, filterOutline, timeOutline, searchOutline, 
-  logInOutline, logOutOutline, idCardOutline, carOutline, checkmarkCircleOutline
+  logInOutline, logOutOutline, idCardOutline, carOutline, checkmarkCircleOutline,
+  chevronDownOutline, documentTextOutline, cashOutline
 } from 'ionicons/icons';
+import { NavbarComponent } from '../../shared/components/navbar/navbar.component'; 
 
-// Đã chuẩn hóa tên biến theo PascalCase (Viết hoa chữ cái đầu)
 interface ParkingRecord {
-  NfcId: string;
-  PlateNumber: string;
-  VehicleType: 'Xe máy' | 'Ô tô' | string;
-  CheckInTime: Date;
-  CheckOutTime?: Date;
-  Duration?: number;
-  TotalCost?: number;
-  Status: 'In' | 'Out';
+  nfcId: string;
+  plateNumber: string;
+  vehicleType: string;
+  checkInTime: Date;
+  checkOutTime?: Date;
+  duration?: number;
+  totalCost?: number;
+  status: 'In' | 'Out';
 }
 
 @Component({
@@ -33,135 +34,112 @@ interface ParkingRecord {
     IonCardContent, IonCard, IonCardHeader, IonCardTitle,
     IonItem, IonContent, IonGrid, IonRow, IonInput, IonCol,
     IonBadge, IonSearchbar, IonText, IonButton, IonSelect,
-    IonSelectOption, IonIcon, CommonModule, FormsModule,
+    IonSelectOption, IonIcon, CommonModule, FormsModule, NavbarComponent
   ],
 })
 export class HistoryPage implements OnInit {
   
-  // DỮ LIỆU FORM QUÉT VÀO / RA
-  CheckInData = {
-    NfcId: '',
-    PlateNumber: '',
-    VehicleType: 'Xe máy'
+  // Dữ liệu form Check-in
+  checkInData = {
+    nfcId: '',
+    plateNumber: '',
+    vehicleType: 'Ô tô'
   };
 
-  CheckOutData = {
-    NfcId: '',
-    PlateNumber: 'Chưa có thông tin',
-    TimeIn: '',
-    TotalCost: 0
+  // Dữ liệu form Check-out
+  checkOutData = {
+    nfcId: '',
+    plateNumber: '--',
+    timeIn: '',
+    totalCost: 0
   };
 
-  // DỮ LIỆU LỊCH SỬ
-  ParkingHistory: ParkingRecord[] = [
-    { NfcId: 'NFC_100101', PlateNumber: '73A-123.45', VehicleType: 'Ô tô', CheckInTime: new Date('2026-04-16T07:30:00'), CheckOutTime: new Date('2026-04-16T11:00:00'), Duration: 3.5, TotalCost: 40000, Status: 'Out' },
-    { NfcId: 'NFC_100102', PlateNumber: '75F1-888.88', VehicleType: 'Xe máy', CheckInTime: new Date('2026-04-16T08:15:00'), Status: 'In' },
-    { NfcId: 'NFC_100103', PlateNumber: '71B-001.23', VehicleType: 'Ô tô', CheckInTime: new Date('2026-04-16T08:45:00'), CheckOutTime: new Date('2026-04-16T09:45:00'), Duration: 1, TotalCost: 15000, Status: 'Out' },
-  ];
-  
-  FilteredHistory: ParkingRecord[] = [];
+  parkingHistory: ParkingRecord[] = [];
+  filteredHistory: ParkingRecord[] = [];
 
-  FilterConfig = {
-    PlateNumber: '',
-    Status: 'all', 
-    VehicleType: 'all',
-    DateFrom: '',
-    DateTo: '',
-    SortByCost: 'none', 
+  filterConfig = {
+    plateNumber: '',
+    status: 'all'
   };
 
   constructor() {
+    // Đăng ký các icon sẽ dùng trên giao diện mới
     addIcons({
       downloadOutline, filterOutline, timeOutline, searchOutline,
-      logInOutline, logOutOutline, idCardOutline, carOutline, checkmarkCircleOutline
+      logInOutline, logOutOutline, idCardOutline, carOutline, checkmarkCircleOutline,
+      chevronDownOutline, documentTextOutline, cashOutline
     });
   }
 
   ngOnInit() {
-    this.FilteredHistory = [...this.ParkingHistory];
+    // Để trống mảng để hiển thị giao diện "Chưa có giao dịch" như trong ảnh
+    // Bạn có thể thêm dữ liệu mẫu vào đây để xem dạng bảng
+    this.parkingHistory = [];
+    this.applyFilters();
   }
 
-  // --- LOGIC XE VÀO ---
+  // --- LOGIC CHECK-IN ---
   onCheckIn() {
-    if (!this.CheckInData.NfcId || !this.CheckInData.PlateNumber) {
-      alert('Vui lòng nhập đủ thông tin xe vào!');
+    if (!this.checkInData.nfcId || !this.checkInData.plateNumber) {
+      alert('Vui lòng nhập đủ thông tin!');
       return;
     }
     const newRecord: ParkingRecord = {
-      NfcId: this.CheckInData.NfcId,
-      PlateNumber: this.CheckInData.PlateNumber,
-      VehicleType: this.CheckInData.VehicleType,
-      CheckInTime: new Date(),
-      Status: 'In'
+      nfcId: this.checkInData.nfcId,
+      plateNumber: this.checkInData.plateNumber,
+      vehicleType: this.checkInData.vehicleType,
+      checkInTime: new Date(),
+      status: 'In'
     };
-    this.ParkingHistory.unshift(newRecord);
+    this.parkingHistory.unshift(newRecord);
     this.applyFilters();
-    this.CheckInData = { NfcId: '', PlateNumber: '', VehicleType: 'Xe máy' };
+    this.checkInData = { nfcId: '', plateNumber: '', vehicleType: 'Ô tô' };
   }
 
-  // --- LOGIC TÌM & XE RA ---
+  // --- LOGIC TÌM VÀ CHECK-OUT ---
   findVehicleOut() {
-    const record = this.ParkingHistory.find(x => x.NfcId === this.CheckOutData.NfcId && x.Status === 'In');
+    if (!this.checkOutData.nfcId) {
+      this.checkOutData.plateNumber = '--';
+      this.checkOutData.timeIn = '';
+      this.checkOutData.totalCost = 0;
+      return;
+    }
+    const record = this.parkingHistory.find(x => x.nfcId === this.checkOutData.nfcId && x.status === 'In');
     if (record) {
-      this.CheckOutData.PlateNumber = record.PlateNumber;
-      this.CheckOutData.TimeIn = record.CheckInTime.toLocaleString('vi-VN');
-      this.CheckOutData.TotalCost = record.VehicleType === 'Ô tô' ? 20000 : 5000; // Giả lập tính tiền
+      this.checkOutData.plateNumber = record.plateNumber;
+      this.checkOutData.timeIn = record.checkInTime.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' ' + (record.checkInTime.getHours() >= 12 ? 'PM' : 'AM');
+      this.checkOutData.totalCost = record.vehicleType === 'Ô tô' ? 20000 : 5000; // Giả lập tính tiền
     } else {
-      this.CheckOutData.PlateNumber = 'Không tìm thấy thẻ In';
-      this.CheckOutData.TotalCost = 0;
+      this.checkOutData.plateNumber = '--';
+      this.checkOutData.timeIn = '';
+      this.checkOutData.totalCost = 0;
     }
   }
 
   onCheckOut() {
-    const index = this.ParkingHistory.findIndex(x => x.NfcId === this.CheckOutData.NfcId && x.Status === 'In');
+    const index = this.parkingHistory.findIndex(x => x.nfcId === this.checkOutData.nfcId && x.status === 'In');
     if (index !== -1) {
-      this.ParkingHistory[index].Status = 'Out';
-      this.ParkingHistory[index].CheckOutTime = new Date();
-      this.ParkingHistory[index].TotalCost = this.CheckOutData.TotalCost;
+      this.parkingHistory[index].status = 'Out';
+      this.parkingHistory[index].checkOutTime = new Date();
+      this.parkingHistory[index].totalCost = this.checkOutData.totalCost;
       this.applyFilters();
-      this.CheckOutData = { NfcId: '', PlateNumber: 'Chưa có thông tin', TimeIn: '', TotalCost: 0 };
-      alert('Thanh toán thành công!');
+      this.checkOutData = { nfcId: '', plateNumber: '--', timeIn: '', totalCost: 0 };
+    } else {
+      alert('Không tìm thấy xe trong bãi với mã thẻ này!');
     }
   }
 
   // --- LOGIC BỘ LỌC ---
   applyFilters() {
-    let result = [...this.ParkingHistory];
+    let result = [...this.parkingHistory];
     
-    if (this.FilterConfig.Status !== 'all') {
-      result = result.filter(item => item.Status === this.FilterConfig.Status);
+    if (this.filterConfig.status !== 'all') {
+      result = result.filter(item => item.status === this.filterConfig.status);
     }
-    if (this.FilterConfig.DateFrom) {
-      const from = new Date(this.FilterConfig.DateFrom).getTime();
-      result = result.filter(item => new Date(item.CheckInTime).getTime() >= from);
+    if (this.filterConfig.plateNumber) {
+      const searchStr = this.filterConfig.plateNumber.toLowerCase();
+      result = result.filter(item => item.plateNumber.toLowerCase().includes(searchStr) || item.nfcId.toLowerCase().includes(searchStr));
     }
-    if (this.FilterConfig.DateTo) {
-      const to = new Date(this.FilterConfig.DateTo).getTime();
-      result = result.filter(item => new Date(item.CheckInTime).getTime() <= to);
-    }
-    if (this.FilterConfig.SortByCost !== 'none') {
-      result.sort((a, b) => {
-        const costA = a.TotalCost || 0;
-        const costB = b.TotalCost || 0;
-        return this.FilterConfig.SortByCost === 'asc' ? costA - costB : costB - costA;
-      });
-    }
-    if (this.FilterConfig.PlateNumber) {
-      const searchStr = this.FilterConfig.PlateNumber.toLowerCase();
-      result = result.filter(item => item.PlateNumber.toLowerCase().includes(searchStr));
-    }
-    
-    this.FilteredHistory = result;
-  }
-
-  getBadgeColor(status: string) {
-    return status === 'In' ? 'success' : 'medium';
-  }
-
-  resetFilters() {
-    this.FilterConfig = {
-      PlateNumber: '', Status: 'all', VehicleType: 'all', DateFrom: '', DateTo: '', SortByCost: 'none'
-    };
-    this.applyFilters();
+    this.filteredHistory = result;
   }
 }

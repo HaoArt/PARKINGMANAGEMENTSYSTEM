@@ -1,80 +1,117 @@
-<div class="mt-8 bg-white p-5 rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100">
+<ion-content class="custom-bg">
+  
+  <app-navbar></app-navbar>
+
+  <div class="px-6 md:px-10 py-2 max-w-[1400px] mx-auto pb-12">
+    
+    <div class="mb-8">
+      <h2 class="text-[26px] font-extrabold text-[#111827] mb-1 tracking-tight">Tổng quan hệ thống</h2>
+      <p class="text-gray-500 text-[13px] font-medium">Cập nhật lúc 08:30 AM, Hôm nay</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      
+      <div class="bg-white rounded-[24px] p-6 flex items-center gap-5 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+        <div class="w-[52px] h-[52px] rounded-full bg-[#f0f5ff] flex items-center justify-center text-[#3b82f6]">
+          <ion-icon name="car-outline" class="text-2xl"></ion-icon>
+        </div>
+        <div>
+          <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Tổng phương tiện</p>
+          <h3 class="text-[32px] font-black text-[#111827] m-0 leading-none">{{ stats.totalVehicles }}</h3>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-[24px] p-6 flex items-center gap-5 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+        <div class="w-[52px] h-[52px] rounded-full bg-[#ecfdf5] flex items-center justify-center text-[#10b981] font-black text-xl">
+          P
+        </div>
+        <div>
+          <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Chỗ trống</p>
+          <h3 class="text-[32px] font-black text-[#111827] m-0 leading-none">{{ stats.availableSlots }}</h3>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-[24px] p-6 flex items-center gap-5 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+        <div class="w-[52px] h-[52px] rounded-full bg-[#fff7ed] flex items-center justify-center text-[#f97316]">
+          <ion-icon name="cash-outline" class="text-2xl"></ion-icon>
+        </div>
+        <div>
+          <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Doanh thu hôm nay</p>
+          <h3 class="text-[32px] font-black text-[#111827] m-0 leading-none">{{ stats.revenueToday }}</h3>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="bg-white p-7 rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
       
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h3 class="text-xl font-bold text-[#191c1d] m-0 tracking-tight">Lịch sử ra vào gần đây</h3>
+        <h3 class="text-[16px] font-bold text-[#111827] m-0">Lịch sử ra vào gần đây</h3>
         
-        <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-          <div class="relative w-full sm:w-56">
+        <div class="flex gap-3 w-full md:w-auto">
+          <div class="relative w-full md:w-[240px]">
             <input 
               type="text" 
               placeholder="Tìm biển số, mã NFC..." 
-              class="w-full bg-[#f4f6f8] text-[#191c1d] text-sm border-none rounded-xl pl-10 pr-3 py-2.5 outline-none focus:ring-2 focus:ring-[#0040a1]"
+              class="w-full bg-[#f4f6f8] text-gray-700 text-[12px] border-none rounded-[10px] pl-9 pr-3 py-2.5 outline-none font-medium"
               [(ngModel)]="searchTerm" 
               (input)="applyFilters()">
-            <ion-icon name="search-outline" class="absolute left-3 top-3 text-gray-400 text-lg"></ion-icon>
+            <ion-icon name="search-outline" class="absolute left-3 top-2.5 text-gray-400 text-[16px]"></ion-icon>
           </div>
 
           <select 
-            class="bg-[#f4f6f8] text-[#191c1d] text-sm border-none rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-[#0040a1] font-medium"
+            class="bg-[#f4f6f8] text-gray-600 text-[12px] border-none rounded-[10px] px-4 py-2.5 outline-none font-medium appearance-none cursor-pointer"
             [(ngModel)]="filterStatus" 
             (change)="applyFilters()">
             <option value="all">Tất cả trạng thái</option>
-            <option value="In">Đang trong bãi</option>
-            <option value="Out">Đã rời đi</option>
+            <option value="In">Trong bãi</option>
+            <option value="Out">Đã ra</option>
           </select>
         </div>
       </div>
 
-      <div class="overflow-x-auto rounded-xl border border-gray-100">
+      <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse whitespace-nowrap">
           <thead>
-            <tr class="bg-[#f8f9fa] text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
-              <th class="py-4 px-5 font-bold">Mã NFC</th>
-              <th class="py-4 px-5 font-bold">Biển số</th>
-              <th class="py-4 px-5 font-bold">Loại xe</th>
-              <th class="py-4 px-5 font-bold">Thời gian</th>
-              <th class="py-4 px-5 font-bold text-center">Trạng thái</th>
+            <tr>
+              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider w-1/5 pl-2">Mã NFC</th>
+              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider w-1/5 text-center">Biển số</th>
+              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider w-1/5 text-center">Loại xe</th>
+              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider w-1/5 text-center">Thời gian</th>
+              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider w-1/5 text-center pr-2">Trạng thái</th>
             </tr>
           </thead>
-          <tbody class="text-sm">
-            <tr *ngFor="let item of paginatedRecords" class="border-b border-gray-50 hover:bg-blue-50/50 transition-colors">
-              <td class="py-3 px-5 font-semibold text-[#0040a1]">{{ item.id }}</td>
-              <td class="py-3 px-5 font-medium text-gray-800">{{ item.plateNumber }}</td>
-              <td class="py-3 px-5 text-gray-600">{{ item.vehicleType }}</td>
-              <td class="py-3 px-5 text-gray-600">{{ item.timeIn }}</td>
-              <td class="py-3 px-5 text-center">
+          <tbody>
+            <tr *ngFor="let item of paginatedRecords" class="border-b border-gray-50 hover:bg-[#f4f6f8]/50 transition-colors">
+              <td class="py-4 text-[12px] font-bold text-[#374151] pl-2">{{ item.id }}</td>
+              <td class="py-4 text-[12px] font-bold text-[#111827] text-center">{{ item.plateNumber }}</td>
+              <td class="py-4 text-[12px] font-medium text-gray-500 text-center">{{ item.vehicleType }}</td>
+              <td class="py-4 text-[12px] font-medium text-gray-500 text-center">{{ item.timeIn }}</td>
+              <td class="py-4 text-center pr-2">
                 <span [class]="item.status === 'In' 
-                  ? 'bg-[#e7edf6] text-[#0040a1] px-3 py-1 rounded-full text-xs font-bold' 
-                  : 'bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold'">
+                  ? 'bg-[#eff6ff] text-[#3b82f6] px-3 py-1.5 rounded-full text-[10px] font-bold inline-block min-w-[70px] text-center' 
+                  : 'bg-[#f0fdf4] text-[#22c55e] px-3 py-1.5 rounded-full text-[10px] font-bold inline-block min-w-[70px] text-center'">
                   {{ item.status === 'In' ? 'Trong bãi' : 'Đã ra' }}
                 </span>
               </td>
-            </tr>
-            <tr *ngIf="paginatedRecords.length === 0">
-               <td colspan="5" class="py-10 text-center text-gray-400 font-medium">Không tìm thấy dữ liệu phù hợp</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <div class="flex justify-between items-center mt-4 px-1 text-sm">
-        <span class="text-gray-500 font-medium">Hiển thị trang <span class="text-gray-900 font-bold">{{ currentPage }}</span> / {{ totalPages }}</span>
-        <div class="flex gap-2">
-          <button 
-            class="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 font-medium hover:bg-gray-50 hover:text-[#0040a1] transition-colors disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-gray-600" 
-            [disabled]="currentPage === 1" 
-            (click)="prevPage()">
-            Trang trước
-          </button>
-          <button 
-            class="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 font-medium hover:bg-gray-50 hover:text-[#0040a1] transition-colors disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-gray-600" 
-            [disabled]="currentPage === totalPages" 
-            (click)="nextPage()">
-            Trang sau
-          </button>
+      <div class="flex justify-between items-center mt-6">
+        <span class="text-gray-400 text-[11px] font-medium pl-2">Hiển thị 1-4 trên 50 kết quả</span>
+        <div class="flex items-center gap-1">
+          <button class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-[#0a2342] bg-transparent border-none cursor-pointer" (click)="prevPage()"><ion-icon name="chevron-back-outline"></ion-icon></button>
+          
+          <button class="w-7 h-7 rounded-full bg-[#0f172a] text-white font-bold text-[12px] border-none cursor-pointer">1</button>
+          <button class="w-7 h-7 rounded-full text-gray-500 hover:bg-gray-100 font-bold text-[12px] bg-transparent border-none cursor-pointer">2</button>
+          <button class="w-7 h-7 rounded-full text-gray-500 hover:bg-gray-100 font-bold text-[12px] bg-transparent border-none cursor-pointer">3</button>
+          
+          <button class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-[#0a2342] bg-transparent border-none cursor-pointer" (click)="nextPage()"><ion-icon name="chevron-forward-outline"></ion-icon></button>
         </div>
       </div>
       
     </div>
-    ```
-
+  </div>
+</ion-content>

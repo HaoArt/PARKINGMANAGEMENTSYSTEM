@@ -1,36 +1,26 @@
-<ion-menu contentId="main-content" class="border-r border-gray-200">
+<ion-menu contentId="main-content" class="border-none shadow-none">
   <ion-header class="ion-no-border">
-    <ion-toolbar class="px-4 py-3" style="--background: #ffffff;">
-      <h1 class="text-2xl font-extrabold text-[#0040a1] m-0 tracking-tight">VisionPark</h1>
+    <ion-toolbar style="--background: #f8f9fa;">
+      <h1 class="text-[20px] font-extrabold text-[#0a192f] m-0 pl-6 mt-4 tracking-tight">VisionPark</h1>
     </ion-toolbar>
   </ion-header>
 
-  <ion-content style="--background: #ffffff;">
-    <ion-list lines="none" class="px-3 mt-2 bg-transparent">
+  <ion-content style="--background: #f8f9fa;">
+    <ion-list lines="none" class="px-3 pt-6 bg-transparent">
       
       <ion-item 
         *ngFor="let p of adminPages"
         button
         (click)="navigate(p.url)"
-        [ngClass]="{'bg-blue-50 text-[#0040a1] font-bold selected': currentUrl === p.url}"
+        [ngClass]="currentUrl === p.url ? 'active-menu' : 'inactive-menu'"
         detail="false" 
-        class="menu-item cursor-pointer mb-2 rounded-xl transition-all" 
-        style="--background: transparent; --color: #4b5563;">
-        <ion-icon slot="start" [name]="p.icon" class="text-xl"></ion-icon>
-        <ion-label class="text-[15px]">{{ p.title }}</ion-label>
-      </ion-item>
+        class="menu-item cursor-pointer mb-2 transition-all">
+        
+        <ion-icon *ngIf="p.title !== 'QUẢN LÝ BÃI ĐỖ'" slot="start" [name]="p.icon" class="text-[18px] mr-3"></ion-icon>
+        <span *ngIf="p.title === 'QUẢN LÝ BÃI ĐỖ'" slot="start" class="text-[18px] mr-3 font-bold flex items-center justify-center w-[18px]">P</span>
 
-      <div class="mt-8 border-t border-gray-100 pt-4">
-        <ion-item 
-          button 
-          (click)="navigate('/login')"
-          lines="none" 
-          class="logout-item cursor-pointer rounded-xl hover:bg-red-50 text-red-600 transition-all" 
-          style="--background: transparent; --color: #dc2626;">
-          <ion-icon slot="start" name="log-out-outline" class="text-xl"></ion-icon>
-          <ion-label class="font-semibold text-[15px]">Đăng xuất</ion-label>
-        </ion-item>
-      </div>
+        <ion-label class="text-[11px] font-bold uppercase tracking-wider">{{ p.title }}</ion-label>
+      </ion-item>
 
     </ion-list>
   </ion-content>

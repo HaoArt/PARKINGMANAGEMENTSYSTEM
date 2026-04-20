@@ -5,6 +5,8 @@ import {
   IonContent, IonHeader, IonTitle, IonToolbar, 
   IonFooter, IonButtons, IonMenuButton, IonIcon, IonButton } from '@ionic/angular/standalone';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component'; 
+import { addIcons } from 'ionicons';
+import { carOutline, cashOutline, searchOutline, documentTextOutline, chevronBackOutline, chevronForwardOutline } from 'ionicons/icons';
 
 interface ParkingRecord {
   id: string;
@@ -40,41 +42,31 @@ export class DashboardPage implements OnInit {
     revenueToday: '2,500,000đ'
   };
 
-  // --- DỮ LIỆU VÀ PHÂN TRANG BẢNG ---
   allRecords: ParkingRecord[] = [];
   filteredRecords: ParkingRecord[] = [];
   paginatedRecords: ParkingRecord[] = [];
 
-  // Trạng thái bộ lọc
   searchTerm: string = '';
   filterStatus: string = 'all';
 
-  // Cấu hình trang
   currentPage: number = 1;
-  itemsPerPage: number = 10;
-  totalPages: number = 1;
+  itemsPerPage: number = 4;
+  totalPages: number = 13;
 
-  constructor() { }
+  constructor() { 
+    addIcons({ carOutline, cashOutline, searchOutline, documentTextOutline, chevronBackOutline, chevronForwardOutline });
+  }
 
   ngOnInit() {
-    this.generateMockData();
+    this.allRecords = [
+      { id: 'NFC-1042', plateNumber: '29A-123.45', vehicleType: 'Ô tô', timeIn: '08:15 AM', status: 'In' },
+      { id: 'NFC-0891', plateNumber: '30E-987.65', vehicleType: 'Ô tô', timeIn: '08:02 AM', status: 'In' },
+      { id: 'NFC-2201', plateNumber: '29C-456.78', vehicleType: 'Xe tải nhỏ', timeIn: '07:45 AM', status: 'Out' },
+      { id: 'NFC-1156', plateNumber: '29B-555.22', vehicleType: 'Ô tô', timeIn: '07:30 AM', status: 'Out' },
+    ];
     this.applyFilters();
   }
 
-  // Tạo 25 dòng dữ liệu ảo làm ví dụ
-  generateMockData() {
-    for (let i = 1; i <= 25; i++) {
-      this.allRecords.push({
-        id: `NFC-${1000 + i}`,
-        plateNumber: `75A-${Math.floor(10000 + Math.random() * 90000)}`,
-        vehicleType: i % 3 === 0 ? 'Ô tô' : 'Xe máy',
-        timeIn: new Date(Date.now() - Math.random() * 10000000).toLocaleString('vi-VN'),
-        status: i % 4 === 0 ? 'Out' : 'In'
-      });
-    }
-  }
-
-  // Lọc dữ liệu dựa trên Text và Trạng thái
   applyFilters() {
     let temp = this.allRecords;
 
@@ -88,29 +80,22 @@ export class DashboardPage implements OnInit {
     }
 
     this.filteredRecords = temp;
-    this.totalPages = Math.ceil(this.filteredRecords.length / this.itemsPerPage) || 1;
-    this.currentPage = 1; // Luôn quay về trang 1 khi lọc
     this.updatePagination();
   }
 
-  // Cắt mảng dữ liệu theo giới hạn (10 item)
   updatePagination() {
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    this.paginatedRecords = this.filteredRecords.slice(start, start + this.itemsPerPage);
+    this.paginatedRecords = this.filteredRecords;
   }
 
-  // Chuyển trang
   nextPage() {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      this.updatePagination();
     }
   }
 
   prevPage() {
     if (this.currentPage > 1) {
       this.currentPage--;
-      this.updatePagination();
     }
   }
 }
