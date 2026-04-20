@@ -54,12 +54,13 @@ namespace VisionPark.API.Controllers
             if (string.IsNullOrEmpty(detectedPlate))
                 return BadRequest("AI không thể nhận diện được biển số từ bức ảnh này!");
 
-            // ==============================================
-            // 2. LƯU THÔNG TIN VÀO DATABASE
-            // ==============================================
+
 
             var card = await _context.NfcCards.FirstOrDefaultAsync(c => c.CardUID == request.CardUID);
             if (card == null) return BadRequest("Thẻ này chưa được khởi tạo trong hệ thống!");
+
+            var cardAlreadyUsed = await _context.MonthlyTickets.AnyAsync(t => t.CardID == card.CardID && t.IsActive);
+            if (cardAlreadyUsed) return BadRequest("Thẻ NFC này đang được sử dụng cho một vé tháng khác chưa hết hạn!");
 
             var isExist = await _context.MonthlyTickets.AnyAsync(t => t.RegisterPlate == detectedPlate && t.IsActive);
             if (isExist) return BadRequest($"Biển số {detectedPlate} đã có vé tháng đang hoạt động!");
@@ -84,9 +85,48 @@ namespace VisionPark.API.Controllers
             return Ok(new
             {
                 Message = "Đăng ký vé tháng thành công!",
-                DetectedPlate = detectedPlate, // Trả về biển số AI đọc được cho Frontend xem
+                DetectedPlate = detectedPlate, 
                 Data = newTicket
             });
         }
+        [HttpGet("monthly-tickets")]
+        public async Task<IActionResult> GetAllMonthlyTicket()
+        {
+            var tickets = await _context.MonthlyTickets
+                .Include(t => t.Card)
+                .Include(t => t.VehicleType)
+                .Select(t => new
+                {
+                    TicketId = t.TicketId,
+                    CustomerName = t.CustomerName,
+                    PhoneNumber = t.PhoneNumber,
+                    RegisterPlate = t.RegisterPlate,
+                    VehicleType = t.VehicleType != null ? t.VehicleType.TypeName : "Không xác định",
+                    CardUID = t.Card != null ? t.Card.CardUID : "Không có thẻ",
+                    StartDate = t.StartDate.ToString("dd/MM/yyyy HH:mm"),
+                    EndDate = t.EndDate.ToString("dd/MM/yyyy HH:mm"),
+                    IsActive = t.IsActive,
+                    Status = DateTime.Now > t.EndDate ? "Đã hết hạn" : (t.IsActive ? "Đang hoạt động" : "Đã khóa")
+                })
+                .ToListAsync();
+            if (tickets.Count == 0)
+            {
+                return Ok(new
+                {
+                    Message = "Chưa có vé tháng nào được đăng ký.",
+                    TotalCount = 0,
+                    Data = tickets
+                });
+            }
+            return Ok(new
+            {
+                Message = "Lấy danh sách vé tháng thành công!",
+                TotalCount = tickets.Count,
+                Data = tickets
+            });
+        }
+
+
+
     }
 }

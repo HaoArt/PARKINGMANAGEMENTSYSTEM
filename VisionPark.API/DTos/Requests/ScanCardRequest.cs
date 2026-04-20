@@ -2,5 +2,6 @@
 {
     public class ScanCardRequest
     {
+        public string CardUID { get; set; } = string.Empty;
     }
 }
