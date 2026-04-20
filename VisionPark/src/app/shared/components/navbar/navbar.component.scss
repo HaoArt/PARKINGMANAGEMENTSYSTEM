@@ -1,0 +1,48 @@
+:host {
+  display: block;
+}
+
+ion-toolbar {
+  --min-height: 64px;
+}
+
+/* Custom cho thẻ div bọc input tìm kiếm */
+.search-container {
+  transition: all 0.2s ease-in-out;
+  border: 1px solid transparent;
+
+  /* Hiệu ứng viền sáng lên khi bấm vào ô tìm kiếm */
+  &:focus-within {
+    background-color: #ffffff;
+    border-color: #0040a1;
+    box-shadow: 0 0 0 3px rgba(0, 64, 161, 0.1);
+  }
+
+  input {
+    &::placeholder {
+      color: #737785;
+      opacity: 1;
+    }
+  }
+}
+
+/* Hiệu ứng rung chuông khi hover vào nút thông báo */
+button.relative:hover .material-symbols-outlined {
+  animation: ring 0.5s ease-in-out;
+}
+
+@keyframes ring {
+  0% { transform: rotate(0); }
+  25% { transform: rotate(15deg); }
+  50% { transform: rotate(-10deg); }
+  75% { transform: rotate(5deg); }
+  100% { transform: rotate(0); }
+}
+
+/* Ẩn viền focus mặc định của menu button */
+ion-menu-button {
+  --color: #424654;
+  &::part(native) {
+    outline: none;
+  }
+}

@@ -2,32 +2,26 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
-  IonContent,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonBadge,
-  IonSearchbar,
-  IonText,
-  IonSelect,
-  IonButton,
-  IonIcon,
-  IonSelectOption,
-  IonItem,
-  IonInput,
+  IonContent, IonGrid, IonRow, IonCol, IonBadge, IonSearchbar,
+  IonText, IonSelect, IonButton, IonIcon, IonSelectOption,
+  IonItem, IonInput, IonCard, IonCardContent, IonCardHeader, IonCardTitle
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { downloadOutline, filterOutline } from 'ionicons/icons';
+import { 
+  downloadOutline, filterOutline, timeOutline, searchOutline, 
+  logInOutline, logOutOutline, idCardOutline, carOutline, checkmarkCircleOutline
+} from 'ionicons/icons';
 
+// Đã chuẩn hóa tên biến theo PascalCase (Viết hoa chữ cái đầu)
 interface ParkingRecord {
-  nfcId: string;
-  plateNumber: string;
-  vehicleType: 'Xe máy' | 'Ô tô';
-  checkInTime: Date;
-  checkOutTime?: Date;
-  duration?: number;
-  totalCost?: number;
-  status: 'In' | 'Out';
+  NfcId: string;
+  PlateNumber: string;
+  VehicleType: 'Xe máy' | 'Ô tô' | string;
+  CheckInTime: Date;
+  CheckOutTime?: Date;
+  Duration?: number;
+  TotalCost?: number;
+  Status: 'In' | 'Out';
 }
 
 @Component({
@@ -36,195 +30,137 @@ interface ParkingRecord {
   styleUrls: ['./history.page.scss'],
   standalone: true,
   imports: [
-    IonItem,
-    IonContent,
-    IonGrid,
-    IonRow,
-    IonInput,
-    IonCol,
-    IonBadge,
-    IonSearchbar,
-    IonText,
-    IonButton,
-    IonSelect,
-    IonButton,
-    IonSelectOption,
-    IonIcon,
-    CommonModule,
-    FormsModule,
+    IonCardContent, IonCard, IonCardHeader, IonCardTitle,
+    IonItem, IonContent, IonGrid, IonRow, IonInput, IonCol,
+    IonBadge, IonSearchbar, IonText, IonButton, IonSelect,
+    IonSelectOption, IonIcon, CommonModule, FormsModule,
   ],
 })
 export class HistoryPage implements OnInit {
-  parkingHistory: ParkingRecord[] = [
-    {
-      nfcId: 'NFC_100101',
-      plateNumber: '73A-123.45',
-      vehicleType: 'Ô tô',
-      checkInTime: new Date('2026-04-16T07:30:00'),
-      checkOutTime: new Date('2026-04-16T11:00:00'),
-      duration: 3.5,
-      totalCost: 40000,
-      status: 'Out',
-    },
-    {
-      nfcId: 'NFC_100102',
-      plateNumber: '75F1-888.88',
-      vehicleType: 'Xe máy',
-      checkInTime: new Date('2026-04-16T08:15:00'),
-      status: 'In',
-    },
-    {
-      nfcId: 'NFC_100103',
-      plateNumber: '71B-001.23',
-      vehicleType: 'Ô tô',
-      checkInTime: new Date('2026-04-16T08:45:00'),
-      checkOutTime: new Date('2026-04-16T09:45:00'),
-      duration: 1,
-      totalCost: 15000,
-      status: 'Out',
-    },
-    {
-      nfcId: 'NFC_100104',
-      plateNumber: '75H1-567.89',
-      vehicleType: 'Xe máy',
-      checkInTime: new Date('2026-04-16T09:00:00'),
-      status: 'In',
-    },
-    {
-      nfcId: 'NFC_100105',
-      plateNumber: '75A-999.99',
-      vehicleType: 'Ô tô',
-      checkInTime: new Date('2026-04-16T06:00:00'),
-      checkOutTime: new Date('2026-04-16T16:00:00'),
-      duration: 10,
-      totalCost: 120000,
-      status: 'Out',
-    },
-    {
-      nfcId: 'NFC_100106',
-      plateNumber: '75K1-246.35',
-      vehicleType: 'Xe máy',
-      checkInTime: new Date('2026-04-16T10:30:00'),
-      status: 'In',
-    },
-    {
-      nfcId: 'NFC_100107',
-      plateNumber: '75F1-111.22',
-      vehicleType: 'Xe máy',
-      checkInTime: new Date('2026-04-16T11:00:00'),
-      checkOutTime: new Date('2026-04-16T12:00:00'),
-      duration: 1,
-      totalCost: 3000,
-      status: 'Out',
-    },
-    {
-      nfcId: 'NFC_100108',
-      plateNumber: '75B-222.44',
-      vehicleType: 'Ô tô',
-      checkInTime: new Date('2026-04-16T13:00:00'),
-      status: 'In',
-    },
-    {
-      nfcId: 'NFC_100109',
-      plateNumber: '75C1-333.55',
-      vehicleType: 'Xe máy',
-      checkInTime: new Date('2026-04-16T14:20:00'),
-      checkOutTime: new Date('2026-04-16T15:50:00'),
-      duration: 1.5,
-      totalCost: 5000,
-      status: 'Out',
-    },
-    {
-      nfcId: 'NFC_100110',
-      plateNumber: '75A-444.66',
-      vehicleType: 'Ô tô',
-      checkInTime: new Date('2026-04-16T15:00:00'),
-      status: 'In',
-    },
-    {
-      nfcId: 'NFC_100111',
-      plateNumber: '75F1-777.88',
-      vehicleType: 'Xe máy',
-      checkInTime: new Date('2026-04-16T07:00:00'),
-      checkOutTime: new Date('2026-04-16T16:30:00'),
-      duration: 9.5,
-      totalCost: 15000,
-      status: 'Out',
-    },
-    {
-      nfcId: 'NFC_100112',
-      plateNumber: '75B-888.00',
-      vehicleType: 'Ô tô',
-      checkInTime: new Date('2026-04-16T16:10:00'),
-      status: 'In',
-    },
-  ];
-  filteredHistory: ParkingRecord[] = [];
+  
+  // DỮ LIỆU FORM QUÉT VÀO / RA
+  CheckInData = {
+    NfcId: '',
+    PlateNumber: '',
+    VehicleType: 'Xe máy'
+  };
 
-  filterConfig = {
-    plateNumber: '',
-    status: 'all', // 'all', 'In', 'Out'
-    vehicleType: 'all',
-    dateFrom: '',
-    dateTo: '',
-    sortByCost: 'none', // 'none', 'asc', 'desc'
+  CheckOutData = {
+    NfcId: '',
+    PlateNumber: 'Chưa có thông tin',
+    TimeIn: '',
+    TotalCost: 0
+  };
+
+  // DỮ LIỆU LỊCH SỬ
+  ParkingHistory: ParkingRecord[] = [
+    { NfcId: 'NFC_100101', PlateNumber: '73A-123.45', VehicleType: 'Ô tô', CheckInTime: new Date('2026-04-16T07:30:00'), CheckOutTime: new Date('2026-04-16T11:00:00'), Duration: 3.5, TotalCost: 40000, Status: 'Out' },
+    { NfcId: 'NFC_100102', PlateNumber: '75F1-888.88', VehicleType: 'Xe máy', CheckInTime: new Date('2026-04-16T08:15:00'), Status: 'In' },
+    { NfcId: 'NFC_100103', PlateNumber: '71B-001.23', VehicleType: 'Ô tô', CheckInTime: new Date('2026-04-16T08:45:00'), CheckOutTime: new Date('2026-04-16T09:45:00'), Duration: 1, TotalCost: 15000, Status: 'Out' },
+  ];
+  
+  FilteredHistory: ParkingRecord[] = [];
+
+  FilterConfig = {
+    PlateNumber: '',
+    Status: 'all', 
+    VehicleType: 'all',
+    DateFrom: '',
+    DateTo: '',
+    SortByCost: 'none', 
   };
 
   constructor() {
-    addIcons({ downloadOutline, filterOutline });
+    addIcons({
+      downloadOutline, filterOutline, timeOutline, searchOutline,
+      logInOutline, logOutOutline, idCardOutline, carOutline, checkmarkCircleOutline
+    });
   }
 
   ngOnInit() {
-    this.filteredHistory = [...this.parkingHistory];
+    this.FilteredHistory = [...this.ParkingHistory];
   }
 
+  // --- LOGIC XE VÀO ---
+  onCheckIn() {
+    if (!this.CheckInData.NfcId || !this.CheckInData.PlateNumber) {
+      alert('Vui lòng nhập đủ thông tin xe vào!');
+      return;
+    }
+    const newRecord: ParkingRecord = {
+      NfcId: this.CheckInData.NfcId,
+      PlateNumber: this.CheckInData.PlateNumber,
+      VehicleType: this.CheckInData.VehicleType,
+      CheckInTime: new Date(),
+      Status: 'In'
+    };
+    this.ParkingHistory.unshift(newRecord);
+    this.applyFilters();
+    this.CheckInData = { NfcId: '', PlateNumber: '', VehicleType: 'Xe máy' };
+  }
+
+  // --- LOGIC TÌM & XE RA ---
+  findVehicleOut() {
+    const record = this.ParkingHistory.find(x => x.NfcId === this.CheckOutData.NfcId && x.Status === 'In');
+    if (record) {
+      this.CheckOutData.PlateNumber = record.PlateNumber;
+      this.CheckOutData.TimeIn = record.CheckInTime.toLocaleString('vi-VN');
+      this.CheckOutData.TotalCost = record.VehicleType === 'Ô tô' ? 20000 : 5000; // Giả lập tính tiền
+    } else {
+      this.CheckOutData.PlateNumber = 'Không tìm thấy thẻ In';
+      this.CheckOutData.TotalCost = 0;
+    }
+  }
+
+  onCheckOut() {
+    const index = this.ParkingHistory.findIndex(x => x.NfcId === this.CheckOutData.NfcId && x.Status === 'In');
+    if (index !== -1) {
+      this.ParkingHistory[index].Status = 'Out';
+      this.ParkingHistory[index].CheckOutTime = new Date();
+      this.ParkingHistory[index].TotalCost = this.CheckOutData.TotalCost;
+      this.applyFilters();
+      this.CheckOutData = { NfcId: '', PlateNumber: 'Chưa có thông tin', TimeIn: '', TotalCost: 0 };
+      alert('Thanh toán thành công!');
+    }
+  }
+
+  // --- LOGIC BỘ LỌC ---
   applyFilters() {
-    let result = [...this.parkingHistory];
-    if (this.filterConfig.status !== 'all') {
-      result = result.filter(
-        (item) => item.status === this.filterConfig.status,
-      );
+    let result = [...this.ParkingHistory];
+    
+    if (this.FilterConfig.Status !== 'all') {
+      result = result.filter(item => item.Status === this.FilterConfig.Status);
     }
-    if (this.filterConfig.dateFrom) {
-      const from = new Date(this.filterConfig.dateFrom).getTime();
-      result = result.filter(
-        (item) => new Date(item.checkInTime).getTime() >= from,
-      );
+    if (this.FilterConfig.DateFrom) {
+      const from = new Date(this.FilterConfig.DateFrom).getTime();
+      result = result.filter(item => new Date(item.CheckInTime).getTime() >= from);
     }
-    if (this.filterConfig.dateTo) {
-      const to = new Date(this.filterConfig.dateTo).getTime();
-      result = result.filter(
-        (item) => new Date(item.checkInTime).getTime() <= to,
-      );
+    if (this.FilterConfig.DateTo) {
+      const to = new Date(this.FilterConfig.DateTo).getTime();
+      result = result.filter(item => new Date(item.CheckInTime).getTime() <= to);
     }
-    if (this.filterConfig.sortByCost !== 'none') {
+    if (this.FilterConfig.SortByCost !== 'none') {
       result.sort((a, b) => {
-        const costA = a.totalCost || 0;
-        const costB = b.totalCost || 0;
-        return this.filterConfig.sortByCost === 'asc'
-          ? costA - costB
-          : costB - costA;
+        const costA = a.TotalCost || 0;
+        const costB = b.TotalCost || 0;
+        return this.FilterConfig.SortByCost === 'asc' ? costA - costB : costB - costA;
       });
     }
-    if (this.filterConfig.plateNumber) {
-      const searchStr = this.filterConfig.plateNumber.toLowerCase();
-      result = result.filter((item) =>
-        item.plateNumber.toLowerCase().includes(searchStr),
-      );
+    if (this.FilterConfig.PlateNumber) {
+      const searchStr = this.FilterConfig.PlateNumber.toLowerCase();
+      result = result.filter(item => item.PlateNumber.toLowerCase().includes(searchStr));
     }
-    this.filteredHistory = result;
+    
+    this.FilteredHistory = result;
   }
+
   getBadgeColor(status: string) {
     return status === 'In' ? 'success' : 'medium';
   }
+
   resetFilters() {
-    this.filterConfig = {
-      plateNumber: '',
-      status: 'all',
-      vehicleType: 'all',
-      dateFrom: '',
-      dateTo: '',
-      sortByCost: 'none',
+    this.FilterConfig = {
+      PlateNumber: '', Status: 'all', VehicleType: 'all', DateFrom: '', DateTo: '', SortByCost: 'none'
     };
     this.applyFilters();
   }

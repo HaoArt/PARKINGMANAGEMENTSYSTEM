@@ -4,43 +4,80 @@
 }
 
 ion-menu {
-  
   height: 100%;
-  --width: 270px; 
+  --width: 280px; /* Mở rộng thêm một chút cho thoáng */
   --background: #ffffff;
-  border-right: 1px solid #e0e0e0;
+  border-right: 1px solid #f3f4f5;
 
   ion-content {
     --background: #ffffff;
-    --padding-top: 20px;
+    --padding-top: 16px;
+
+    /* Tùy chỉnh thanh cuộn (Scrollbar) cho mượt mà */
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #e0e0e0;
+      border-radius: 4px;
+    }
   }
 }
 
-
-ion-item {
+ion-item.menu-item {
   --padding-start: 16px;
-  --border-radius: 10px;
-  margin: 4px 12px;
-  font-size: 14px;
-  --color: #4a4a4a;
-  
+  --inner-padding-end: 16px;
+  --border-radius: 12px; /* Bo góc mềm mại hơn */
+  --min-height: 52px;
+  margin: 6px 16px;
+  font-size: 15px;
+  --color: #737785; /* Màu chữ mặc định (nhạt) */
+  --background-hover: #f8f9fa;
+  --background-hover-opacity: 1;
+  transition: all 0.3s ease-in-out;
+
+  /* Hiệu ứng khi di chuột vào (nhưng không phải item đang chọn) */
+  &:hover:not(.selected) {
+    --color: #424654;
+    transform: translateX(4px); /* Đẩy nhẹ chữ sang phải */
+  }
+
+  /* Trạng thái đang được chọn (Active) */
   &.selected {
-    --background: rgba(var(--ion-color-primary-rgb), 0.08);
-    --color: var(--ion-color-primary);
+    --background: #e7edf6; /* Nền xanh nhạt đồng bộ với nút Navbar */
+    --color: #0040a1; /* Xanh đậm chủ đạo */
     font-weight: 600;
-    
+
     ion-icon {
-      color: var(--ion-color-primary);
+      color: #0040a1;
+      transform: scale(1.1); /* Phóng to icon một chút */
+      transition: transform 0.3s ease;
     }
   }
 
   ion-icon {
-    font-size: 20px;
+    font-size: 22px;
     margin-right: 12px;
+    transition: color 0.3s ease;
   }
 }
 
+/* Nút đăng xuất tách biệt */
 .logout-item {
-  margin-top: 20px;
-  --color: var(--ion-color-danger);
+  margin-top: 32px;
+  margin-left: 16px;
+  margin-right: 16px;
+  --border-radius: 12px;
+  --padding-start: 16px;
+  --color: #ba1a1a; /* Màu đỏ cảnh báo */
+  --background-hover: rgba(186, 26, 26, 0.08); /* Nền đỏ nhạt khi hover */
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateX(4px);
+  }
+
+  ion-icon {
+    color: #ba1a1a;
+  }
 }

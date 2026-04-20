@@ -1,9 +1,133 @@
+<ion-content class="ion-padding" style="--background: #f4f6f8;">
+  
+  <div class="page-header mb-5 flex justify-between items-center">
+    <h2 class="text-2xl font-bold text-gray-800 m-0">Cài đặt Hệ thống</h2>
+    <ion-button color="primary" class="font-bold" style="--border-radius: 8px;" (click)="saveSettings()">
+      <ion-icon slot="start" name="save-outline"></ion-icon>
+      Lưu thay đổi
+    </ion-button>
+  </div>
 
+  <ion-segment [value]="CurrentTab" (ionChange)="segmentChanged($event)" class="bg-white rounded-xl shadow-sm mb-6 p-1 border border-gray-100">
+    <ion-segment-button value="general" class="rounded-lg">
+      <ion-label class="font-bold tracking-wide flex items-center justify-center py-2">
+        <ion-icon name="hardwareChipOutline" class="mr-2 text-lg"></ion-icon> Cấu hình Phần cứng & AI
+      </ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="pricing" class="rounded-lg">
+      <ion-label class="font-bold tracking-wide flex items-center justify-center py-2">
+        <ion-icon name="cashOutline" class="mr-2 text-lg"></ion-icon> Quy tắc Tính tiền
+      </ion-label>
+    </ion-segment-button>
+  </ion-segment>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">settings</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <div *ngIf="CurrentTab === 'general'">
+    <ion-grid class="p-0">
+      <ion-row>
+        <ion-col size="12" size-md="6">
+          <ion-card class="m-0 h-full border border-gray-200 shadow-sm rounded-xl">
+            <ion-card-header class="bg-gray-50 border-b border-gray-100 py-3">
+              <ion-card-title class="text-gray-700 font-bold text-lg">Hệ thống Camera AI</ion-card-title>
+            </ion-card-header>
+            <ion-card-content class="pt-4">
+              
+              <ion-item lines="none" class="mb-3 bg-white rounded-lg border border-gray-200 shadow-sm">
+                <ion-label>
+                  <h3 class="font-bold text-gray-800">Nhận diện biển số (AI)</h3>
+                  <p class="text-sm text-gray-500">Tự động đọc biển số từ luồng Camera</p>
+                </ion-label>
+                <ion-toggle slot="end" color="success" [(ngModel)]="SystemConfig.EnableAIPlateRecognition"></ion-toggle>
+              </ion-item>
+
+              <ion-item lines="none" class="mb-3 bg-white rounded-lg border border-gray-200 shadow-sm">
+                <ion-label>
+                  <h3 class="font-bold text-gray-800">Tự động mở Barrier</h3>
+                  <p class="text-sm text-gray-500">Mở barrier nếu biển số ra/vào khớp nhau</p>
+                </ion-label>
+                <ion-toggle slot="end" color="primary" [(ngModel)]="SystemConfig.AutoOpenBarrier"></ion-toggle>
+              </ion-item>
+
+              <ion-item lines="none" class="mb-3 bg-gray-50 rounded-lg border border-gray-200">
+                <ion-input label="IP Camera Lối Vào" label-placement="floating" [(ngModel)]="SystemConfig.CameraIpIn"></ion-input>
+              </ion-item>
+
+              <ion-item lines="none" class="bg-gray-50 rounded-lg border border-gray-200">
+                <ion-input label="IP Camera Lối Ra" label-placement="floating" [(ngModel)]="SystemConfig.CameraIpOut"></ion-input>
+              </ion-item>
+
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <ion-col size="12" size-md="6" class="mt-4 md:mt-0">
+          <ion-card class="m-0 h-full border border-gray-200 shadow-sm rounded-xl">
+            <ion-card-header class="bg-gray-50 border-b border-gray-100 py-3">
+              <ion-card-title class="text-gray-700 font-bold text-lg">Thông số Bãi đỗ</ion-card-title>
+            </ion-card-header>
+            <ion-card-content class="pt-4">
+              
+              <ion-item lines="none" class="mb-3 bg-gray-50 rounded-lg border border-gray-200">
+                <ion-input type="number" label="Sức chứa tối đa (xe)" label-placement="floating" [(ngModel)]="SystemConfig.MaxCapacity"></ion-input>
+              </ion-item>
+
+              <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 mt-4">
+                <h4 class="text-[#0040a1] font-bold m-0 mb-2 flex items-center">
+                  <ion-icon name="settings-outline" class="mr-2"></ion-icon> Ghi chú vận hành
+                </h4>
+                <p class="text-sm text-blue-800 m-0 leading-relaxed">
+                  Các thông số này sẽ áp dụng ngay lập tức sau khi lưu. Hệ thống AI cần ít nhất 5 giây để khởi động lại luồng RTSP từ Camera nếu bạn thay đổi địa chỉ IP.
+                </p>
+              </div>
+
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <div *ngIf="CurrentTab === 'pricing'">
+    <ion-grid class="p-0">
+      <ion-row>
+        
+        <ion-col size="12" size-md="6" *ngFor="let rule of PricingRules">
+          <ion-card class="m-0 mb-4 border border-gray-200 shadow-sm rounded-xl">
+            <ion-card-header class="bg-white border-b border-gray-100 py-3 flex justify-between items-center">
+              <ion-card-title class="text-gray-800 font-bold text-lg flex items-center">
+                <ion-icon [name]="rule.VehicleType === 'Ô tô' ? 'car-outline' : 'bicycle-outline'" class="mr-2 text-xl text-[#0040a1]"></ion-icon> 
+                Bảng giá: {{ rule.VehicleType }}
+              </ion-card-title>
+            </ion-card-header>
+            
+            <ion-card-content class="pt-4 bg-gray-50">
+              
+              <ion-item lines="none" class="mb-3 bg-white rounded-lg border border-gray-200 shadow-sm">
+                <ion-select label="Loại quy tắc" label-placement="floating" [(ngModel)]="rule.RuleType">
+                  <ion-select-option value="Flat">Giá phẳng (Một lần gửi)</ion-select-option>
+                  <ion-select-option value="Block">Tính theo Block thời gian</ion-select-option>
+                </ion-select>
+              </ion-item>
+
+              <ion-item lines="none" class="mb-3 bg-white rounded-lg border border-gray-200 shadow-sm">
+                <ion-input type="number" label="Giá mặc định (VNĐ)" label-placement="floating" [(ngModel)]="rule.BasePrice"></ion-input>
+              </ion-item>
+
+              <div *ngIf="rule.RuleType === 'Block'" class="flex gap-3">
+                <ion-item lines="none" class="flex-1 bg-white rounded-lg border border-gray-200 shadow-sm">
+                  <ion-input type="number" label="Số phút/Block" label-placement="floating" [(ngModel)]="rule.BlockMinutes"></ion-input>
+                </ion-item>
+                
+                <ion-item lines="none" class="flex-1 bg-white rounded-lg border border-gray-200 shadow-sm">
+                  <ion-input type="number" label="Giá mỗi Block cộng thêm" label-placement="floating" [(ngModel)]="rule.PricePerBlock"></ion-input>
+                </ion-item>
+              </div>
+
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+      </ion-row>
+    </ion-grid>
+  </div>
+
 </ion-content>
