@@ -26,12 +26,14 @@ namespace VisionPark.API.Models
         public string? PlateNumberIn { get; set; }
         public string? ImageInPath { get; set; }
 
-        public int UserInID { get; set; }
+        public int? UserInID { get; set; }
         [ForeignKey("UserInID")]
-        public  User UserIn { get; set; }
+        public  User? UserIn { get; set; }
 
-       
-        public DateTime? TimeOut { get; set; } 
+        public DateTime CheckInTime { get; set; }
+        public string LicensePlateIn { get; set; } = string.Empty;
+        public DateTime? CheckOutTime { get; set; }
+        public string? LicensePlateOut { get; set; }
         public string? PlateNumberOut { get; set; }
         public string? ImageOutPath { get; set; }
 
