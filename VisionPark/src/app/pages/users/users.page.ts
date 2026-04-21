@@ -14,12 +14,12 @@ import {
 import { Api } from '../../services/api'; // <-- KẾT NỐI API VÀO ĐÂY
 
 interface UserRecord {
-  UserId: number;
-  Username: string;
-  FullName: string;
-  Role: string; 
-  IsActive: boolean;
-  CreatedAt: string;
+  userId: number;
+  username: string;
+  fullName: string;
+  role: string; 
+  isActive: boolean;
+  createdAt: string;
 }
 
 @Component({
@@ -59,17 +59,18 @@ export class UsersPage implements OnInit {
       next: (res: any) => {
         const rawData = res.data ? res.data : res; 
         
-        // Hứng đúng chuẩn camelCase từ .NET trả về
+        // Map đúng với response từ API (camelCase)
         this.UsersList = rawData.map((u: any) => ({
-          UserId: u.userId,
-          Username: u.username, 
-          FullName: u.fullName,
-          Role: u.role,
-          IsActive: u.isActive,
-          CreatedAt: u.createdAt
+          userId: u.userId,
+          username: u.username,
+          fullName: u.fullName,
+          role: u.role,
+          isActive: u.isActive,
+          createdAt: u.createdAt
         }));
         
         this.FilteredUsers = [...this.UsersList];
+        console.log('Users loaded:', this.UsersList);
       },
       error: (err) => console.error('Lỗi lấy danh sách nhân viên:', err)
     });
@@ -77,9 +78,9 @@ export class UsersPage implements OnInit {
 
   // --- ĐỔI TRẠNG THÁI (KHÓA/MỞ KHÓA) ---
   toggleUserStatus(user: UserRecord) {
-    this.api.toggleUserStatus(user.UserId).subscribe({
+    this.api.toggleUserStatus(user.userId).subscribe({
       next: () => {
-        user.IsActive = !user.IsActive; // Cập nhật giao diện nếu C# báo thành công
+        user.isActive = !user.isActive; // Cập nhật giao diện nếu C# báo thành công
       },
       error: (err) => alert('Có lỗi xảy ra khi đổi trạng thái nhân viên!')
     });
@@ -105,8 +106,8 @@ export class UsersPage implements OnInit {
     }
     const term = this.SearchTerm.toLowerCase();
     this.FilteredUsers = this.UsersList.filter(u => 
-      u.FullName.toLowerCase().includes(term) || 
-      u.Username.toLowerCase().includes(term)
+      u.fullName.toLowerCase().includes(term) || 
+      u.username.toLowerCase().includes(term)
     );
   }
 

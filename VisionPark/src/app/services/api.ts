@@ -6,8 +6,12 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class Api {
+  login(credentials: any): Observable<any> {
+  // Nhớ kiểm tra port 7154 hay 5295 cho đúng với backend của bạn nhé
+  return this.http.post(`${this.baseUrl}/User/login`, credentials);
+}
   // ĐIỀN ĐÚNG PORT CỦA .NET (Ví dụ: 5000, 7154, 5001...)
-  private baseUrl = 'http://localhost:7154/api'; 
+  private baseUrl = 'http://localhost:5295/api'; 
 
   constructor(private http: HttpClient) {}
 
@@ -33,4 +37,5 @@ export class Api {
   deleteUser(userId: number): Observable<any> {
     return this.http.delete(`${this.baseUrl}/User/${userId}`);
   }
+  
 }
