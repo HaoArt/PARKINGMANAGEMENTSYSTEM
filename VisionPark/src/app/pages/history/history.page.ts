@@ -19,6 +19,7 @@ import {
   IonCardContent,
   IonCardHeader,
   IonCardTitle,
+  ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import * as icons from 'ionicons/icons';
@@ -76,10 +77,13 @@ interface ScanResultData {
 })
 export class HistoryPage implements OnInit {
   private api = inject(Api);
-
+  private toastCtrl = inject(ToastController);
+  private isScanLocked = false; 
+  private lastScannedUid = '';
   parkingHistory: ParkingRecord[] = [];
   filteredHistory: ParkingRecord[] = [];
   isLoading = false;
+  
 
   inputNfcId = '';
   filterConfig = { plateNumber: '', status: 'all' };

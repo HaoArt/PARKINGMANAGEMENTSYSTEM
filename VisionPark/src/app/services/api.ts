@@ -9,11 +9,6 @@ import { environment } from '@environments/environment';
 export class Api {
   private http = inject(HttpClient);
   private baseUrl = environment.apiUrl;
-  login(credentials: any): Observable<any> {
-  
-  return this.http.post(`${this.baseUrl}/User/login`, credentials);
-}
-
 
   getCards(): Observable<any> {
     return this.http.get(`${this.baseUrl}/Card`);
@@ -39,5 +34,8 @@ export class Api {
   }
   addVehicleType(data: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/VehicleTypes`, data);
+  }
+  login(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/Auth/login`, data);
   }
 }

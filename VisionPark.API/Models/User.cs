@@ -7,7 +7,7 @@ namespace VisionPark.API.Models
     public class User
     {
         [Key]
-        public int UsertId { get; set; }
+        public int UserId { get; set; }
 
         [Required]
         public String UserName { get; set; } = String.Empty;
