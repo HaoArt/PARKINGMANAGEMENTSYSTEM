@@ -11,6 +11,6 @@ bootstrapApplication(AppComponent, {
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
-    provideHttpClient(), // <-- 2. Thêm dòng này để bật tính năng API
+    provideHttpClient(), 
   ],
 });

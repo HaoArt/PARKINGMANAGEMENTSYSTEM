@@ -13,6 +13,16 @@ import {
 } from 'ionicons/icons';
 import { Api } from '../../services/api'; // <-- KẾT NỐI API VÀO ĐÂY
 
+
+interface UserRecord {
+  UserId: number;
+  Username: string;
+  FullName: string;
+  Role: string; 
+  IsActive: boolean;
+  CreatedAt: string;
+}
+
 interface UserRecord {
   userId: number;
   username: string;
@@ -21,6 +31,7 @@ interface UserRecord {
   isActive: boolean;
   createdAt: string;
 }
+
 
 @Component({
   selector: 'app-users',
@@ -59,6 +70,33 @@ export class UsersPage implements OnInit {
       next: (res: any) => {
         const rawData = res.data ? res.data : res; 
         
+
+        // Hứng đúng chuẩn camelCase từ .NET trả về
+        this.UsersList = rawData.map((u: any) => ({
+          UserId: u.userId,
+          Username: u.username, 
+          FullName: u.fullName,
+          Role: u.role,
+          IsActive: u.isActive,
+          CreatedAt: u.createdAt
+        }));
+        
+        this.FilteredUsers = [...this.UsersList];
+      },
+      error: (err) => console.error('Lỗi lấy danh sách nhân viên:', err)
+    });
+  }
+
+  // --- ĐỔI TRẠNG THÁI (KHÓA/MỞ KHÓA) ---
+  toggleUserStatus(user: UserRecord) {
+    this.api.toggleUserStatus(user.UserId).subscribe({
+      next: () => {
+        user.IsActive = !user.IsActive; // Cập nhật giao diện nếu C# báo thành công
+      },
+      error: (err) => alert('Có lỗi xảy ra khi đổi trạng thái nhân viên!')
+    });
+  }
+
         // Map đúng với response từ API (camelCase)
         this.UsersList = rawData.map((u: any) => ({
           userId: u.userId,
@@ -86,6 +124,7 @@ export class UsersPage implements OnInit {
     });
   }
 
+
   // --- XÓA TÀI KHOẢN ---
   deleteUser(userId: number) {
     if(confirm('Bạn có chắc chắn muốn xóa tài khoản này không?')) {
@@ -99,6 +138,18 @@ export class UsersPage implements OnInit {
     }
   }
 
+
+  filterUsers() {
+    if (!this.SearchTerm) {
+      this.FilteredUsers = [...this.UsersList];
+      return;
+    }
+    const term = this.SearchTerm.toLowerCase();
+    this.FilteredUsers = this.UsersList.filter(u => 
+      u.FullName.toLowerCase().includes(term) || 
+      u.Username.toLowerCase().includes(term)
+    );
+  }
   filterUsers() {
     if (!this.SearchTerm) {
       this.FilteredUsers = [...this.UsersList];
