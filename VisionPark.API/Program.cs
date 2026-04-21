@@ -29,8 +29,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpClient();
 
-
-// === THÊM MỚI: 1. CẤU HÌNH BẢO MẬT JWT ===
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "VisionPark_Super_Secret_Key_1234567890_!!!"; // Fallback nếu quên cấu hình appsettings
 var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
 
@@ -72,7 +70,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-
 var app = builder.Build();
 
 app.UseCors("AllowAll");
@@ -83,13 +80,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+
+app.UseCors("AllowIonicApp");
 
 
 app.UseAuthentication();
 
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

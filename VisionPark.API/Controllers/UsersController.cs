@@ -25,16 +25,16 @@ namespace VisionPark.API.Controllers
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _context.Users
-                .OrderByDescending(u => u.CreateAt)
+                .OrderByDescending(u => u.CreatedAt)
               
                 .Select(u => new
                 {
-                    u.UserId,
+                    u.UserID,
                     u.UserName,
                     u.FullName,
                     u.Role,
                     u.IsActive,
-                    CreateAt = u.CreateAt.ToString("dd/MM/yyyy HH:mm")
+                    CreateAt = u.CreatedAt.ToString("dd/MM/yyyy HH:mm")
                 })
                 .ToListAsync();
 
@@ -71,7 +71,7 @@ namespace VisionPark.API.Controllers
                 FullName = request.FullName,
                 Role = request.Role,
                 IsActive = true,
-                CreateAt = DateTime.Now
+                CreatedAt = DateTime.Now
             };
 
             _context.Users.Add(newUser);
@@ -82,7 +82,7 @@ namespace VisionPark.API.Controllers
                 Message = "Tạo tài khoản nhân viên thành công!",
                 Data = new
                 {
-                    newUser.UserId,
+                    newUser.UserID,
                     newUser.UserName,
                     newUser.FullName,
                     newUser.Role
