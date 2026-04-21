@@ -6,6 +6,9 @@ import {
   IonItem, IonButton, NavController, LoadingController,
   ToastController, IonHeader, IonToolbar, IonTitle, 
   IonCardHeader, IonCardSubtitle, IonCardTitle } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { personOutline, lockClosedOutline } from 'ionicons/icons';
+import { Api } from '../../services/api'; // Đường dẫn import Api có thể thay đổi tùy thư mục của bạn
 
 @Component({
   selector: 'app-login',
@@ -28,40 +31,60 @@ export class LoginPage implements OnInit {
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
     private navCtrl: NavController,
-  ) {}
+    private api: Api // Nhúng API Service
+  ) {
+    // Đăng ký icon để không bị lỗi không hiện hình
+    addIcons({ personOutline, lockClosedOutline });
+  }
 
   ngOnInit() {}
 
   async handleLogin() {
-    // 1. Kiểm tra nhập liệu
     if (!this.loginData.username || !this.loginData.password) {
       this.showToast('Vui lòng nhập tài khoản và mật khẩu!', 'warning');
       return;
     }
 
     const loading = await this.loadingCtrl.create({
-      message: 'Đang đăng nhập...',
-      duration: 1000 // Giả lập thời gian xử lý
+      message: 'Đang xác thực...',
     });
     await loading.present();
 
-    // 2. Kiểm tra dữ liệu ảo (admin / 123)
-    if (this.loginData.username === 'admin' && this.loginData.password === '123') {
-      await loading.dismiss();
-      this.showToast('Đăng nhập thành công!', 'success');
-      
-      // Chuyển sang trang dashboard lập tức
-      this.navCtrl.navigateRoot('/dashboard'); 
-    } else {
-      await loading.dismiss();
-      this.showToast('Tài khoản hoặc mật khẩu không đúng!', 'danger');
-    }
+    this.api.login(this.loginData).subscribe({
+      next: async (res: any) => {
+        await loading.dismiss();
+        
+        // Bắt tên hiển thị (phòng trường hợp C# trả về FullName hoặc fullName)
+        const name = res.fullName || res.FullName || res.username || 'User';
+        const role = res.role || res.Role || 'Security';
+
+        this.showToast(`Xin chào ${name}!`, 'success');
+        
+        // Lưu thông tin vào bộ nhớ trình duyệt
+        localStorage.setItem('userRole', role);
+        localStorage.setItem('fullName', name);
+
+        this.navCtrl.navigateRoot('/dashboard');
+      },
+      error: async (err) => {
+        await loading.dismiss();
+        console.error('Lỗi đăng nhập:', err);
+        
+        // Kiểm tra lỗi trả về từ Backend (như "Sai mật khẩu", "Tài khoản bị khóa")
+        let errorMsg = 'Mất kết nối đến Server!';
+        if (err.error) {
+          errorMsg = typeof err.error === 'string' ? err.error : (err.error.message || errorMsg);
+        }
+        
+        this.showToast(errorMsg, 'danger');
+      }
+    });
   }
 
   async showToast(message: string, color: string = 'dark') {
     const toast = await this.toastCtrl.create({
       message,
-      duration: 2000,
+      duration: 3000,
       color,
       position: 'bottom'
     });
