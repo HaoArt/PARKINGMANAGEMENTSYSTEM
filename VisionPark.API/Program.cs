@@ -9,6 +9,19 @@ builder.WebHost.ConfigureKestrel(options =>
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+ 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowIonicApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:8100") // URL của ứng dụng Ionic
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -23,7 +36,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
 
-
 var app = builder.Build();
 
 app.UseCors("AllowAll");
@@ -33,10 +45,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+
+app.UseCors("AllowIonicApp");
 
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
