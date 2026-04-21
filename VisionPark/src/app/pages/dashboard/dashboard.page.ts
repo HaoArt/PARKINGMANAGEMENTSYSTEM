@@ -3,10 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { 
   IonContent, IonHeader, IonTitle, IonToolbar, 
-  IonFooter, IonButtons, IonMenuButton, IonIcon, IonButton } from '@ionic/angular/standalone';
+  IonFooter, IonButtons, IonMenuButton, IonIcon, IonButton 
+} from '@ionic/angular/standalone';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component'; 
 import { addIcons } from 'ionicons';
 import { carOutline, cashOutline, searchOutline, documentTextOutline, chevronBackOutline, chevronForwardOutline } from 'ionicons/icons';
+import { Api } from '../../services/api'; // <-- IMPORT FILE KẾT NỐI API
 
 interface ParkingRecord {
   id: string;
@@ -36,10 +38,11 @@ interface ParkingRecord {
   ]
 })
 export class DashboardPage implements OnInit {
+  // Thẻ thống kê
   stats = {
-    totalVehicles: 150,
-    availableSlots: 50,
-    revenueToday: '2,500,000đ'
+    totalVehicles: 0,
+    availableSlots: 100, // Giả sử bãi xe có sức chứa tối đa là 100 chỗ
+    revenueToday: '0 đ'  // Sẽ cập nhật khi Backend có API tính doanh thu
   };
 
   allRecords: ParkingRecord[] = [];
@@ -51,20 +54,47 @@ export class DashboardPage implements OnInit {
 
   currentPage: number = 1;
   itemsPerPage: number = 4;
-  totalPages: number = 13;
+  totalPages: number = 1;
 
-  constructor() { 
+  // Tiêm Api service vào constructor
+  constructor(private api: Api) { 
     addIcons({ carOutline, cashOutline, searchOutline, documentTextOutline, chevronBackOutline, chevronForwardOutline });
   }
 
   ngOnInit() {
-    this.allRecords = [
-      { id: 'NFC-1042', plateNumber: '29A-123.45', vehicleType: 'Ô tô', timeIn: '08:15 AM', status: 'In' },
-      { id: 'NFC-0891', plateNumber: '30E-987.65', vehicleType: 'Ô tô', timeIn: '08:02 AM', status: 'In' },
-      { id: 'NFC-2201', plateNumber: '29C-456.78', vehicleType: 'Xe tải nhỏ', timeIn: '07:45 AM', status: 'Out' },
-      { id: 'NFC-1156', plateNumber: '29B-555.22', vehicleType: 'Ô tô', timeIn: '07:30 AM', status: 'Out' },
-    ];
-    this.applyFilters();
+    this.loadDataFromDatabase();
+  }
+
+  // --- HÀM KẾT NỐI DB LẤY DỮ LIỆU ---
+  loadDataFromDatabase() {
+    this.api.getParkingHistory().subscribe({
+      next: (response: any) => {
+        if (response && response.data) {
+          
+          // 1. Map dữ liệu từ SQL Server sang dạng hiển thị trên bảng
+          this.allRecords = response.data.map((item: any) => ({
+            id: `NFC-${item.cardID}`,
+            plateNumber: item.licensePlateIn,
+            vehicleType: item.vehicleTypeID === 1 ? 'Ô tô' : 'Xe máy',
+            timeIn: item.checkInTime,
+            status: item.status === "Đang đỗ" ? 'In' : 'Out'
+          }));
+
+          // 2. Tự động tính toán dữ liệu cho 3 Thẻ thống kê
+          // Đếm số lượng xe có trạng thái "In" (Đang đỗ)
+          const carsInParking = this.allRecords.filter(r => r.status === 'In').length;
+          
+          this.stats.totalVehicles = carsInParking;
+          this.stats.availableSlots = 100 - carsInParking; // Chỗ trống = Tổng sức chứa (100) - Xe đang đỗ
+          
+          // 3. Áp dụng bộ lọc và phân trang để vẽ lên giao diện
+          this.applyFilters();
+        }
+      },
+      error: (err) => {
+        console.error('Lỗi khi lấy dữ liệu Dashboard:', err);
+      }
+    });
   }
 
   applyFilters() {
@@ -80,22 +110,27 @@ export class DashboardPage implements OnInit {
     }
 
     this.filteredRecords = temp;
+    this.totalPages = Math.ceil(this.filteredRecords.length / this.itemsPerPage) || 1;
+    this.currentPage = 1;
     this.updatePagination();
   }
 
   updatePagination() {
-    this.paginatedRecords = this.filteredRecords;
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    this.paginatedRecords = this.filteredRecords.slice(start, start + this.itemsPerPage);
   }
 
   nextPage() {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
+      this.updatePagination();
     }
   }
 
   prevPage() {
     if (this.currentPage > 1) {
       this.currentPage--;
+      this.updatePagination();
     }
   }
 }

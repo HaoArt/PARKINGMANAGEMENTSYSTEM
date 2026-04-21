@@ -74,7 +74,7 @@
             <ion-icon slot="icon-only" [name]="user.IsActive ? 'lock-closed-outline' : 'lock-open-outline'"></ion-icon>
           </ion-button>
           
-          <ion-button fill="clear" color="danger" class="m-0" title="Xóa tài khoản">
+          <ion-button fill="clear" color="danger" class="m-0" title="Xóa tài khoản" (click)="deleteUser(user.UserId)">
             <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
           </ion-button>
         </ion-col>

@@ -11,15 +11,15 @@ import {
   personOutline, shieldCheckmarkOutline, searchOutline,
   lockClosedOutline, lockOpenOutline
 } from 'ionicons/icons';
+import { Api } from '../../services/api'; // <-- KẾT NỐI API VÀO ĐÂY
 
-// Giao diện chuẩn hóa theo bảng Users trong Database C#
 interface UserRecord {
   UserId: number;
   Username: string;
   FullName: string;
-  Role: string; // 'Admin', 'Security', 'Manager'
+  Role: string; 
   IsActive: boolean;
-  CreatedAt: Date;
+  CreatedAt: string;
 }
 
 @Component({
@@ -37,12 +37,11 @@ interface UserRecord {
 export class UsersPage implements OnInit {
 
   SearchTerm: string = '';
-  
-  // Dữ liệu mẫu giả lập từ DB
   UsersList: UserRecord[] = [];
   FilteredUsers: UserRecord[] = [];
 
-  constructor() {
+  // Nhúng biến api vào constructor
+  constructor(private api: Api) {
     addIcons({ 
       addOutline, createOutline, trashOutline, 
       personOutline, shieldCheckmarkOutline, searchOutline,
@@ -51,17 +50,54 @@ export class UsersPage implements OnInit {
   }
 
   ngOnInit() {
-    // Khởi tạo dữ liệu mẫu
-    this.UsersList = [
-      { UserId: 1, Username: 'admin', FullName: 'Trần Đức Thành Nhuận', Role: 'Admin', IsActive: true, CreatedAt: new Date('2025-01-01') },
-      { UserId: 2, Username: 'baove_ca1', FullName: 'Nguyễn Văn A', Role: 'Security', IsActive: true, CreatedAt: new Date('2026-02-15') },
-      { UserId: 3, Username: 'baove_ca2', FullName: 'Lê Thị B', Role: 'Security', IsActive: false, CreatedAt: new Date('2026-03-10') },
-      { UserId: 4, Username: 'quanly_01', FullName: 'Phạm C', Role: 'Manager', IsActive: true, CreatedAt: new Date('2026-04-01') },
-    ];
-    this.FilteredUsers = [...this.UsersList];
+    this.loadUsersFromBackend(); // Tải dữ liệu thật khi mở trang
   }
 
-  // Hàm tìm kiếm nhân viên
+  // --- LẤY DỮ LIỆU TỪ SQL SERVER ---
+  loadUsersFromBackend() {
+    this.api.getAllUsers().subscribe({
+      next: (res: any) => {
+        const rawData = res.data ? res.data : res; 
+        
+        // Hứng đúng chuẩn camelCase từ .NET trả về
+        this.UsersList = rawData.map((u: any) => ({
+          UserId: u.userId,
+          Username: u.username, 
+          FullName: u.fullName,
+          Role: u.role,
+          IsActive: u.isActive,
+          CreatedAt: u.createdAt
+        }));
+        
+        this.FilteredUsers = [...this.UsersList];
+      },
+      error: (err) => console.error('Lỗi lấy danh sách nhân viên:', err)
+    });
+  }
+
+  // --- ĐỔI TRẠNG THÁI (KHÓA/MỞ KHÓA) ---
+  toggleUserStatus(user: UserRecord) {
+    this.api.toggleUserStatus(user.UserId).subscribe({
+      next: () => {
+        user.IsActive = !user.IsActive; // Cập nhật giao diện nếu C# báo thành công
+      },
+      error: (err) => alert('Có lỗi xảy ra khi đổi trạng thái nhân viên!')
+    });
+  }
+
+  // --- XÓA TÀI KHOẢN ---
+  deleteUser(userId: number) {
+    if(confirm('Bạn có chắc chắn muốn xóa tài khoản này không?')) {
+      this.api.deleteUser(userId).subscribe({
+        next: () => {
+          alert('Xóa thành công!');
+          this.loadUsersFromBackend(); // Tải lại bảng sau khi xóa
+        },
+        error: (err) => alert('Lỗi khi xóa nhân viên!')
+      });
+    }
+  }
+
   filterUsers() {
     if (!this.SearchTerm) {
       this.FilteredUsers = [...this.UsersList];
@@ -74,7 +110,6 @@ export class UsersPage implements OnInit {
     );
   }
 
-  // Hàm tạo màu cho Badge phân quyền
   getRoleColor(role: string): string {
     switch (role) {
       case 'Admin': return 'danger';
@@ -84,14 +119,6 @@ export class UsersPage implements OnInit {
     }
   }
 
-  // Hàm thay đổi trạng thái (Khóa / Mở khóa tài khoản)
-  toggleUserStatus(user: UserRecord) {
-    user.IsActive = !user.IsActive;
-    // Ở đây sau này sẽ gọi API update xuống C#
-    console.log(`Đã thay đổi trạng thái của ${user.Username} thành ${user.IsActive}`);
-  }
-
-  // Nút thêm nhân viên
   addNewUser() {
     alert('Chức năng mở Popup/Modal thêm nhân viên sẽ được gọi ở đây!');
   }
