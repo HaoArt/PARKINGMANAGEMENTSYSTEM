@@ -1,36 +1,38 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '@environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class Api {
-  // ĐIỀN ĐÚNG PORT CỦA .NET (Ví dụ: 5000, 7154, 5001...)
-  private baseUrl = 'http://localhost:7154/api'; 
+  private http = inject(HttpClient);
+  private baseUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  getCards(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/Card`);
+  }
 
-  // 1. Gọi API lấy lịch sử bãi đỗ xe
+  createCard(cardData: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/Card`, cardData);
+  }
+  scanCard(cardUID: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/Parking/scan-card`, { cardUID });
+  }
   getParkingHistory(): Observable<any> {
     return this.http.get(`${this.baseUrl}/Parking/history`);
   }
-
-  // 2. Gọi API quét thẻ (C# đang gộp cả In và Out vào chung 1 API scan-card)
-  scanCard(cardUID: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/Parking/scan-card`, { CardUID: cardUID });
+  registerMonthly(formData: FormData): Observable<any> {
+    return this.http.post(`${this.baseUrl}/Ticket/register-monthly`, formData);
   }
-  getAllUsers(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/User`);
+  getMonthlyTickets(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/Ticket/monthly-tickets`);
   }
-
-  // Khóa / Mở khóa tài khoản
-  toggleUserStatus(userId: number): Observable<any> {
-    return this.http.put(`${this.baseUrl}/User/toggle-status/${userId}`, {});
+  getVehicleTypes(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/VehicleTypes`);
   }
-
-  // Xóa tài khoản
-  deleteUser(userId: number): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/User/${userId}`);
+  addVehicleType(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/VehicleTypes`, data);
   }
 }
