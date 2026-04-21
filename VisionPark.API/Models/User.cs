@@ -7,22 +7,21 @@ namespace VisionPark.API.Models
     public class User
     {
         [Key]
-        public int UsertId { get; set; }
+        public int UserID { get; set; } // Đổi thành UserID cho chuẩn SQL
 
         [Required]
-        public String UserName { get; set; } = String.Empty;
+        public string Username { get; set; } = string.Empty; // Sửa UserName thành Username
 
         [Required]
-        public string PasswordHash { get; set; } = String.Empty;
+        public string PasswordHash { get; set; } = string.Empty;
 
         [Required]
-        public string FullName {  get; set; } = String.Empty;
+        public string FullName { get; set; } = string.Empty;
 
         public string Role { get; set; } = "Security";
 
         public bool IsActive { get; set; } = true;
 
-        public DateTime CreateAt { get; set; }= DateTime.Now;
-
+        public DateTime CreatedAt { get; set; } = DateTime.Now; // Đã thêm chữ 'd' vào CreatedAt
     }
 }
