@@ -2,12 +2,15 @@
 using VisionPark.API.Data;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5295);
+});
 
-// Cấu hình Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+ 
 
-// THÊM ĐOẠN NÀY ĐỂ MỞ KHÓA CORS CHO IONIC
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowIonicApp", policy =>
@@ -18,7 +21,16 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Thêm các dịch vụ cơ bản
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()    
+              .AllowAnyMethod()    
+              .AllowAnyHeader();   
+    });
+});
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -26,15 +38,14 @@ builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
+app.UseCors("AllowAll");
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
 
-// KÍCH HOẠT CORS TẠI ĐÂY (Phải đặt trước UseAuthorization)
 app.UseCors("AllowIonicApp");
 
 app.UseAuthorization();

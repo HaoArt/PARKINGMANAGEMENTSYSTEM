@@ -1,27 +1,49 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
-  IonContent, IonGrid, IonRow, IonCol, IonBadge, IonSearchbar,
-  IonText, IonSelect, IonButton, IonIcon, IonSelectOption,
-  IonItem, IonInput, IonCard, IonCardContent, IonCardHeader, IonCardTitle
+  IonContent,
+  IonGrid,
+  IonRow,
+  IonCol,
+  IonBadge,
+  IonSearchbar,
+  IonText,
+  IonSelect,
+  IonButton,
+  IonIcon,
+  IonSelectOption,
+  IonItem,
+  IonInput,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { 
-  downloadOutline, filterOutline, timeOutline, searchOutline, 
-  logInOutline, logOutOutline, idCardOutline, carOutline, checkmarkCircleOutline,
-  chevronDownOutline, documentTextOutline, cashOutline
-} from 'ionicons/icons';
-import { NavbarComponent } from '../../shared/components/navbar/navbar.component'; 
-import { Api } from '../../services/api' 
+import * as icons from 'ionicons/icons';
+import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
+import { Api } from '../../services/api';
 
 interface ParkingRecord {
   nfcId: string;
+  plateNumberIn: string;
+  plateNumberOut: string;
+  vehicleType: string;
+  checkInTime: string;
+  checkOutTime: string;
+  status: 'In' | 'Out';
+}
+
+interface ScanResultData {
+  action: string;
+  message: string;
+  customerName: string;
   plateNumber: string;
   vehicleType: string;
-  checkInTime: string; // Đổi thành string vì C# trả về string
-  checkOutTime?: string;
-  status: 'In' | 'Out';
+  expiryDate: string;
+  status: string;
+  isSuccess: boolean;
 }
 
 @Component({
@@ -30,107 +52,130 @@ interface ParkingRecord {
   styleUrls: ['./history.page.scss'],
   standalone: true,
   imports: [
-    IonCardContent, IonCard, IonCardHeader, IonCardTitle,
-    IonItem, IonContent, IonGrid, IonRow, IonInput, IonCol,
-    IonBadge, IonSearchbar, IonText, IonButton, IonSelect,
-    IonSelectOption, IonIcon, CommonModule, FormsModule, NavbarComponent
+    IonCardContent,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
+    IonItem,
+    IonContent,
+    IonGrid,
+    IonRow,
+    IonInput,
+    IonCol,
+    IonBadge,
+    IonSearchbar,
+    IonText,
+    IonButton,
+    IonSelect,
+    IonSelectOption,
+    IonIcon,
+    CommonModule,
+    FormsModule,
+    NavbarComponent,
   ],
 })
 export class HistoryPage implements OnInit {
-  
-  checkInData = { nfcId: '', plateNumber: '', vehicleType: 'Ô tô' };
-  checkOutData = { nfcId: '', plateNumber: '--', timeIn: '', totalCost: 0 };
+  private api = inject(Api);
 
   parkingHistory: ParkingRecord[] = [];
   filteredHistory: ParkingRecord[] = [];
+  isLoading = false;
 
+  inputNfcId = '';
   filterConfig = { plateNumber: '', status: 'all' };
 
-  // Tiêm Api vào constructor
-  constructor(private api: Api) {
-    addIcons({
-      downloadOutline, filterOutline, timeOutline, searchOutline,
-      logInOutline, logOutOutline, idCardOutline, carOutline, checkmarkCircleOutline,
-      chevronDownOutline, documentTextOutline, cashOutline
-    });
+  scanResult: ScanResultData | null = null;
+
+  constructor() {
+    addIcons({ ...icons });
   }
 
   ngOnInit() {
-    this.loadHistoryFromBackend(); // Load dữ liệu thật khi mở trang
+    this.fetchData();
   }
 
-  // --- GỌI API LẤY LỊCH SỬ ---
-  loadHistoryFromBackend() {
+  fetchData() {
+    this.isLoading = true;
     this.api.getParkingHistory().subscribe({
-      next: (response: any) => {
-        if (response && response.data) {
-          // Map dữ liệu từ C# sang Frontend
-          this.parkingHistory = response.data.map((item: any) => ({
-            nfcId: `Card ID: ${item.cardID}`,
-            plateNumber: item.licensePlateIn,
-            vehicleType: item.vehicleTypeID === 1 ? 'Ô tô' : 'Xe máy',
-            checkInTime: item.checkInTime,
-            checkOutTime: item.checkOutTime !== "Chưa ra khỏi bãi" ? item.checkOutTime : null,
-            status: item.status === "Đang đỗ" ? 'In' : 'Out'
-          }));
+      next: (res: any) => {
+        if (res?.data) {
+          this.parkingHistory = res.data.map((item: any) =>
+            this.mapBackendToFrontend(item),
+          );
           this.applyFilters();
         }
-      },
-      error: (err) => console.error('Lỗi khi lấy dữ liệu API:', err)
-    });
-  }
-
-  // --- GỌI API QUÉT THẺ (DÙNG CHUNG CHO VÀO VÀ RA THEO C#) ---
-  onCheckIn() {
-    if (!this.checkInData.nfcId) {
-      alert('Vui lòng nhập Mã thẻ NFC!');
-      return;
-    }
-    
-    this.api.scanCard(this.checkInData.nfcId).subscribe({
-      next: (res: any) => {
-        alert(res.message); // Hiển thị thông báo "Xe VÀO bãi thành công" hoặc "Xe RA..."
-        this.loadHistoryFromBackend(); // Tải lại bảng dữ liệu
-        this.checkInData.nfcId = '';
+        this.isLoading = false;
       },
       error: (err) => {
-        alert(err.error?.message || err.error || 'Lỗi xử lý thẻ!');
-      }
+        console.error('Lỗi API:', err);
+        this.isLoading = false;
+      },
     });
   }
 
-  onCheckOut() {
-    if (!this.checkOutData.nfcId) {
-      alert('Vui lòng nhập Mã thẻ NFC!');
-      return;
-    }
+  private mapBackendToFrontend(item: any): ParkingRecord {
+    return {
+      nfcId: item.cardID,
+      plateNumberIn: item.licensePlateIn || '---',
+      plateNumberOut: item.licensePlateOut || '---', // Hứng biển số lúc ra
+      vehicleType: item.vehicleTypeID === 1 ? 'Ô tô' : 'Xe máy',
+      checkInTime: item.checkInTime,
+      checkOutTime: item.checkOutTime, // C# đã trả về string ("... HH:mm" hoặc "Chưa ra khỏi bãi")
+      status: item.status === 'Đang đỗ' ? 'In' : 'Out',
+    };
+  }
 
-    // Do C# xử lý In/Out chung 1 hàm, ta gọi lại hàm scanCard
-    this.api.scanCard(this.checkOutData.nfcId).subscribe({
+  onProcessCard(nfcId: string) {
+    if (!nfcId) return alert('Vui lòng nhập hoặc quét mã thẻ!');
+
+    this.isLoading = true;
+    this.api.scanCard(nfcId).subscribe({
       next: (res: any) => {
-        alert(res.message);
-        this.loadHistoryFromBackend();
-        this.checkOutData.nfcId = '';
+        const data = res.data;
+
+        this.scanResult = {
+          action: res.action,
+          message: res.message,
+          customerName: data?.customerName || '---',
+          plateNumber: data?.plateNumber || '---',
+          vehicleType:
+            data?.vehicleType?.name || data?.vehicleType?.typeName || '---', // Đã map theo C# mới
+          expiryDate: data?.expiryDate || '---',
+          status: data?.status || '---',
+          isSuccess: res.action === 'CHECK_IN' || res.action === 'CHECK_OUT',
+        };
+
+        this.inputNfcId = '';
+        this.fetchData();
       },
       error: (err) => {
-        alert(err.error?.message || err.error || 'Lỗi xử lý thẻ!');
-      }
+        this.scanResult = {
+          action: 'ERROR',
+          message: err.error?.message || err.error || 'Lỗi xử lý thẻ!',
+          customerName: '---',
+          plateNumber: '---',
+          vehicleType: '---',
+          expiryDate: '---',
+          status: '---',
+          isSuccess: false,
+        };
+        this.isLoading = false;
+      },
     });
   }
 
-  // Bộ lọc nội bộ trên bảng
   applyFilters() {
-    let result = [...this.parkingHistory];
-    if (this.filterConfig.status !== 'all') {
-      result = result.filter(item => item.status === this.filterConfig.status);
-    }
-    if (this.filterConfig.plateNumber) {
-      const searchStr = this.filterConfig.plateNumber.toLowerCase();
-      result = result.filter(item => item.plateNumber.toLowerCase().includes(searchStr) || item.nfcId.toLowerCase().includes(searchStr));
-    }
-    this.filteredHistory = result;
-  }
+    const { plateNumber, status } = this.filterConfig;
+    const searchStr = plateNumber.toLowerCase().trim();
 
-  // Bỏ đi hàm findVehicleOut vì C# đã tự tính toán hóa đơn khi gọi scanCard
-  findVehicleOut() {}
+    this.filteredHistory = this.parkingHistory.filter((item) => {
+      const matchStatus = status === 'all' || item.status === status;
+      const matchSearch =
+        !searchStr ||
+        item.plateNumberIn.toLowerCase().includes(searchStr) ||
+        item.plateNumberOut.toLowerCase().includes(searchStr) ||
+        item.nfcId.toLowerCase().includes(searchStr);
+      return matchStatus && matchSearch;
+    });
+  }
 }
