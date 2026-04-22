@@ -17,8 +17,7 @@ import {
   IonTitle,
   IonCardHeader,
   IonCardSubtitle,
-  IonCardTitle,
-} from '@ionic/angular/standalone';
+  IonCardTitle, IonImg } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { personOutline, lockClosedOutline } from 'ionicons/icons';
 import { Api } from '../../services/api';
@@ -28,7 +27,7 @@ import { Api } from '../../services/api';
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   standalone: true,
-  imports: [
+  imports: [IonImg, 
     IonCardTitle,
     CommonModule,
     FormsModule,

@@ -1,21 +1,16 @@
-import { Component, OnInit, inject } from '@angular/core'; // Thêm OnInit, dùng inject
+import { Component, OnInit, inject } from '@angular/core'; 
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import {
-  IonMenu,
-  IonContent,
-  IonList,
-  IonItem,
-  IonIcon,
-  IonLabel,
-  IonListHeader,
-  IonToolbar,
-  IonHeader,
-  MenuController,
-  NavController,
+  IonContent, IonIcon,
+  MenuController, NavController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
+import { 
+  gridOutline, carOutline, timeOutline, peopleOutline, settingsOutline,
+  helpCircleOutline, logOutOutline, eye 
+} from 'ionicons/icons';
 
 @Component({
   selector: 'app-sidebar',
@@ -23,16 +18,7 @@ import { addIcons } from 'ionicons';
   styleUrls: ['./sidebar.component.scss'],
   standalone: true,
   imports: [
-    IonHeader,
-    IonToolbar,
-    CommonModule,
-    IonMenu,
-    IonContent,
-    IonList,
-    IonItem,
-    IonIcon,
-    IonLabel,
-    IonListHeader,
+    CommonModule, IonContent, IonIcon
   ],
 })
 export class SidebarComponent implements OnInit {
@@ -41,7 +27,7 @@ export class SidebarComponent implements OnInit {
   private navCtrl = inject(NavController);
 
   adminPages = [
-    { title: 'Dashboard', url: '/dashboard', icon: 'grid-outline' },
+    { title: 'Tổng quan', url: '/dashboard', icon: 'eye' },
     { title: 'Tạo thẻ', url: '/ticket-parking', icon: 'car-outline' },
     { title: 'Lịch sử', url: '/history', icon: 'time-outline' },
     { title: 'Nhân viên', url: '/users', icon: 'people-outline' },
@@ -49,9 +35,11 @@ export class SidebarComponent implements OnInit {
   ];
 
   currentUrl: string = '';
+  fullName: string = 'User'; 
+  role: string = 'Security'; 
 
   constructor() {
-    addIcons({ ...addIcons });
+    addIcons({ gridOutline, carOutline, timeOutline, peopleOutline, settingsOutline, helpCircleOutline, logOutOutline, eye });
   }
 
   ngOnInit() {
@@ -61,6 +49,9 @@ export class SidebarComponent implements OnInit {
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe((event: any) => {
         this.currentUrl = event.urlAfterRedirects;
+        // Quét thông tin user mỗi khi chuyển trang
+        this.fullName = localStorage.getItem('fullName') || 'User';
+        this.role = localStorage.getItem('userRole') || 'Security';
       });
   }
 
@@ -74,5 +65,10 @@ export class SidebarComponent implements OnInit {
     this.menuCtrl.close().then(() => {
       this.navCtrl.navigateRoot(url, { animated: false });
     });
+  }
+
+  logout() {
+    localStorage.clear(); 
+    this.navCtrl.navigateRoot('/login'); 
   }
 }

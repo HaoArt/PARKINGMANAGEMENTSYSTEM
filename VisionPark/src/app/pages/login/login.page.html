@@ -1,43 +1,88 @@
-<ion-content class="login-page">
+<ion-content class="login-bg">
+  
+  <div class="decor top-left">
+    <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 9V5a2 2 0 0 1 2-2h4M21 9V5a2 2 0 0 0-2-2h-4M3 15v4a2 2 0 0 0 2 2h4M21 15v4a2 2 0 0 1-2 2h-4"></path>
+      <rect x="7" y="7" width="3" height="3"></rect>
+      <rect x="14" y="7" width="3" height="3"></rect>
+      <rect x="7" y="14" width="3" height="3"></rect>
+      <rect x="14" y="14" width="3" height="3"></rect>
+    </svg>
+  </div>
+  <div class="decor bottom-right">
+    <svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 24 24" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+      <path d="M12 22V2"></path>
+      <path d="M4 12h16"></path>
+    </svg>
+  </div>
 
-  <div class="login-wrapper">
-
-    <!-- Logo / Title -->
-    <div class="brand">
-      <h1>VisionPark</h1>
-      <p>Smart Parking System</p>
-    </div>
-
-    <!-- Card -->
+  <div class="login-container">
+    
     <div class="login-card">
-
-      <h2>Đăng nhập</h2>
-      <p class="subtitle">Chào mừng bạn quay lại 👋</p>
-
-      <div class="input-group">
-        <ion-icon name="person-outline"></ion-icon>
-        <input 
-          type="text" 
-          placeholder="Tên đăng nhập"
-          [(ngModel)]="loginData.username"
-        />
+      <div class="card-header">
+        <h1 class="logo">VISIONPARK</h1>
+        <h2 class="title">Chào mừng trở lại</h2>
+        <p class="subtitle">Hệ thống quản lý bãi xe thông minh</p>
       </div>
 
-      <div class="input-group">
-        <ion-icon name="lock-closed-outline"></ion-icon>
-        <input 
-          type="password" 
-          placeholder="Mật khẩu"
-          [(ngModel)]="loginData.password"
-        />
+      <div class="form-group">
+        <label>TÊN ĐĂNG NHẬP</label>
+        <div class="input-wrapper">
+          <ion-icon name="person-outline" class="input-icon"></ion-icon>
+          <input 
+            type="text" 
+            placeholder="Nhập tài khoản của bạn" 
+            [(ngModel)]="loginData.username"
+            (keyup.enter)="handleLogin()"
+          />
+        </div>
       </div>
 
-      <button class="login-btn" (click)="handleLogin()">
-        Đăng nhập
+      <div class="form-group">
+        <div class="label-row">
+          <label>MẬT KHẨU</label>
+          <a href="#" class="forgot-link">Quên mật khẩu?</a>
+        </div>
+        <div class="input-wrapper">
+          <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
+          <input 
+            type="password" 
+            placeholder="Nhập mật khẩu" 
+            [(ngModel)]="loginData.password"
+            (keyup.enter)="handleLogin()"
+          />
+          <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </div>
+      </div>
+
+      <button class="btn-login" (click)="handleLogin()">
+        Đăng nhập 
+        <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
       </button>
 
+      <div class="card-footer">
+        Bạn chưa có tài khoản? <a href="#">Liên hệ quản trị viên</a>
+      </div>
     </div>
 
+
+
+  </div>
+
+  <div class="page-footer">
+    <span class="copyright">© 2026 VISIONPARK. HỆ THỐNG QUẢN LÝ BÃI XE THÔNG MINH.</span>
+    <div class="links">
+      <a href="#">ĐIỀU KHOẢN</a>
+      <a href="#">BẢO MẬT</a>
+      <a href="#">LIÊN HỆ</a>
+    </div>
   </div>
 
 </ion-content>

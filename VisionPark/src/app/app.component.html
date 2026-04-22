@@ -1,9 +1,21 @@
 <ion-app>
-  <ion-split-pane [when]="showMenu ? 'md' : false" contentId="main-content">
-    
-    <app-sidebar *ngIf="showMenu"></app-sidebar>
-    
-    <ion-router-outlet id="main-content"></ion-router-outlet>
-    
+  <ion-split-pane 
+    contentId="main-content" 
+    when="md" 
+    [disabled]="!showMenu"
+    style="--side-min-width: 240px; --side-max-width: 170px; --side-width: 240px;">
+
+    <ion-menu 
+      contentId="main-content" 
+      [disabled]="!showMenu" 
+      style="--background: #ffffff; border-right: 1px solid #f3f4f6; --width: 240px; max-width: 240px;">
+      
+      <app-sidebar style="display: flex; flex-direction: column; height: 100%;"></app-sidebar>
+    </ion-menu>
+
+    <div class="ion-page" id="main-content">
+      <ion-router-outlet></ion-router-outlet>
+    </div>
+
   </ion-split-pane>
 </ion-app>
