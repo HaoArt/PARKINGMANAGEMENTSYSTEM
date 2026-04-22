@@ -12,7 +12,7 @@ import {
   IonMenuButton,
 } from '@ionic/angular/standalone';
 
-// Import thư viện icon
+import { NavController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
   searchOutline,
@@ -38,12 +38,17 @@ import {
   ],
 })
 export class NavbarComponent {
-  constructor() {
-    // Khai báo icon một lần duy nhất bằng cú pháp ngắn gọn
+  constructor(
+    private navCtrl: NavController,
+  ) {
     addIcons({
       searchOutline,
       notificationsOutline,
-      personCircleOutline
+      personCircleOutline,
     });
+  }
+  logout() {
+    localStorage.clear();
+    this.navCtrl.navigateRoot('/login');
   }
 }

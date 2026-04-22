@@ -34,7 +34,6 @@ namespace VisionPark.API.Controllers
             var isExpired = DateTime.Now > ticket.EndDate;
             var ticketStatus = isExpired ? "Đã hết hạn" : "Hợp lệ";
 
-            // ĐÃ SỬA: Format ngày tháng và lỗi type spelling
             var displayInfo = new
             {
                 CustomerName = ticket.CustomerName,
@@ -77,7 +76,6 @@ namespace VisionPark.API.Controllers
                     Data = displayInfo
                 });
             }
-            // XỬ LÝ CHECK-OUT (RA BÃI)
             else
             {
                 activeSession.CheckOutTime = DateTime.Now;
@@ -95,9 +93,28 @@ namespace VisionPark.API.Controllers
         }
 
         [HttpGet("history")]
-        public async Task<IActionResult> GetParkingHistory()
+        public async Task<IActionResult> GetParkingHistory(string? searchTerm, string? status)
         {
-            var sessions = await _context.ParkingSessions
+          
+            var query = _context.ParkingSessions.AsQueryable();
+
+           
+            if (!string.IsNullOrEmpty(status) && status != "all")
+            {
+                query = query.Where(s => (status == "In" ? s.CheckOutTime == null : s.CheckOutTime != null));
+            }
+
+           
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                searchTerm = searchTerm.ToLower();
+                query = query.Where(s => s.LicensePlateIn.Contains(searchTerm) ||
+                                         (s.LicensePlateOut != null && s.LicensePlateOut.Contains(searchTerm)) ||
+                                         s.CardID.ToString().Contains(searchTerm));
+            }
+
+          
+            var sessions = await query
                 .OrderByDescending(s => s.CheckInTime)
                 .Select(s => new
                 {
@@ -110,22 +127,12 @@ namespace VisionPark.API.Controllers
                     CheckOutTime = s.CheckOutTime.HasValue
                             ? s.CheckOutTime.Value.ToString("dd/MM/yyyy HH:mm:ss")
                             : "Chưa ra khỏi bãi",
-                    Status = s.CheckOutTime == null ? "Đang đỗ" : "Đã rời đi"
+                    Status = s.CheckOutTime == null ? "In" : "Out"
                 }).ToListAsync();
-
-            if (sessions.Count == 0)
-            {
-                return Ok(new
-                {
-                    Message = "Chưa có dữ liệu ra vào bãi.",
-                    TotalCount = 0,
-                    Data = sessions
-                });
-            }
 
             return Ok(new
             {
-                Message = "Lấy lịch sử ra vào thành công!",
+                Message = "Lấy lịch sử thành công!",
                 TotalCount = sessions.Count,
                 Data = sessions
             });

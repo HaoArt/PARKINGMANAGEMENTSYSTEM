@@ -1,41 +1,43 @@
-<ion-header class="ion-no-border">
-  <ion-toolbar>
-    <ion-title class="ion-text-center">VisionPark</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="login-page">
 
-<ion-content class="ion-padding">
-  <div class="login-container">
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title class="ion-text-center">Đăng Nhập</ion-card-title>
-        <ion-card-subtitle class="ion-text-center">Hệ thống quản lý bãi giữ xe</ion-card-subtitle>
-      </ion-card-header>
+  <div class="login-wrapper">
 
-      <ion-card-content>
-        <ion-item lines="full">
-          <ion-icon name="person-outline" slot="start"></ion-icon>
-          <ion-input 
-            type="text" 
-            placeholder="Tên đăng nhập" 
-            [(ngModel)]="loginData.username">
-          </ion-input>
-        </ion-item>
+    <!-- Logo / Title -->
+    <div class="brand">
+      <h1>VisionPark</h1>
+      <p>Smart Parking System</p>
+    </div>
 
-        <ion-item lines="full">
-          <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
-          <ion-input 
-            type="password" 
-            placeholder="Mật khẩu" 
-            [(ngModel)]="loginData.password">
-          </ion-input>
-        </ion-item>
+    <!-- Card -->
+    <div class="login-card">
 
-        <div class="ion-margin-top">
-          <ion-button expand="block" (click)="handleLogin()">Đăng Nhập</ion-button>
-        </div>
+      <h2>Đăng nhập</h2>
+      <p class="subtitle">Chào mừng bạn quay lại 👋</p>
 
-      </ion-card-content>
-    </ion-card>
+      <div class="input-group">
+        <ion-icon name="person-outline"></ion-icon>
+        <input 
+          type="text" 
+          placeholder="Tên đăng nhập"
+          [(ngModel)]="loginData.username"
+        />
+      </div>
+
+      <div class="input-group">
+        <ion-icon name="lock-closed-outline"></ion-icon>
+        <input 
+          type="password" 
+          placeholder="Mật khẩu"
+          [(ngModel)]="loginData.password"
+        />
+      </div>
+
+      <button class="login-btn" (click)="handleLogin()">
+        Đăng nhập
+      </button>
+
+    </div>
+
   </div>
+
 </ion-content>

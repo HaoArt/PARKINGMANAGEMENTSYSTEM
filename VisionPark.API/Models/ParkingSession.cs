@@ -11,24 +11,24 @@ namespace VisionPark.API.Models
 
         public int CardID { get; set; }
         [ForeignKey("CardID")]
-        public  NfcCard Card { get; set; }
+        public NfcCard Card { get; set; }
 
         public int VehicleTypeID { get; set; }
         [ForeignKey("VehicleTypeID")]
-        public  VehicleType VehicleType { get; set; }
+        public VehicleType VehicleType { get; set; }
 
         public int? TicketID { get; set; }
         [ForeignKey("TicketID")]
-        public MonthlyTicket? MonthlyTicket { get; set; } 
+        public MonthlyTicket? MonthlyTicket { get; set; }
 
-    
+
         public DateTime TimeIn { get; set; } = DateTime.Now;
         public string? PlateNumberIn { get; set; }
         public string? ImageInPath { get; set; }
 
         public int? UserInID { get; set; }
         [ForeignKey("UserInID")]
-        public  User? UserIn { get; set; }
+        public User? UserIn { get; set; }
 
         public DateTime CheckInTime { get; set; }
         public string LicensePlateIn { get; set; } = string.Empty;

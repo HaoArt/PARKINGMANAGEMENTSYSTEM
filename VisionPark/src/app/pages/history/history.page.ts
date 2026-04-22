@@ -19,6 +19,7 @@ import {
   IonCardContent,
   IonCardHeader,
   IonCardTitle,
+  ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import * as icons from 'ionicons/icons';
@@ -76,12 +77,13 @@ interface ScanResultData {
 })
 export class HistoryPage implements OnInit {
   private api = inject(Api);
+  private toastCtrl = inject(ToastController);
 
   parkingHistory: ParkingRecord[] = [];
-  filteredHistory: ParkingRecord[] = [];
   isLoading = false;
 
   inputNfcId = '';
+  // Bộ lọc cấu hình gửi lên BE
   filterConfig = { plateNumber: '', status: 'all' };
 
   scanResult: ScanResultData | null = null;
@@ -94,39 +96,57 @@ export class HistoryPage implements OnInit {
     this.fetchData();
   }
 
+  // Hàm gọi API lấy dữ liệu đã lọc từ Backend
   fetchData() {
     this.isLoading = true;
-    this.api.getParkingHistory().subscribe({
+    const params = {
+      searchTerm: this.filterConfig.plateNumber,
+      status: this.filterConfig.status,
+      pageNumber: 1,
+      pageSize: 20,
+    };
+
+    this.api.getParkingHistory(params).subscribe({
       next: (res: any) => {
         if (res?.data) {
           this.parkingHistory = res.data.map((item: any) =>
             this.mapBackendToFrontend(item),
           );
-          this.applyFilters();
+        } else {
+          this.parkingHistory = [];
         }
         this.isLoading = false;
       },
       error: (err) => {
         console.error('Lỗi API:', err);
         this.isLoading = false;
+        this.showToast('Lỗi khi tải lịch sử dữ liệu!', 'danger');
       },
     });
+  }
+
+  // Kích hoạt khi gõ tìm kiếm hoặc đổi select box
+  applyFilters() {
+    this.fetchData();
   }
 
   private mapBackendToFrontend(item: any): ParkingRecord {
     return {
       nfcId: item.cardID,
       plateNumberIn: item.licensePlateIn || '---',
-      plateNumberOut: item.licensePlateOut || '---', // Hứng biển số lúc ra
+      plateNumberOut: item.licensePlateOut || '---',
       vehicleType: item.vehicleTypeID === 1 ? 'Ô tô' : 'Xe máy',
       checkInTime: item.checkInTime,
-      checkOutTime: item.checkOutTime, // C# đã trả về string ("... HH:mm" hoặc "Chưa ra khỏi bãi")
-      status: item.status === 'Đang đỗ' ? 'In' : 'Out',
+      checkOutTime: item.checkOutTime,
+      status: item.status === 'In' || item.status === 'Đang đỗ' ? 'In' : 'Out',
     };
   }
 
   onProcessCard(nfcId: string) {
-    if (!nfcId) return alert('Vui lòng nhập hoặc quét mã thẻ!');
+    if (!nfcId) {
+      this.showToast('Vui lòng nhập hoặc quét mã thẻ!', 'warning');
+      return;
+    }
 
     this.isLoading = true;
     this.api.scanCard(nfcId).subscribe({
@@ -137,16 +157,19 @@ export class HistoryPage implements OnInit {
           action: res.action,
           message: res.message,
           customerName: data?.customerName || '---',
-          plateNumber: data?.plateNumber || '---',
+          plateNumber: data?.plateNumber || data?.registerPlate || '---',
           vehicleType:
-            data?.vehicleType?.name || data?.vehicleType?.typeName || '---', // Đã map theo C# mới
+            data?.vehicleType?.name ||
+            data?.vehicleType?.typeName ||
+            data?.vehicleType ||
+            '---',
           expiryDate: data?.expiryDate || '---',
           status: data?.status || '---',
           isSuccess: res.action === 'CHECK_IN' || res.action === 'CHECK_OUT',
         };
 
         this.inputNfcId = '';
-        this.fetchData();
+        this.fetchData(); // Quẹt xong thì load lại bảng lịch sử mới nhất
       },
       error: (err) => {
         this.scanResult = {
@@ -164,18 +187,16 @@ export class HistoryPage implements OnInit {
     });
   }
 
-  applyFilters() {
-    const { plateNumber, status } = this.filterConfig;
-    const searchStr = plateNumber.toLowerCase().trim();
-
-    this.filteredHistory = this.parkingHistory.filter((item) => {
-      const matchStatus = status === 'all' || item.status === status;
-      const matchSearch =
-        !searchStr ||
-        item.plateNumberIn.toLowerCase().includes(searchStr) ||
-        item.plateNumberOut.toLowerCase().includes(searchStr) ||
-        item.nfcId.toLowerCase().includes(searchStr);
-      return matchStatus && matchSearch;
+  async showToast(
+    message: string,
+    color: 'success' | 'danger' | 'warning' = 'danger',
+  ) {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      color,
+      position: 'top',
     });
+    toast.present();
   }
 }

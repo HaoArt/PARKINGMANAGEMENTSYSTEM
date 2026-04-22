@@ -1,15 +1,18 @@
 <ion-header class="ion-no-border hidden md:block">
-  <ion-toolbar style="--background: transparent; --padding-end: 32px; --padding-top: 16px;">
-    
+  <ion-toolbar
+    style="--background: transparent; --padding-end: 32px; --padding-top: 16px"
+  >
     <ion-buttons slot="start">
       <ion-menu-button color="dark"></ion-menu-button>
     </ion-buttons>
 
-    <ion-buttons slot="end">
-      <div class="w-10 h-10 rounded-full bg-[#111827] flex items-center justify-center text-white cursor-pointer shadow-sm hover:bg-[#1f2937] transition-colors">
-        <ion-icon name="person" class="text-[18px]"></ion-icon>
+    <<ion-buttons slot="end">
+      <div
+        (click)="logout()"
+        class="w-10 h-10 rounded-full bg-[#111827] flex items-center justify-center text-white cursor-pointer shadow-sm hover:bg-[#1f2937] transition-colors"
+      >
+        <ion-icon name="log-out-outline" class="text-[18px]"></ion-icon>
       </div>
     </ion-buttons>
-
   </ion-toolbar>
 </ion-header>
