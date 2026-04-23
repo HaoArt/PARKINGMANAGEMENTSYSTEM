@@ -13,32 +13,36 @@ print("AI đã sẵn sàng hoạt động!")
 
 
 def clean_vietnam_plate(text):
-    # 1. Loại bỏ rác
-    cleaned = re.sub(r'[^A-Z0-9\-\.]', '', text.upper())
+    cleaned = re.sub(r'[^A-Z0-9]', '', text.upper())
 
-    # 2. LUẬT TOÀN CỤC: Trị dứt điểm các chữ CẤM trong biển số VN
-    # Vì biển VN không dùng I và Z, nên hễ thấy I là 1, thấy Z là 2.
+    # 2. Thay thế I và Z
     cleaned = cleaned.replace('I', '1').replace('Z', '2')
 
-    parts = cleaned.split('-')
-    if len(parts) > 0:
-        head = parts[0]
-        head_chars = list(head)  
+    # Biển số VN (cả xe máy và ô tô) khi gộp lại thường có từ 7-9 ký tự
+    if len(cleaned) >= 7:
+        chars = list(cleaned)
 
-        if len(head) in [3, 4]:
-            char_to_num = {'O':'0', 'D':'0', 'Q':'0', 'L':'1', 'S':'5', 'G':'6', 'B':'8', 'P':'9'}
-            if head_chars[0] in char_to_num: head_chars[0] = char_to_num[head_chars[0]]
-            if head_chars[1] in char_to_num: head_chars[1] = char_to_num[head_chars[1]]
+        char_to_num = {'O':'0', 'D':'0', 'Q':'0', 'L':'1', 'S':'5', 'G':'6', 'B':'8', 'P':'9'}
+        num_to_char = {'1':'L', '0':'D', '5':'S', '6':'G', '8':'B', '9':'P', '4':'A', '2':'Z'}
 
-            num_to_char = {'1':'L', '0':'D', '5':'S', '6':'G', '8':'B', '9':'P', '4':'A'}
-            if len(head_chars) >= 3 and head_chars[2] in num_to_char:
-                head_chars[2] = num_to_char[head_chars[2]]
+        # Vị trí 0 và 1 BẮT BUỘC là số (Mã tỉnh)
+        for i in range(2):
+            if chars[i] in char_to_num: 
+                chars[i] = char_to_num[chars[i]]
 
-        parts[0] = "".join(head_chars)
-        cleaned = "-".join(parts)
+        # Vị trí 2 BẮT BUỘC là chữ (Seri đăng ký)
+        if chars[2] in num_to_char: 
+            chars[2] = num_to_char[chars[2]]
+
+        # Từ vị trí thứ 4 trở đi (đuôi biển số) BẮT BUỘC phải là số 
+        # (Giúp chống lỗi AI đọc số 8 thành chữ B, số 5 thành chữ S ở đuôi biển)
+        for i in range(4, len(chars)):
+            if chars[i] in char_to_num: 
+                chars[i] = char_to_num[chars[i]]
+
+        cleaned = "".join(chars)
 
     return cleaned
-
 def extract_plate(text):
     pattern = r'(\d{2}-[A-Z]-\d{3}\.\d{2})|(\d{2}-[A-Z][A-Z0-9]-\d{5})'
     match = re.search(pattern, text)
@@ -64,21 +68,16 @@ def format_plate(text):
 @app.post("/api/recognize-plate")
 async def recognize_plate(image: UploadFile = File(...)):
     try:
-        # Đọc ảnh
         image_bytes = await image.read()
         nparr = np.frombuffer(image_bytes, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
+        # KHÔNG DÙNG THRESHOLD NỮA. EasyOCR đọc ảnh màu hoặc xám chuẩn xác hơn rất nhiều.
+        # Chỉ chuyển sang ảnh xám để model chạy nhanh hơn một chút.
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        gray = cv2.convertScaleAbs(gray, alpha=1.5, beta=0)
-
-        blur = cv2.GaussianBlur(gray, (5, 5), 0)
-        thresh = cv2.threshold(
-            blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
-        )[1]
 
         ai_results = reader.readtext(
-            thresh,
+            gray,  # <--- Truyền ảnh xám hoặc ảnh gốc vào đây
             detail=1,
             mag_ratio=2.0,
             allowlist='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-.'
@@ -98,30 +97,26 @@ async def recognize_plate(image: UploadFile = File(...)):
 
             print(f"-> '{text_line}' | conf: {conf:.2f}")
 
-            # Loại bỏ chữ không cần
+            # Loại bỏ chữ rác
             text_line = text_line.replace("VIE", "").replace("VN", "").replace("HONDA", "").strip()
 
-            # GIỮ dấu - .
-            text_line = re.sub(r'[^A-Z0-9\-\.]', '', text_line)
-
-            if len(text_line) > 0 and conf > 0.1:
+            if len(text_line) > 0 and conf > 0.1: # Có thể cân nhắc tăng conf > 0.3 nếu muốn chặt chẽ hơn
                 detected_texts.append(text_line)
                 total_confidence += conf
-
-        print("TEXT GIỮ LẠI:", detected_texts)
 
         if not detected_texts:
             return {"success": False, "error": "Ảnh quá nhiễu hoặc mờ."}
 
-        raw_text = "-".join(detected_texts)
+        # Nối tất cả các dòng AI đọc được lại với nhau
+        raw_text = "".join(detected_texts)
         avg_confidence = float(total_confidence / len(detected_texts))
 
-        # ============================
-        # POST PROCESS
-        # ============================
-        final_plate = clean_vietnam_plate(raw_text)
-        final_plate = format_plate(final_plate)
-        final_plate = extract_plate(final_plate)
+
+        # Bước 1: Làm sạch và ép kiểu theo vị trí (đã gỡ bỏ gạch ngang)
+        final_plate = clean_vietnam_plate(raw_text) 
+        
+        # Bước 2: Nhét lại dấu gạch ngang và dấu chấm cho chuẩn form VN
+        final_plate = format_plate(final_plate)     
 
         print(f"KẾT QUẢ: {final_plate} | CONF: {avg_confidence:.2f}")
 
@@ -134,7 +129,6 @@ async def recognize_plate(image: UploadFile = File(...)):
 
     except Exception as e:
         return {"success": False, "error": str(e)}
-
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
