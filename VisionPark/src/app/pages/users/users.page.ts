@@ -117,25 +117,40 @@ export class UsersPage implements OnInit {
   saveUser() {
     if (!this.editingUser.fullName || !this.editingUser.userName) {
       this.showToast('Họ tên và Tên đăng nhập không được để trống!', 'danger');
-      return; // Chỉ dùng return để thoát hàm
+      return;
     }
 
     if (this.modalMode === 'add') {
       if (!this.editingUser.password) {
         this.showToast('Vui lòng nhập mật khẩu!', 'danger');
-        return; // Chỉ dùng return để thoát hàm
+        return;
       }
       
-      const payload = { ...this.editingUser, role: 'Security' };
+      // SỬA Ở ĐÂY: Chỉ gửi đúng 4 trường cần thiết, tuyệt đối không gửi userID = null
+      const payload = {
+        fullName: this.editingUser.fullName,
+        userName: this.editingUser.userName,
+        password: this.editingUser.password,
+        role: 'Security'
+      };
+
       this.api.createUser(payload).subscribe({
         next: (res: any) => { 
           this.showToast('Thêm nhân viên thành công!', 'success'); 
           this.closeModal(); 
           this.loadUsers(); 
         },
-        error: (err: any) => this.showToast(err.error?.Message || 'Lỗi thêm nhân viên!', 'danger')
+        error: (err: any) => {
+          // Bắt thêm lỗi validation mặc định của .NET (err.error.title) để dễ debug hơn
+          const errorMsg = err.error?.Message || err.error?.title || 'Lỗi thêm nhân viên!';
+          this.showToast(errorMsg, 'danger');
+          console.error('Chi tiết lỗi API 400:', err.error);
+        }
       });
+
     } else {
+      
+      // SỬA Ở ĐÂY: Dành riêng cho Update
       const payload = {
         fullName: this.editingUser.fullName, 
         userName: this.editingUser.userName,
@@ -143,17 +158,21 @@ export class UsersPage implements OnInit {
         role: this.editingUser.role, 
         isActive: this.editingUser.isActive
       };
+
       this.api.updateUser(this.editingUser.userID, payload).subscribe({
         next: (res: any) => { 
           this.showToast('Cập nhật thành công!', 'success'); 
           this.closeModal(); 
           this.loadUsers(); 
         },
-        error: (err: any) => this.showToast(err.error?.Message || 'Lỗi cập nhật!', 'danger')
+        error: (err: any) => {
+          const errorMsg = err.error?.Message || err.error?.title || 'Lỗi cập nhật!';
+          this.showToast(errorMsg, 'danger');
+          console.error('Chi tiết lỗi API 400:', err.error);
+        }
       });
     }
   }
-
   // --- XÓA NHÂN VIÊN ---
   async deleteUser(user: UserRecord) {
     if (user.role === 'Admin') return this.showToast('Không được phép xóa tài khoản Admin!', 'danger');

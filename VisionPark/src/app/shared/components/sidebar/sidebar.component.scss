@@ -76,3 +76,27 @@
     a:hover { color: #111827; }
   }
 }
+/* Ẩn thanh cuộn cho thẻ ion-content trong Sidebar */
+ion-content {
+  &::part(scroll) {
+    /* Ẩn trên Chrome, Safari và Opera */
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    /* Ẩn trên IE, Edge */
+    -ms-overflow-style: none;  
+    /* Ẩn trên Firefox */
+    scrollbar-width: none;  
+  }
+}
+
+/* Nếu bạn dùng thẻ div thường (không phải ion-content) làm container */
+.sidebar-container, 
+.menu-list,
+:host {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

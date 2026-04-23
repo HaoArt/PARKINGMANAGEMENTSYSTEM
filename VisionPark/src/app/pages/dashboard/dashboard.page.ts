@@ -31,13 +31,13 @@ export class DashboardPage implements OnInit {
   stats = {
     totalVehicles: 0, availableSlots: 100, revenueToday: '0', fillRate: 0 
   };
-  currentDate: string = '';
+  
   allRecords: ParkingRecord[] = [];
   filteredRecords: ParkingRecord[] = [];
   paginatedRecords: ParkingRecord[] = [];
   
   searchTerm: string = '';
-  filterStatus: string = 'all'; // Biến lưu trạng thái lọc
+  filterStatus: string = 'all'; 
   
   currentPage: number = 1;
   itemsPerPage: number = 4;
@@ -48,24 +48,16 @@ export class DashboardPage implements OnInit {
   }
 
   ngOnInit() {
-    this.formatCurrentDate();
     this.loadDataFromDatabase();
-  }
-
-  formatCurrentDate() {
-    const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
-    const now = new Date();
-    this.currentDate = `Hôm nay: ${days[now.getDay()]}, ${now.getDate().toString().padStart(2, '0')} Tháng ${(now.getMonth() + 1).toString().padStart(2, '0')}, ${now.getFullYear()} | ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
   }
 
   loadDataFromDatabase() {
     this.api.getParkingHistory().subscribe({
       next: (response: any) => {
         if (response && response.data) {
-          let totalRevenue = 0; // Biến cộng dồn doanh thu
+          let totalRevenue = 0; 
 
           this.allRecords = response.data.map((item: any) => {
-            // Cộng dồn tiền vé từ API
             const cost = item.totalCost || item.TotalCost || 0;
             totalRevenue += cost;
 
@@ -78,14 +70,11 @@ export class DashboardPage implements OnInit {
             };
           });
 
-          // Cập nhật các thẻ thống kê DỮ LIỆU THẬT
           const carsInParking = this.allRecords.filter(r => r.status === 'In').length;
           this.stats.totalVehicles = carsInParking;
           this.stats.availableSlots = 100 - carsInParking;
           this.stats.fillRate = Math.round((carsInParking / 100) * 100);
-          this.stats.revenueToday = totalRevenue.toLocaleString('vi-VN'); // Format tiền tệ VN
-
-          // Đã XÓA đoạn Mock Data cũ ở đây để hiển thị 100% dữ liệu thật!
+          this.stats.revenueToday = totalRevenue.toLocaleString('vi-VN'); 
 
           this.applyFilters();
         }
@@ -97,13 +86,11 @@ export class DashboardPage implements OnInit {
   applyFilters() {
     let temp = this.allRecords;
     
-    // 1. Lọc theo thanh tìm kiếm (Tìm biển số, thẻ)
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
       temp = temp.filter(r => r.plateNumber.toLowerCase().includes(term) || r.id.toLowerCase().includes(term));
     }
     
-    // 2. Lọc theo Trạng thái (Dropdown)
     if (this.filterStatus !== 'all') {
       temp = temp.filter(r => r.status === this.filterStatus);
     }

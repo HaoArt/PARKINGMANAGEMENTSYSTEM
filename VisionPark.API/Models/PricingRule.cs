@@ -8,24 +8,33 @@ namespace VisionPark.API.Models
     {
         [Key]
         public int RuleID { get; set; }
-         public int VehicleTypeID { get; set; }
+
+        public int VehicleTypeID { get; set; }
+
         [ForeignKey("VehicleTypeID")]
-
-
-        public  VehicleType VehicleType { get; set; }
+        public VehicleType VehicleType { get; set; }
 
         [Required]
-        public string RuleType {  get; set; } = string.Empty;
+        public string RuleType { get; set; } = string.Empty;
+
         [Column(TypeName = "decimal(18,2)")]
-        public decimal BasePrice { get; set; }
+        public decimal BasePrice { get; set; } // Sẽ dùng làm Giá Vé Lượt
 
         public int? BlockMinutes { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal PricePerBlock { get; set; }
 
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal PricePerMonth { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal PricePerQuarter { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal PricePerYear { get; set; }
+
         public TimeSpan? ApplyFromTime { get; set; }
         public DateTime? ApplyToTime { get; set; }
-
     }
 }

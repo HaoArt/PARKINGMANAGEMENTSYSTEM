@@ -72,4 +72,11 @@ export class Api {
   deleteUser(id: number): Observable<any> {
     return this.http.delete(`${this.baseUrl}/Users/delete/${id}`);
   }
+  getSettings(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/Settings`);
+  }
+
+  saveSettings(payload: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/Settings/update`, payload);
+  }
 }
