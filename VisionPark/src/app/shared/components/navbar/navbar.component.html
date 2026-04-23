@@ -1,18 +1,59 @@
-<ion-header class="ion-no-border hidden md:block">
-  <ion-toolbar
-    style="--background: transparent; --padding-end: 32px; --padding-top: 16px"
-  >
+<ion-header class="ion-no-border">
+  <ion-toolbar style="--background: transparent; --padding-start: 16px; --padding-end: 32px; --padding-top: 16px; --padding-bottom: 10px;">
+    
     <ion-buttons slot="start">
-      <ion-menu-button color="dark"></ion-menu-button>
+      <ion-menu-button color="dark" auto-hide="false" class="bg-white rounded-xl shadow-sm border border-gray-100 mr-2 md:hidden"></ion-menu-button>
     </ion-buttons>
 
-    <<ion-buttons slot="end">
-      <div
-        (click)="logout()"
-        class="w-10 h-10 rounded-full bg-[#111827] flex items-center justify-center text-white cursor-pointer shadow-sm hover:bg-[#1f2937] transition-colors"
-      >
-        <ion-icon name="log-out-outline" class="text-[18px]"></ion-icon>
+    <div slot="start" class="page-title hidden md:block ml-2">
+      <h1 class="text-[26px] font-extrabold text-[#111827] m-0 tracking-tight">{{ pageTitle }}</h1>
+    </div>
+
+    <div slot="start" class="page-title md:hidden ml-1">
+      <h1 class="text-[20px] font-extrabold text-[#111827] m-0 tracking-tight">{{ pageTitle }}</h1>
+    </div>
+
+    <div slot="end" class="flex items-center">
+      
+      <div id="profile-trigger" class="flex items-center gap-3 cursor-pointer hover:bg-gray-100 p-2 rounded-2xl transition-colors">
+        <div class="hidden sm:flex flex-col text-right">
+          <span class="text-[14px] font-bold text-[#111827]">{{ fullName }}</span>
+          <span class="text-[11px] font-bold text-[#003399] uppercase tracking-wider">{{ role }}</span>
+        </div>
+        
+        <div class="w-10 h-10 rounded-full border-2 border-white overflow-hidden shadow-sm">
+          <img src="https://i.pravatar.cc/150?img=11" alt="Avatar" class="w-full h-full object-cover">
+        </div>
+        
+        <ion-icon name="chevron-down-outline" class="text-gray-400 text-sm hidden sm:block"></ion-icon>
       </div>
-    </ion-buttons>
+
+      <ion-popover #profileMenu trigger="profile-trigger" triggerAction="click" alignment="end" class="profile-dropdown">
+        <ng-template>
+          <ion-content class="ion-padding-vertical">
+            <ion-list lines="none" class="m-0 p-0">
+              
+              <div class="px-4 py-3 mb-2 border-b border-gray-100 sm:hidden block">
+                <p class="font-bold text-[#111827] m-0 text-sm">{{ fullName }}</p>
+                <p class="font-bold text-[#003399] m-0 text-[11px] uppercase mt-1">{{ role }}</p>
+              </div>
+
+              <ion-item button detail="false" (click)="profileMenu.dismiss(); manageAccount()" class="hover:bg-gray-50 transition-colors">
+                <ion-icon name="person-outline" slot="start" class="text-gray-500 text-[18px] mr-3"></ion-icon>
+                <span class="text-sm font-bold text-gray-700">Quản lý tài khoản</span>
+              </ion-item>
+
+              <ion-item button detail="false" (click)="profileMenu.dismiss(); logout()" class="hover:bg-red-50 transition-colors">
+                <ion-icon name="log-out-outline" slot="start" class="text-red-500 text-[18px] mr-3"></ion-icon>
+                <span class="text-sm font-bold text-red-600">Đăng xuất</span>
+              </ion-item>
+
+            </ion-list>
+          </ion-content>
+        </ng-template>
+      </ion-popover>
+
+    </div>
+
   </ion-toolbar>
 </ion-header>

@@ -1,117 +1,120 @@
-<ion-content class="custom-bg">
-  
-  <app-navbar></app-navbar>
-
-  <div class="px-6 md:px-10 py-2 max-w-[1400px] mx-auto pb-12">
+<ion-content class="dashboard-bg">
+  <app-navbar></app-navbar> 
+  <div class="dashboard-container">
     
-    <div class="mb-8">
-      <h2 class="text-[26px] font-extrabold text-[#111827] mb-1 tracking-tight">Tổng quan hệ thống</h2>
-      <p class="text-gray-500 text-[13px] font-medium">Cập nhật lúc 08:30 AM, Hôm nay</p>
+    <div class="page-header">
+      <h2>Tổng quan hệ thống</h2>
+      <p>{{ currentDate }}</p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="stats-cards">
       
-      <div class="bg-white rounded-[24px] p-6 flex items-center gap-5 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-        <div class="w-[52px] h-[52px] rounded-full bg-[#f0f5ff] flex items-center justify-center text-[#3b82f6]">
-          <ion-icon name="car-outline" class="text-2xl"></ion-icon>
+      <div class="stat-card">
+        <div class="stat-info">
+          <span class="label">Tổng phương tiện</span>
+          <span class="value">{{ stats.totalVehicles | number }}</span>
+          <span class="trend up"><ion-icon name="arrow-up-outline"></ion-icon> Dữ liệu thực tế</span>
         </div>
-        <div>
-          <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Tổng phương tiện</p>
-          <h3 class="text-[32px] font-black text-[#111827] m-0 leading-none">{{ stats.totalVehicles }}</h3>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-[24px] p-6 flex items-center gap-5 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-        <div class="w-[52px] h-[52px] rounded-full bg-[#ecfdf5] flex items-center justify-center text-[#10b981] font-black text-xl">
-          P
-        </div>
-        <div>
-          <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Chỗ trống</p>
-          <h3 class="text-[32px] font-black text-[#111827] m-0 leading-none">{{ stats.availableSlots }}</h3>
+        <div class="stat-icon icon-blue">
+          <ion-icon name="car"></ion-icon>
         </div>
       </div>
 
-      <div class="bg-white rounded-[24px] p-6 flex items-center gap-5 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-        <div class="w-[52px] h-[52px] rounded-full bg-[#fff7ed] flex items-center justify-center text-[#f97316]">
-          <ion-icon name="cash-outline" class="text-2xl"></ion-icon>
+      <div class="stat-card">
+        <div class="stat-info full-width">
+          <span class="label">Chỗ trống</span>
+          <div class="value-row">
+            <span class="value">{{ stats.availableSlots }}</span>
+            <div class="stat-icon icon-green">P</div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="stats.fillRate"></div>
+          </div>
+          <span class="trend-text">Tỷ lệ lấp đầy {{ stats.fillRate }}%</span>
         </div>
-        <div>
-          <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Doanh thu hôm nay</p>
-          <h3 class="text-[32px] font-black text-[#111827] m-0 leading-none">{{ stats.revenueToday }}</h3>
+      </div>
+
+      <div class="stat-card card-dark">
+        <div class="stat-info">
+          <span class="label">Doanh thu hôm nay</span>
+          <span class="value">{{ stats.revenueToday }}</span>
+          <span class="unit">VND</span>
+        </div>
+        <div class="stat-icon icon-transparent">
+          <ion-icon name="cash-outline"></ion-icon>
         </div>
       </div>
 
     </div>
 
-    <div class="bg-white p-7 rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+    <div class="table-section">
       
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h3 class="text-[16px] font-bold text-[#111827] m-0">Lịch sử ra vào gần đây</h3>
-        
-        <div class="flex gap-3 w-full md:w-auto">
-          <div class="relative w-full md:w-[240px]">
-            <input 
-              type="text" 
-              placeholder="Tìm biển số, mã NFC..." 
-              class="w-full bg-[#f4f6f8] text-gray-700 text-[12px] border-none rounded-[10px] pl-9 pr-3 py-2.5 outline-none font-medium"
-              [(ngModel)]="searchTerm" 
-              (input)="applyFilters()">
-            <ion-icon name="search-outline" class="absolute left-3 top-2.5 text-gray-400 text-[16px]"></ion-icon>
+      <div class="table-header-row">
+        <h3>Lịch sử ra vào gần đây</h3>
+        <div class="table-actions">
+          
+          <div class="search-box">
+            <ion-icon name="search-outline"></ion-icon>
+            <input type="text" placeholder="Tìm biển số, mã NFC..." [(ngModel)]="searchTerm" (input)="applyFilters()">
           </div>
 
-          <select 
-            class="bg-[#f4f6f8] text-gray-600 text-[12px] border-none rounded-[10px] px-4 py-2.5 outline-none font-medium appearance-none cursor-pointer"
-            [(ngModel)]="filterStatus" 
-            (change)="applyFilters()">
-            <option value="all">Tất cả trạng thái</option>
-            <option value="In">Trong bãi</option>
-            <option value="Out">Đã ra</option>
-          </select>
+          <div class="filter-box">
+            <ion-icon name="options-outline"></ion-icon>
+            <select [(ngModel)]="filterStatus" (change)="applyFilters()">
+              <option value="all">Tất cả trạng thái</option>
+              <option value="In">Trong bãi</option>
+              <option value="Out">Đã ra</option>
+            </select>
+          </div>
+
         </div>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse whitespace-nowrap">
+      <div class="table-responsive">
+        <table>
           <thead>
             <tr>
-              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider w-1/5 pl-2">Mã NFC</th>
-              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider w-1/5 text-center">Biển số</th>
-              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider w-1/5 text-center">Loại xe</th>
-              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider w-1/5 text-center">Thời gian</th>
-              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider w-1/5 text-center pr-2">Trạng thái</th>
+              <th>MÃ NFC</th>
+              <th>BIỂN SỐ</th>
+              <th>LOẠI XE</th>
+              <th>THỜI GIAN</th>
+              <th>TRẠNG THÁI</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let item of paginatedRecords" class="border-b border-gray-50 hover:bg-[#f4f6f8]/50 transition-colors">
-              <td class="py-4 text-[12px] font-bold text-[#374151] pl-2">{{ item.id }}</td>
-              <td class="py-4 text-[12px] font-bold text-[#111827] text-center">{{ item.plateNumber }}</td>
-              <td class="py-4 text-[12px] font-medium text-gray-500 text-center">{{ item.vehicleType }}</td>
-              <td class="py-4 text-[12px] font-medium text-gray-500 text-center">{{ item.timeIn }}</td>
-              <td class="py-4 text-center pr-2">
-                <span [class]="item.status === 'In' 
-                  ? 'bg-[#eff6ff] text-[#3b82f6] px-3 py-1.5 rounded-full text-[10px] font-bold inline-block min-w-[70px] text-center' 
-                  : 'bg-[#f0fdf4] text-[#22c55e] px-3 py-1.5 rounded-full text-[10px] font-bold inline-block min-w-[70px] text-center'">
+            <tr *ngFor="let item of paginatedRecords">
+              <td class="nfc-col">{{ item.id }}</td>
+              <td><span class="plate-badge">{{ item.plateNumber }}</span></td>
+              <td class="type-col">
+                <ion-icon [name]="item.vehicleType === 'Ô tô' ? 'car-outline' : 'bicycle'"></ion-icon>
+                {{ item.vehicleType }}
+              </td>
+              <td class="time-col">{{ item.timeIn }}</td>
+              <td>
+                <span class="status-badge" [class.in]="item.status === 'In'" [class.out]="item.status === 'Out'">
+                  <span class="dot"></span>
                   {{ item.status === 'In' ? 'Trong bãi' : 'Đã ra' }}
                 </span>
+              </td>
+            </tr>
+            <tr *ngIf="paginatedRecords.length === 0">
+              <td colspan="5" style="text-align: center; padding: 30px; color: #9ca3af; font-weight: 600;">
+                Không có dữ liệu phù hợp
               </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <div class="flex justify-between items-center mt-6">
-        <span class="text-gray-400 text-[11px] font-medium pl-2">Hiển thị 1-4 trên 50 kết quả</span>
-        <div class="flex items-center gap-1">
-          <button class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-[#0a2342] bg-transparent border-none cursor-pointer" (click)="prevPage()"><ion-icon name="chevron-back-outline"></ion-icon></button>
-          
-          <button class="w-7 h-7 rounded-full bg-[#0f172a] text-white font-bold text-[12px] border-none cursor-pointer">1</button>
-          <button class="w-7 h-7 rounded-full text-gray-500 hover:bg-gray-100 font-bold text-[12px] bg-transparent border-none cursor-pointer">2</button>
-          <button class="w-7 h-7 rounded-full text-gray-500 hover:bg-gray-100 font-bold text-[12px] bg-transparent border-none cursor-pointer">3</button>
-          
-          <button class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-[#0a2342] bg-transparent border-none cursor-pointer" (click)="nextPage()"><ion-icon name="chevron-forward-outline"></ion-icon></button>
+      <div class="pagination" *ngIf="paginatedRecords.length > 0">
+        <span class="page-info">Trang {{ currentPage }} / {{ totalPages }}</span>
+        <div class="page-controls">
+          <button (click)="prevPage()" [disabled]="currentPage === 1"><ion-icon name="chevron-back-outline"></ion-icon></button>
+          <button class="active">{{ currentPage }}</button>
+          <button (click)="nextPage()" [disabled]="currentPage === totalPages"><ion-icon name="chevron-forward-outline"></ion-icon></button>
         </div>
       </div>
-      
+
     </div>
   </div>
 </ion-content>
