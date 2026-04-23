@@ -75,3 +75,13 @@ ion-toast.toast-top-right {
     --border-radius: 12px;
   }
 }
+/* --- ẨN THANH CUỘN CỦA SIDEBAR BÊN TRÁI --- */
+ion-menu ion-content::part(scroll),
+app-sidebar ion-content::part(scroll),
+.sidebar-wrapper {
+  &::-webkit-scrollbar {
+    display: none !important;
+  }
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}

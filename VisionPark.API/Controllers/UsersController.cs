@@ -26,6 +26,7 @@ namespace VisionPark.API.Controllers
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _context.Users
+                .Where(u => u.Role != "Admin")
                 .OrderByDescending(u => u.CreatedAt)
                 .Select(u => new
                 {
