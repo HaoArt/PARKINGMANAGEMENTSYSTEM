@@ -7,9 +7,6 @@ import { environment } from '@environments/environment';
   providedIn: 'root',
 })
 export class Api {
-  deleteUser(userID: number) {
-      throw new Error('Method not implemented.');
-  }
   private http = inject(HttpClient);
   private baseUrl = environment.apiUrl;
 
@@ -55,5 +52,24 @@ export class Api {
   }
   login(data: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/Auth/login`, data);
+  }
+  // Lấy danh sách nhân viên
+  getAllUsers(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/Users`);
+  }
+
+  // Thêm nhân viên
+  createUser(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/Users/create`, data);
+  }
+
+  // Sửa nhân viên
+  updateUser(id: number, data: any): Observable<any> {
+    return this.http.put(`${this.baseUrl}/Users/update/${id}`, data);
+  }
+
+  // Xóa nhân viên
+  deleteUser(id: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/Users/delete/${id}`);
   }
 }
