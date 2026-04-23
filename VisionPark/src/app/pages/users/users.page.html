@@ -4,98 +4,141 @@
   <div class="page-container">
     
     <div class="page-header">
-      <div>
-        <h2>Quản lý Nhân viên</h2>
-        <p>Danh sách phân quyền và tài khoản truy cập hệ thống</p>
-      </div>
-      <button class="add-btn" (click)="addUser()">
-        <ion-icon name="person-add-outline"></ion-icon> Thêm nhân viên
+      <p class="page-subtitle">Phân quyền và kiểm soát tài khoản truy cập hệ thống</p>
+      <button class="btn-primary" (click)="openAddModal()">
+        <ion-icon name="add-outline"></ion-icon> Thêm nhân viên
       </button>
     </div>
 
-    <div class="filters-row">
-      <div class="search-box">
-        <ion-icon name="search-outline"></ion-icon>
-        <input type="text" placeholder="Tìm kiếm theo tên, username..." [(ngModel)]="searchTerm" (input)="applyFilters()">
+    <div class="content-card">
+      <div class="toolbar-section">
+        <div class="search-box">
+          <ion-icon name="search-outline"></ion-icon>
+          <input type="text" placeholder="Tìm kiếm họ tên, username..." [(ngModel)]="searchTerm" (input)="applyFilters()">
+        </div>
+        <div class="filters-group">
+          <div class="dropdown-box">
+            <select [(ngModel)]="filterRole" (change)="applyFilters()">
+              <option value="all">Tất cả vai trò</option>
+              <option value="Admin">Quản trị viên</option>
+              <option value="Security">Nhân viên an ninh</option>
+            </select>
+            <ion-icon name="chevron-down-outline"></ion-icon>
+          </div>
+          <div class="dropdown-box">
+            <select [(ngModel)]="filterStatus" (change)="applyFilters()">
+              <option value="all">Trạng thái</option>
+              <option value="active">Hoạt động</option>
+              <option value="inactive">Đã khóa</option>
+            </select>
+            <ion-icon name="chevron-down-outline"></ion-icon>
+          </div>
+        </div>
       </div>
 
-      <div class="dropdown-box">
-        <select [(ngModel)]="filterRole" (change)="applyFilters()">
-          <option value="all">Tất cả vai trò</option>
-          <option value="Admin">Quản trị viên</option>
-          <option value="Security">Nhân viên an ninh</option>
-        </select>
-        <ion-icon name="chevron-down-outline"></ion-icon>
-      </div>
-
-      <div class="dropdown-box">
-        <select [(ngModel)]="filterStatus" (change)="applyFilters()">
-          <option value="all">Trạng thái</option>
-          <option value="active">Hoạt động</option>
-          <option value="inactive">Đã khóa</option>
-        </select>
-        <ion-icon name="chevron-down-outline"></ion-icon>
-      </div>
-    </div>
-
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>NHÂN VIÊN</th>
-            <th>USERNAME</th>
-            <th>VAI TRÒ</th>
-            <th>NGÀY TẠO</th>
-            <th>TRẠNG THÁI</th>
-            <th class="text-center">THAO TÁC</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let user of users">
-            
-            <td>
-              <div class="user-info">
-                <img [src]="'https://ui-avatars.com/api/?name=' + user.fullName + '&background=random'" class="avatar" alt="Avatar">
-                <div class="name-block">
-                  <span class="full-name">{{ user.fullName }}</span>
-                  <span class="sub-text">{{ user.userName }}@visionpark.vn</span>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>NHÂN VIÊN</th>
+              <th>USERNAME</th>
+              <th>VAI TRÒ</th>
+              <th>NGÀY TẠO</th>
+              <th>TRẠNG THÁI</th>
+              <th class="text-right">THAO TÁC</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users" class="data-row">
+              <td>
+                <div class="user-info">
+                  <div class="avatar-wrapper">
+                    <img [src]="'https://ui-avatars.com/api/?name=' + user.fullName + '&background=f1f5f9&color=003399&bold=true'" alt="Avatar">
+                  </div>
+                  <div class="name-block">
+                    <span class="full-name">{{ user.fullName }}</span>
+                    <span class="sub-text">{{ user.userName }}@visionpark.vn</span>
+                  </div>
                 </div>
-              </div>
-            </td>
-
-            <td class="username-col">{{ user.userName }}</td>
-            <td>
-              <span class="role-badge" [class.admin]="user.role === 'Admin'">
-                {{ user.role === 'Admin' ? 'Quản trị viên' : 'Nhân viên an ninh' }}
-              </span>
-            </td>
-
-            <td class="date-col">{{ user.createAt }}</td>
-            <td>
-              <span class="status-text" [class.active]="user.isActive">
-                <span class="dot"></span> {{ user.isActive ? 'Hoạt động' : 'Đã khóa' }}
-              </span>
-            </td>
-
-            <td class="action-col text-center">
-              <ion-icon name="pencil-outline" class="action-icon" (click)="editUser(user)"></ion-icon>
-              
-              <ion-icon 
-                name="trash-outline" 
-                class="action-icon delete" 
-                [class.disabled]="user.role === 'Admin'"
-                (click)="deleteUser(user)">
-              </ion-icon>
-            </td>
-
-          </tr>
-
-          <tr *ngIf="users.length === 0 && !isLoading">
-            <td colspan="6" class="empty-state">Không tìm thấy nhân viên nào phù hợp.</td>
-          </tr>
-        </tbody>
-      </table>
+              </td>
+              <td class="username-col">{{ user.userName }}</td>
+              <td>
+                <span class="role-badge" [class.admin]="user.role === 'Admin'">
+                  {{ user.role === 'Admin' ? 'Quản trị viên' : 'Nhân viên an ninh' }}
+                </span>
+              </td>
+              <td class="date-col">{{ user.createAt }}</td>
+              <td>
+                <div class="status-indicator" [class.active]="user.isActive">
+                  <span class="dot"></span>
+                  <span class="text">{{ user.isActive ? 'Hoạt động' : 'Đã khóa' }}</span>
+                </div>
+              </td>
+              <td class="action-col text-right">
+                <button class="action-btn edit-btn" (click)="openEditModal(user)" title="Chỉnh sửa">
+                  <ion-icon name="pencil-outline"></ion-icon>
+                </button>
+                <button class="action-btn delete-btn" 
+                  [class.disabled]="user.role === 'Admin'" 
+                  (click)="deleteUser(user)" 
+                  [title]="user.role === 'Admin' ? 'Không thể xóa Admin' : 'Xóa tài khoản'">
+                  <ion-icon name="trash-outline"></ion-icon>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="users.length === 0 && !isLoading">
+              <td colspan="6" class="empty-state">
+                <ion-icon name="folder-open-outline"></ion-icon>
+                <p>Không tìm thấy nhân viên nào phù hợp.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-  </div>
+    <div class="custom-modal-overlay" *ngIf="showModal">
+      <div class="custom-modal-box">
+        
+        <div class="modal-header">
+          <h3>{{ modalMode === 'add' ? 'Thêm nhân viên mới' : 'Cập nhật tài khoản' }}</h3>
+          <button class="close-btn" (click)="closeModal()"><ion-icon name="close-outline"></ion-icon></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Họ và tên</label>
+            <input type="text" [(ngModel)]="editingUser.fullName" placeholder="Nhập họ và tên...">
+          </div>
+
+          <div class="form-group">
+            <label>Tên đăng nhập</label>
+            <input type="text" [(ngModel)]="editingUser.userName" placeholder="Nhập tên đăng nhập...">
+          </div>
+
+          <div class="form-group">
+            <label>Mật khẩu <span class="opt-text" *ngIf="modalMode === 'edit'">(Để trống nếu không đổi)</span></label>
+            <input type="password" [(ngModel)]="editingUser.password" placeholder="Nhập mật khẩu...">
+          </div>
+
+          <div class="form-group" *ngIf="modalMode === 'edit'">
+            <label>Trạng thái tài khoản</label>
+            <div class="select-wrapper">
+              <select [(ngModel)]="editingUser.isActive">
+                <option [ngValue]="true">🟢 Hoạt động</option>
+                <option [ngValue]="false">🔴 Không hoạt động (Khóa)</option>
+              </select>
+              <ion-icon name="chevron-down-outline" class="select-icon"></ion-icon>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-cancel" (click)="closeModal()">Hủy bỏ</button>
+          <button class="btn-save" (click)="saveUser()">{{ modalMode === 'add' ? 'Tạo tài khoản' : 'Lưu thay đổi' }}</button>
+        </div>
+
+      </div>
+    </div>
+    </div>
 </ion-content>

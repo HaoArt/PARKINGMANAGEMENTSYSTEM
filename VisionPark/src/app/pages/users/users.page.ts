@@ -1,7 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core'; 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonIcon, AlertController } from '@ionic/angular/standalone';
+import { IonContent, IonIcon, AlertController, ToastController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import * as icons from 'ionicons/icons';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
@@ -26,6 +26,8 @@ interface UserRecord {
 export class UsersPage implements OnInit {
   private api = inject(Api);
   private alertCtrl = inject(AlertController);
+  private toastCtrl = inject(ToastController);
+  private cdr = inject(ChangeDetectorRef); 
 
   allUsers: UserRecord[] = [];
   users: UserRecord[] = [];
@@ -35,120 +37,144 @@ export class UsersPage implements OnInit {
   filterStatus: string = 'all';
   isLoading = false;
 
+  // --- BIẾN QUẢN LÝ MODAL ---
+  showModal: boolean = false;
+  modalMode: 'add' | 'edit' = 'add';
+  editingUser: any = { userID: null, fullName: '', userName: '', password: '', role: 'Security', isActive: true };
+
   constructor() {
-    addIcons({ ...icons });
+    addIcons({ ...icons, closeOutline: icons.closeOutline });
   }
 
   ngOnInit() {
     this.loadUsers();
   }
 
-  // 1. LẤY DỮ LIỆU TỪ BACKEND
+  async showToast(message: string, color: 'success' | 'danger' = 'success') {
+    const toast = await this.toastCtrl.create({
+      message: message, duration: 2500, color: color, position: 'top',
+      cssClass: `toast-top-right toast-${color}`,
+      icon: color === 'success' ? 'checkmark-circle-outline' : 'alert-circle-outline'
+    });
+    toast.present();
+  }
+
   loadUsers() {
     this.isLoading = true;
     this.api.getAllUsers().subscribe({
       next: (res: any) => {
         if (res?.data) {
-          this.allUsers = res.data;
+          this.allUsers = res.data.map((item: any) => ({
+            ...item, userID: item.userId || item.UserID || item.userID
+          }));
           this.applyFilters();
         }
         this.isLoading = false;
+        this.cdr.detectChanges(); 
       },
       error: (err: any) => {
         console.error('Lỗi API lấy nhân viên:', err);
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
-  // 2. BỘ LỌC
   applyFilters() {
     let temp = this.allUsers;
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
       temp = temp.filter(u => u.fullName.toLowerCase().includes(term) || u.userName.toLowerCase().includes(term));
     }
-    if (this.filterRole !== 'all') {
-      temp = temp.filter(u => u.role === this.filterRole);
-    }
-    if (this.filterStatus !== 'all') {
-      const isActive = this.filterStatus === 'active';
-      temp = temp.filter(u => u.isActive === isActive);
-    }
+    if (this.filterRole !== 'all') temp = temp.filter(u => u.role === this.filterRole);
+    if (this.filterStatus !== 'all') temp = temp.filter(u => u.isActive === (this.filterStatus === 'active'));
     this.users = temp;
+    this.cdr.detectChanges();
   }
 
-  // 3. THÊM NHÂN VIÊN
-  async addUser() {
-    const alert = await this.alertCtrl.create({
-      header: 'Thêm nhân viên mới',
-      inputs: [
-        { name: 'fullName', type: 'text', placeholder: 'Họ và tên' },
-        { name: 'userName', type: 'text', placeholder: 'Tên đăng nhập' },
-        { name: 'password', type: 'password', placeholder: 'Mật khẩu' },
-        { name: 'role', type: 'text', value: 'Security', placeholder: 'Vai trò (Admin/Security)' }
-      ],
-      buttons: [
-        { text: 'Hủy', role: 'cancel' },
-        {
-          text: 'Tạo tài khoản',
-          handler: (data) => {
-            if (!data.fullName || !data.userName || !data.password) return false;
-            this.api.createUser(data).subscribe({
-              next: (res: any) => { window.alert(res.message); this.loadUsers(); },
-              error: (err: any) => window.alert(err.error?.Message || 'Lỗi thêm nhân viên!')
-            });
-            return true;
-          }
-        }
-      ]
-    });
-    await alert.present();
+  // --- LOGIC MỞ/ĐÓNG MODAL ---
+  openAddModal() {
+    this.modalMode = 'add';
+    this.editingUser = { userID: null, fullName: '', userName: '', password: '', role: 'Security', isActive: true };
+    this.showModal = true;
   }
 
-  // 4. SỬA NHÂN VIÊN
-  async editUser(user: UserRecord) {
-    const alert = await this.alertCtrl.create({
-      header: 'Cập nhật thông tin',
-      inputs: [
-        { name: 'fullName', type: 'text', value: user.fullName, placeholder: 'Họ và tên' },
-        { name: 'role', type: 'text', value: user.role, placeholder: 'Vai trò (Admin/Security)' },
-        { name: 'isActive', type: 'text', value: user.isActive ? '1' : '0', placeholder: 'Trạng thái (1: Hoạt động, 0: Khóa)' }
-      ],
-      buttons: [
-        { text: 'Hủy', role: 'cancel' },
-        {
-          text: 'Lưu thay đổi',
-          handler: (data) => {
-            if (!data.fullName || !data.role) return false;
-            const payload = {
-              fullName: data.fullName,
-              role: data.role,
-              isActive: data.isActive === '1'
-            };
-            this.api.updateUser(user.userID, payload).subscribe({
-              next: (res: any) => { window.alert(res.message); this.loadUsers(); },
-              error: (err: any) => window.alert(err.error?.Message || 'Lỗi cập nhật!')
-            });
-            return true;
-          }
-        }
-      ]
-    });
-    await alert.present();
+  openEditModal(user: UserRecord) {
+    this.modalMode = 'edit';
+    this.editingUser = { 
+      userID: user.userID, fullName: user.fullName, userName: user.userName, 
+      password: '', role: user.role, isActive: user.isActive 
+    };
+    this.showModal = true;
   }
 
-  // 5. XÓA NHÂN VIÊN
-  deleteUser(user: UserRecord) {
-    if (user.role === 'Admin') {
-      window.alert('Hệ thống từ chối: Không được phép xóa tài khoản Admin!');
-      return;
+  closeModal() {
+    this.showModal = false;
+  }
+
+  // --- LOGIC LƯU DỮ LIỆU TỪ MODAL ---
+  // --- LOGIC LƯU DỮ LIỆU TỪ MODAL ---
+  saveUser() {
+    if (!this.editingUser.fullName || !this.editingUser.userName) {
+      this.showToast('Họ tên và Tên đăng nhập không được để trống!', 'danger');
+      return; // Chỉ dùng return để thoát hàm
     }
-    if (window.confirm(`Bạn có chắc muốn XÓA VĨNH VIỄN nhân viên ${user.fullName}?`)) {
-      this.api.deleteUser(user.userID).subscribe({
-        next: (res: any) => { window.alert(res.message); this.loadUsers(); },
-        error: (err: any) => window.alert(err.error?.Message || 'Lỗi xóa nhân viên!')
+
+    if (this.modalMode === 'add') {
+      if (!this.editingUser.password) {
+        this.showToast('Vui lòng nhập mật khẩu!', 'danger');
+        return; // Chỉ dùng return để thoát hàm
+      }
+      
+      const payload = { ...this.editingUser, role: 'Security' };
+      this.api.createUser(payload).subscribe({
+        next: (res: any) => { 
+          this.showToast('Thêm nhân viên thành công!', 'success'); 
+          this.closeModal(); 
+          this.loadUsers(); 
+        },
+        error: (err: any) => this.showToast(err.error?.Message || 'Lỗi thêm nhân viên!', 'danger')
+      });
+    } else {
+      const payload = {
+        fullName: this.editingUser.fullName, 
+        userName: this.editingUser.userName,
+        password: this.editingUser.password, 
+        role: this.editingUser.role, 
+        isActive: this.editingUser.isActive
+      };
+      this.api.updateUser(this.editingUser.userID, payload).subscribe({
+        next: (res: any) => { 
+          this.showToast('Cập nhật thành công!', 'success'); 
+          this.closeModal(); 
+          this.loadUsers(); 
+        },
+        error: (err: any) => this.showToast(err.error?.Message || 'Lỗi cập nhật!', 'danger')
       });
     }
+  }
+
+  // --- XÓA NHÂN VIÊN ---
+  async deleteUser(user: UserRecord) {
+    if (user.role === 'Admin') return this.showToast('Không được phép xóa tài khoản Admin!', 'danger');
+    if (!user.userID) return this.showToast('Không tìm thấy ID nhân viên!', 'danger');
+
+    const alert = await this.alertCtrl.create({
+      header: 'Xác nhận xóa',
+      message: `Bạn có chắc chắn muốn XÓA VĨNH VIỄN nhân viên <strong>${user.fullName}</strong>?<br><br>Hành động này không thể hoàn tác.`,
+      buttons: [
+        { text: 'Hủy', role: 'cancel' },
+        {
+          text: 'Xóa nhân viên', role: 'destructive',
+          handler: () => {
+            this.api.deleteUser(user.userID).subscribe({
+              next: (res: any) => { this.showToast('Đã xóa thành công!', 'success'); this.loadUsers(); },
+              error: (err: any) => this.showToast(err.error?.Message || 'Lỗi xóa!', 'danger')
+            });
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 }
