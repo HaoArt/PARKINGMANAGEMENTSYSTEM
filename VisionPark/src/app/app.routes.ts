@@ -39,8 +39,8 @@ export const routes: Routes = [
       ),
   },
 
-  // {
-  //   path: 'users',
-  //   loadComponent: () => import('./pages/users/users.page').then( m => m.UsersPage)
-  // },
+  {
+    path: 'users',
+    loadComponent: () => import('./pages/users/users.page').then( m => m.UsersPage)
+  },
 ];

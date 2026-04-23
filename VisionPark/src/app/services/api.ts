@@ -7,6 +7,9 @@ import { environment } from '@environments/environment';
   providedIn: 'root',
 })
 export class Api {
+  deleteUser(userID: number) {
+      throw new Error('Method not implemented.');
+  }
   private http = inject(HttpClient);
   private baseUrl = environment.apiUrl;
 

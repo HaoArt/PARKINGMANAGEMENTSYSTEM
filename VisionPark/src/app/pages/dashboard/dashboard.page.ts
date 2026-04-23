@@ -7,8 +7,10 @@ import {
 } from '@ionic/angular/standalone';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component'; 
 import { addIcons } from 'ionicons';
-import { carOutline, cashOutline, searchOutline, documentTextOutline, chevronBackOutline, chevronForwardOutline } from 'ionicons/icons';
-import { Api } from '../../services/api'; // <-- IMPORT FILE KẾT NỐI API
+import { 
+  carOutline, cashOutline, searchOutline, chevronBackOutline, 
+  chevronForwardOutline, optionsOutline, car, arrowUpOutline, bicycle, cameraOutline, refreshOutline, scanOutline, chevronDownOutline, saveOutline } from 'ionicons/icons';
+import { Api } from '../../services/api';
 
 interface ParkingRecord {
   id: string;
@@ -23,95 +25,92 @@ interface ParkingRecord {
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
   standalone: true,
-  imports: [IonButton, 
-    IonIcon, 
-    CommonModule, 
-    FormsModule, 
-    IonContent, 
-    IonHeader, 
-    IonTitle, 
-    IonToolbar, 
-    IonFooter,
-    IonButtons,
-    IonMenuButton,
-    NavbarComponent
-  ]
+  imports: [ IonButton, IonIcon, CommonModule, FormsModule, IonContent, IonHeader, IonTitle, IonToolbar, IonFooter, IonButtons, IonMenuButton, NavbarComponent]
 })
 export class DashboardPage implements OnInit {
-  // Thẻ thống kê
   stats = {
-    totalVehicles: 0,
-    availableSlots: 100, // Giả sử bãi xe có sức chứa tối đa là 100 chỗ
-    revenueToday: '0 đ'  // Sẽ cập nhật khi Backend có API tính doanh thu
+    totalVehicles: 0, availableSlots: 100, revenueToday: '0', fillRate: 0 
   };
-
+  currentDate: string = '';
   allRecords: ParkingRecord[] = [];
   filteredRecords: ParkingRecord[] = [];
   paginatedRecords: ParkingRecord[] = [];
-
+  
   searchTerm: string = '';
-  filterStatus: string = 'all';
-
+  filterStatus: string = 'all'; // Biến lưu trạng thái lọc
+  
   currentPage: number = 1;
   itemsPerPage: number = 4;
   totalPages: number = 1;
 
-  // Tiêm Api service vào constructor
   constructor(private api: Api) { 
-    addIcons({ carOutline, cashOutline, searchOutline, documentTextOutline, chevronBackOutline, chevronForwardOutline });
+    addIcons({cameraOutline,refreshOutline,scanOutline,chevronDownOutline,saveOutline,optionsOutline,carOutline,cashOutline,searchOutline,chevronBackOutline,chevronForwardOutline,car,arrowUpOutline,bicycle});
   }
 
   ngOnInit() {
+    this.formatCurrentDate();
     this.loadDataFromDatabase();
   }
 
-  // --- HÀM KẾT NỐI DB LẤY DỮ LIỆU ---
+  formatCurrentDate() {
+    const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+    const now = new Date();
+    this.currentDate = `Hôm nay: ${days[now.getDay()]}, ${now.getDate().toString().padStart(2, '0')} Tháng ${(now.getMonth() + 1).toString().padStart(2, '0')}, ${now.getFullYear()} | ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+  }
+
   loadDataFromDatabase() {
     this.api.getParkingHistory().subscribe({
       next: (response: any) => {
         if (response && response.data) {
-          
-          // 1. Map dữ liệu từ SQL Server sang dạng hiển thị trên bảng
-          this.allRecords = response.data.map((item: any) => ({
-            id: `NFC-${item.cardID}`,
-            plateNumber: item.licensePlateIn,
-            vehicleType: item.vehicleTypeID === 1 ? 'Ô tô' : 'Xe máy',
-            timeIn: item.checkInTime,
-            status: item.status === "Đang đỗ" ? 'In' : 'Out'
-          }));
+          let totalRevenue = 0; // Biến cộng dồn doanh thu
 
-          // 2. Tự động tính toán dữ liệu cho 3 Thẻ thống kê
-          // Đếm số lượng xe có trạng thái "In" (Đang đỗ)
+          this.allRecords = response.data.map((item: any) => {
+            // Cộng dồn tiền vé từ API
+            const cost = item.totalCost || item.TotalCost || 0;
+            totalRevenue += cost;
+
+            return {
+              id: `NFC-${item.cardID || item.CardID}`, 
+              plateNumber: item.licensePlateIn || item.LicensePlateIn || 'N/A', 
+              vehicleType: item.vehicleTypeID === 1 ? 'Xe máy' : 'Ô tô', 
+              timeIn: item.checkInTime || item.CheckInTime, 
+              status: (item.status === "Đang đỗ" || item.status === "In") ? 'In' : 'Out'
+            };
+          });
+
+          // Cập nhật các thẻ thống kê DỮ LIỆU THẬT
           const carsInParking = this.allRecords.filter(r => r.status === 'In').length;
-          
           this.stats.totalVehicles = carsInParking;
-          this.stats.availableSlots = 100 - carsInParking; // Chỗ trống = Tổng sức chứa (100) - Xe đang đỗ
-          
-          // 3. Áp dụng bộ lọc và phân trang để vẽ lên giao diện
+          this.stats.availableSlots = 100 - carsInParking;
+          this.stats.fillRate = Math.round((carsInParking / 100) * 100);
+          this.stats.revenueToday = totalRevenue.toLocaleString('vi-VN'); // Format tiền tệ VN
+
+          // Đã XÓA đoạn Mock Data cũ ở đây để hiển thị 100% dữ liệu thật!
+
           this.applyFilters();
         }
       },
-      error: (err) => {
-        console.error('Lỗi khi lấy dữ liệu Dashboard:', err);
-      }
+      error: (err) => console.error('Lỗi API Dashboard:', err)
     });
   }
 
   applyFilters() {
     let temp = this.allRecords;
-
+    
+    // 1. Lọc theo thanh tìm kiếm (Tìm biển số, thẻ)
     if (this.searchTerm) {
-      const lowerTerm = this.searchTerm.toLowerCase();
-      temp = temp.filter(r => r.plateNumber.toLowerCase().includes(lowerTerm) || r.id.toLowerCase().includes(lowerTerm));
+      const term = this.searchTerm.toLowerCase();
+      temp = temp.filter(r => r.plateNumber.toLowerCase().includes(term) || r.id.toLowerCase().includes(term));
     }
-
+    
+    // 2. Lọc theo Trạng thái (Dropdown)
     if (this.filterStatus !== 'all') {
       temp = temp.filter(r => r.status === this.filterStatus);
     }
 
     this.filteredRecords = temp;
     this.totalPages = Math.ceil(this.filteredRecords.length / this.itemsPerPage) || 1;
-    this.currentPage = 1;
+    this.currentPage = 1; 
     this.updatePagination();
   }
 
@@ -119,18 +118,7 @@ export class DashboardPage implements OnInit {
     const start = (this.currentPage - 1) * this.itemsPerPage;
     this.paginatedRecords = this.filteredRecords.slice(start, start + this.itemsPerPage);
   }
-
-  nextPage() {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-      this.updatePagination();
-    }
-  }
-
-  prevPage() {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.updatePagination();
-    }
-  }
+  
+  nextPage() { if (this.currentPage < this.totalPages) { this.currentPage++; this.updatePagination(); } }
+  prevPage() { if (this.currentPage > 1) { this.currentPage--; this.updatePagination(); } }
 }

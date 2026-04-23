@@ -1,24 +1,28 @@
-<ion-menu contentId="main-content" class="border-r border-gray-100 shadow-sm">
-  <ion-header class="ion-no-border">
-    <ion-toolbar class="px-2 py-4" style="--background: #ffffff;">
-      <h1 class="text-[22px] font-extrabold text-[#001a4d] m-0 pl-4 tracking-tight">VisionPark</h1>
-    </ion-toolbar>
-  </ion-header>
+<div style="display: flex; flex-direction: column; height: 100%; width: 100%; background: #ffffff;">
+  
+  <div class="sidebar-header" style="background: #ffffff; padding: 35px 24px 15px 24px;">
+    <h1 class="logo-text text-[22px] font-black text-[#003399] tracking-wider m-0">VISIONPARK</h1>
+  </div>
 
-  <ion-content style="--background: #ffffff;">
-    <ion-list lines="none" class="px-4 pt-2 bg-transparent">
-      
-      <ion-item 
-        *ngFor="let p of adminPages"
-        button
-        (click)="navigate(p.url)"
-        [ngClass]="currentUrl === p.url ? 'active-menu' : 'inactive-menu'"
-        detail="false" 
-        class="menu-item cursor-pointer mb-2 transition-all">
-        <ion-icon slot="start" [name]="p.icon" class="text-[18px] mr-2"></ion-icon>
-        <ion-label class="text-[11px] font-bold uppercase tracking-wider">{{ p.title }}</ion-label>
-      </ion-item>
-
-    </ion-list>
+  <ion-content class="sidebar-bg" style="--background: #ffffff;">
+    <div class="menu-list">
+      <div class="menu-item" 
+           *ngFor="let p of adminPages" 
+           (click)="navigate(p.url)"
+           [class.active]="currentUrl === p.url">
+        <ion-icon [name]="p.icon"></ion-icon>
+        <span>{{ p.title }}</span>
+      </div>
+    </div>
   </ion-content>
-</ion-menu>
+
+  <div class="sidebar-footer" style="background: #ffffff; padding: 24px;">
+    <button class="btn-export w-full bg-[#003399] text-white border-none p-4 rounded-xl text-[13px] font-bold cursor-pointer mb-4 shadow-[0_4px_12px_rgba(0,51,153,0.2)] hover:bg-[#002277] transition-all">Xuất báo cáo</button>
+    <div class="footer-links flex flex-col gap-4">
+      <a href="#" class="flex items-center gap-3 no-underline text-[12px] font-bold text-gray-500 uppercase transition-all hover:text-[#111827]">
+        <ion-icon name="help-circle-outline" class="text-[20px]"></ion-icon> Trung tâm hỗ trợ
+      </a>
+    </div>
+  </div>
+
+</div>

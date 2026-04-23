@@ -1,98 +1,264 @@
-.login-page {
-  --background: linear-gradient(135deg, #0ea5e9, #2563eb);
+.login-bg {
+  // Gradient màu xanh ngọc bích sang trọng như thiết kế
+  --background: radial-gradient(circle at 60% 40%, #4a75a4 0%, #2f4b70 40%, #172740 100%);
+  position: relative;
 }
 
-.login-wrapper {
+/* --- Họa tiết trang trí --- */
+.decor {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+
+  &.top-left {
+    top: 40px;
+    left: 40px;
+  }
+
+  &.bottom-right {
+    bottom: 50px;
+    right: 50px;
+  }
+}
+
+/* --- Container chính --- */
+.login-container {
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  position: relative;
+  z-index: 10;
 }
 
-/* Brand */
-.brand {
-  text-align: center;
-  margin-bottom: 30px;
-  color: white;
-
-  h1 {
-    font-size: 32px;
-    font-weight: 800;
-    margin: 0;
-    letter-spacing: 1px;
-  }
-
-  p {
-    font-size: 14px;
-    opacity: 0.9;
-  }
-}
-
-/* Card */
+/* --- Card Đăng Nhập --- */
 .login-card {
   width: 90%;
-  max-width: 350px;
-  background: white;
-  padding: 25px;
+  max-width: 440px;
+  background: #f4f6f9; // Màu xám rất nhạt theo ảnh
+  padding: 40px;
   border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  
+  .card-header {
+    text-align: center;
+    margin-bottom: 35px;
 
-  h2 {
-    margin-bottom: 5px;
-    font-weight: 700;
-  }
+    .logo {
+      font-size: 22px;
+      font-weight: 900;
+      color: #003399;
+      margin: 0 0 15px 0;
+      letter-spacing: 0.5px;
+    }
 
-  .subtitle {
-    color: #6b7280;
-    font-size: 13px;
-    margin-bottom: 20px;
-  }
-}
+    .title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #111827;
+      margin: 0 0 8px 0;
+    }
 
-/* Input */
-.input-group {
-  display: flex;
-  align-items: center;
-  background: #f1f5f9;
-  border-radius: 12px;
-  padding: 10px 12px;
-  margin-bottom: 15px;
-
-  ion-icon {
-    color: #2563eb;
-    font-size: 18px;
-    margin-right: 8px;
-  }
-
-  input {
-    border: none;
-    outline: none;
-    background: transparent;
-    flex: 1;
-    font-size: 14px;
+    .subtitle {
+      color: #6b7280;
+      font-size: 13px;
+      font-weight: 500;
+      margin: 0;
+    }
   }
 }
 
-/* Button */
-.login-btn {
+/* --- Form Input --- */
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+
+  label {
+    display: block;
+    font-size: 10px;
+    font-weight: 800;
+    color: #4b5563;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+
+    label { margin-bottom: 0; }
+
+    .forgot-link {
+      font-size: 11px;
+      font-weight: 700;
+      color: #003399;
+      text-decoration: none;
+      transition: color 0.2s;
+
+      &:hover { color: #002277; }
+    }
+  }
+
+  .input-wrapper {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    border: 1px solid #e5e7eb;
+
+    .input-icon {
+      color: #6b7280;
+      font-size: 18px;
+      margin-right: 12px;
+    }
+
+    input {
+      border: none;
+      outline: none;
+      background: transparent;
+      flex: 1;
+      font-size: 14px;
+      font-weight: 500;
+      color: #111827;
+
+      &::placeholder {
+        color: #9ca3af;
+        font-weight: 400;
+      }
+    }
+
+    .eye-icon {
+      color: #6b7280;
+      cursor: pointer;
+      margin-left: 10px;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+
+      &:hover { opacity: 1; }
+    }
+  }
+}
+
+/* --- Button --- */
+.btn-login {
   width: 100%;
-  padding: 12px;
+  padding: 16px;
+  margin-top: 10px;
   border-radius: 12px;
   border: none;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: #003399;
   color: white;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
-  transition: 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 51, 153, 0.3);
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(37, 99, 235, 0.4);
+    background: #002277;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 51, 153, 0.4);
   }
 
   &:active {
-    transform: scale(0.98);
+    transform: translateY(1px);
+  }
+}
+
+/* --- Footer Card --- */
+.card-footer {
+  text-align: center;
+  margin-top: 25px;
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+
+  a {
+    color: #111827;
+    font-weight: 700;
+    text-decoration: none;
+    
+    &:hover { text-decoration: underline; }
+  }
+}
+
+/* --- Trạng thái hệ thống (Nằm ngoài Card) --- */
+.system-status {
+  margin-top: 25px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    background-color: #22c55e; // Xanh lá cây
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+  }
+}
+
+/* --- Chân trang (Bottom Footer) --- */
+.page-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+
+  .copyright {
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 0.5px;
+  }
+
+  .links {
+    display: flex;
+    gap: 20px;
+
+    a {
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.6);
+      text-decoration: none;
+      letter-spacing: 0.5px;
+      transition: color 0.2s;
+
+      &:hover { color: #ffffff; }
+    }
+  }
+}
+
+/* --- Responsive Mobile --- */
+@media (max-width: 768px) {
+  .login-card { padding: 30px 20px; }
+  .decor { display: none; } // Ẩn họa tiết trang trí trên điện thoại cho đỡ rối
+  .page-footer {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+    padding: 20px;
   }
 }

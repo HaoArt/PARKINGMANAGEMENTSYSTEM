@@ -1,0 +1,284 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.app-bg {
+  --background: #ffffff; /* Nền trang trắng */
+}
+
+.page-container {
+  padding: 30px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* --- Header --- */
+.page-header {
+  margin-bottom: 30px;
+  h2 { font-size: 24px; font-weight: 800; color: #111827; margin: 0 0 6px 0; }
+  p { color: #64748b; font-size: 13px; font-weight: 500; margin: 0; }
+}
+
+/* --- Layout 2 cột --- */
+.split-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 30px;
+}
+
+/* --- Hai bảng xám (Tạo thẻ & Danh sách) --- */
+.gray-panel {
+  background-color: #f4f5f7;
+  border-radius: 16px;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* QUAN TRỌNG: Ngăn lỗi vỡ khung Grid trên màn hình nhỏ */
+
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .panel-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+  }
+}
+
+/* --- Form (Cột trái) --- */
+.form-group {
+  margin-bottom: 20px;
+
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    color: #475569;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .input-box {
+    background: #ffffff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    padding: 6px 16px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    position: relative;
+
+    input, select {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      padding: 8px 0;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e293b;
+
+      &::placeholder { color: #94a3b8; font-weight: 500; }
+    }
+
+    select {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .dropdown-icon { color: #94a3b8; pointer-events: none; }
+
+    .icon-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+
+      &.blue-icon { background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; }
+      &.gray-icon { background: #f1f5f9; color: #64748b; transition: 0.2s; &:hover { background: #e2e8f0; color: #0f172a; } }
+    }
+    
+    .hidden { display: none; }
+  }
+
+  .image-preview-mini {
+    display: flex; align-items: center; gap: 12px; margin-top: 10px;
+    img { width: 50px; height: 35px; border-radius: 6px; object-fit: cover; border: 1px solid #cbd5e1; }
+    span { font-size: 12px; font-weight: 700; color: #ef4444; cursor: pointer; &:hover { text-decoration: underline; } }
+  }
+}
+
+.submit-btn {
+  background: #003399;
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: 0.2s;
+
+  &:hover { background: #002277; }
+  &:disabled { opacity: 0.7; cursor: not-allowed; }
+}
+
+/* --- Danh sách (Cột phải) --- */
+.filter-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  &:hover { color: #0f172a; }
+}
+
+.table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px; 
+  text-align: left;
+  min-width: 650px; /* QUAN TRỌNG: Ép bảng giữ nguyên độ rộng để tạo thanh cuộn ngang trên điện thoại */
+
+  th, td {
+    white-space: nowrap; /* QUAN TRỌNG: Ngăn chữ bị rớt dòng lộn xộn */
+  }
+
+  th {
+    padding: 0 16px 10px 16px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    border: none;
+  }
+
+  .row-card {
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+
+    td {
+      padding: 16px;
+      font-size: 13px;
+      border: none;
+      vertical-align: middle;
+
+      &:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+      &:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+    }
+  }
+}
+
+.nfc-col { color: #64748b; font-weight: 600; line-height: 1.4; font-family: monospace; }
+.plate-col { font-weight: 800; color: #111827; }
+.type-col, .date-col { font-weight: 600; color: #64748b; }
+.text-right { text-align: right; }
+
+.badge {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  display: inline-block;
+
+  &.active { background: #dcfce7; color: #16a34a; }
+  &.inactive { background: #f1f5f9; color: #64748b; }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 30px !important;
+  color: #94a3b8;
+  font-weight: 600;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* --- Responsive Điện thoại (Sửa lỗi giao diện Mobile) --- */
+@media (max-width: 992px) {
+  .split-layout { 
+    grid-template-columns: 1fr; 
+    gap: 20px; /* Thu hẹp khoảng cách giữa form và danh sách */
+  }
+  
+  .page-container { 
+    padding: 16px; /* Cho thêm không gian viền trên điện thoại */
+  }
+  
+  .gray-panel {
+    padding: 20px; /* Mảng xám gọn gàng hơn */
+    width: 100%;
+    overflow: hidden; /* Đảm bảo bảng không chọc thủng khung xám */
+  }
+
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Giúp vuốt ngang mượt mà trên iOS */
+    padding-bottom: 5px; /* Chừa chỗ cho box-shadow không bị cắt mất */
+  }
+}
+/* --- Danh sách (Cột phải) --- */
+.filter-box {
+  position: relative;
+  background: #f1f5f9;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 6px;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #e2e8f0;
+  }
+
+  ion-icon {
+    color: #64748b;
+    font-size: 16px;
+  }
+
+  select {
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+    cursor: pointer;
+    padding: 8px 0;
+    /* Ẩn mũi tên mặc định của trình duyệt */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+}
+
+/* Ẩn nút filter cũ nếu bạn quên xóa html */
+.filter-btn { display: none; }
