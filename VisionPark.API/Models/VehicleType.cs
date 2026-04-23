@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace VisionPark.API.Models
 {
-    [Table("VerhicleTypes")]
+    [Table("VehicleTypes")]
     public class VehicleType
     {
         [Key]

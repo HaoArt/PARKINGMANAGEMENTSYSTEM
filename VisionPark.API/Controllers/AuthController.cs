@@ -8,6 +8,7 @@ using VisionPark.API.Data;
 using VisionPark.API.DTOs.Requests;
 namespace VisionPark.API.Controllers
 {
+
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
