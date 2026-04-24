@@ -1,116 +1,116 @@
-<ion-content class="dashboard-bg">
-  <app-navbar></app-navbar> 
-  
-  <div class="dashboard-container pt-6"> 
+<ion-content class="app-bg" style="--background: #f4f6f8;">
+  <app-navbar></app-navbar>
 
-    <div class="stats-cards">
-      
-      <div class="stat-card">
-        <div class="stat-info">
-          <span class="label">Tổng phương tiện</span>
-          <span class="value">{{ stats.totalVehicles | number }}</span>
-          <span class="trend up"><ion-icon name="arrow-up-outline"></ion-icon> Dữ liệu thực tế</span>
-        </div>
-        <div class="stat-icon icon-blue">
-          <ion-icon name="car"></ion-icon>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-info full-width">
-          <span class="label">Chỗ trống</span>
-          <div class="value-row">
-            <span class="value">{{ stats.availableSlots }}</span>
-            <div class="stat-icon icon-green">P</div>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" [style.width.%]="stats.fillRate"></div>
-          </div>
-          <span class="trend-text">Tỷ lệ lấp đầy {{ stats.fillRate }}%</span>
-        </div>
-      </div>
-
-      <div class="stat-card card-dark">
-        <div class="stat-info">
-          <span class="label">Doanh thu hôm nay</span>
-          <span class="value">{{ stats.revenueToday }}</span>
-          <span class="unit">VND</span>
-        </div>
-        <div class="stat-icon icon-transparent">
-          <ion-icon name="cash-outline"></ion-icon>
-        </div>
-      </div>
-
+  <div class="px-6 md:px-10 py-8 max-w-[1400px] mx-auto">
+    
+    <!-- Tiêu đề trang -->
+    <div class="mb-8">
+      <h2 class="text-[24px] font-extrabold text-[#111827] m-0 mb-1">Tổng quan Bãi đỗ xe</h2>
+      <p class="text-[#64748b] text-[13px] font-medium m-0">Cập nhật tình trạng hoạt động theo thời gian thực</p>
     </div>
 
-    <div class="table-section">
-      
-      <div class="table-header-row">
-        <h3>Lịch sử ra vào gần đây</h3>
-        <div class="table-actions">
-          
-          <div class="search-box">
-            <ion-icon name="search-outline"></ion-icon>
-            <input type="text" placeholder="Tìm biển số, mã NFC..." [(ngModel)]="searchTerm" (input)="applyFilters()">
-          </div>
+    <!-- Hàng chứa các Thẻ Thống Kê -->
+    <ion-grid class="p-0">
+      <ion-row class="gap-y-6">
+        
+        <!-- Thẻ 1: Sức chứa tối đa -->
+        <ion-col size="12" size-md="4">
+          <ion-card class="m-0 h-full border border-gray-200 shadow-sm rounded-2xl mx-2 transition-all hover:-translate-y-1 hover:shadow-md">
+            <ion-card-content class="p-6 flex items-center gap-4">
+              <div class="w-14 h-14 rounded-full flex items-center justify-center bg-blue-50 text-blue-500 shrink-0">
+                <ion-icon name="business-outline" class="text-[28px]"></ion-icon>
+              </div>
+              <div>
+                <h3 class="text-[#64748b] text-[13px] font-bold uppercase tracking-wide m-0 mb-1">Sức chứa tối đa</h3>
+                <div class="flex items-baseline gap-1">
+                  <span class="text-[28px] font-black text-[#111827] leading-none">{{ maxCapacity }}</span>
+                  <span class="text-[#64748b] text-[13px] font-semibold">xe</span>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
 
-          <div class="filter-box">
-            <ion-icon name="options-outline"></ion-icon>
-            <select [(ngModel)]="filterStatus" (change)="applyFilters()">
-              <option value="all">Tất cả trạng thái</option>
-              <option value="In">Trong bãi</option>
-              <option value="Out">Đã ra</option>
-            </select>
-          </div>
+        <!-- Thẻ 2: Xe đang đỗ -->
+        <ion-col size="12" size-md="4">
+          <ion-card class="m-0 h-full border border-gray-200 shadow-sm rounded-2xl mx-2 transition-all hover:-translate-y-1 hover:shadow-md">
+            <ion-card-content class="p-6 flex items-center gap-4">
+              <div class="w-14 h-14 rounded-full flex items-center justify-center bg-orange-50 text-orange-500 shrink-0">
+                <ion-icon name="car-outline" class="text-[28px]"></ion-icon>
+              </div>
+              <div>
+                <h3 class="text-[#64748b] text-[13px] font-bold uppercase tracking-wide m-0 mb-1">Xe đang đỗ</h3>
+                <div class="flex items-baseline gap-1">
+                  <span class="text-[28px] font-black text-[#111827] leading-none">{{ currentParked }}</span>
+                  <span class="text-[#64748b] text-[13px] font-semibold">xe</span>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
 
+        <!-- Thẻ 3: Chỗ trống (Tính toán từ DB) -->
+        <ion-col size="12" size-md="4">
+          <ion-card class="m-0 h-full border border-gray-200 shadow-sm rounded-2xl mx-2 transition-all hover:-translate-y-1 hover:shadow-md">
+            <ion-card-content class="p-6 flex items-center gap-4">
+              <div class="w-14 h-14 rounded-full flex items-center justify-center bg-green-50 text-green-500 shrink-0">
+                <ion-icon name="checkmark-circle-outline" class="text-[28px]"></ion-icon>
+              </div>
+              <div>
+                <h3 class="text-[#64748b] text-[13px] font-bold uppercase tracking-wide m-0 mb-1">Chỗ còn trống</h3>
+                <div class="flex items-baseline gap-1">
+                  <span class="text-[28px] font-black text-green-600 leading-none">{{ availableSpots }}</span>
+                  <span class="text-[#64748b] text-[13px] font-semibold">chỗ</span>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+      </ion-row>
+    </ion-grid>
+
+    <!-- Phần Danh sách xe đang đỗ -->
+    <div class="mt-8 animate-fade-in">
+      <div class="mb-5 flex justify-between items-center">
+        <div>
+          <h3 class="text-[18px] font-extrabold text-[#111827] m-0 mb-1">Danh sách xe đang đỗ</h3>
+          <p class="text-[#64748b] text-[13px] font-medium m-0">Hiển thị các phương tiện hiện đang có mặt trong bãi</p>
         </div>
       </div>
 
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th>MÃ NFC</th>
-              <th>BIỂN SỐ</th>
-              <th>LOẠI XE</th>
-              <th>THỜI GIAN</th>
-              <th>TRẠNG THÁI</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of paginatedRecords">
-              <td class="nfc-col">{{ item.id }}</td>
-              <td><span class="plate-badge">{{ item.plateNumber }}</span></td>
-              <td class="type-col">
-                <ion-icon [name]="item.vehicleType === 'Ô tô' ? 'car-outline' : 'bicycle'"></ion-icon>
-                {{ item.vehicleType }}
-              </td>
-              <td class="time-col">{{ item.timeIn }}</td>
-              <td>
-                <span class="status-badge" [class.in]="item.status === 'In'" [class.out]="item.status === 'Out'">
-                  <span class="dot"></span>
-                  {{ item.status === 'In' ? 'Trong bãi' : 'Đã ra' }}
-                </span>
-              </td>
-            </tr>
-            <tr *ngIf="paginatedRecords.length === 0">
-              <td colspan="5" style="text-align: center; padding: 30px; color: #9ca3af; font-weight: 600;">
-                Không có dữ liệu phù hợp
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="pagination" *ngIf="paginatedRecords.length > 0">
-        <span class="page-info">Trang {{ currentPage }} / {{ totalPages }}</span>
-        <div class="page-controls">
-          <button (click)="prevPage()" [disabled]="currentPage === 1"><ion-icon name="chevron-back-outline"></ion-icon></button>
-          <button class="active">{{ currentPage }}</button>
-          <button (click)="nextPage()" [disabled]="currentPage === totalPages"><ion-icon name="chevron-forward-outline"></ion-icon></button>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse min-w-[600px]">
+            <thead>
+              <tr class="bg-[#f8fafc] border-b border-gray-200">
+                <th class="py-4 px-6 text-[12px] font-extrabold text-[#64748b] uppercase tracking-wider">Biển số xe</th>
+                <th class="py-4 px-6 text-[12px] font-extrabold text-[#64748b] uppercase tracking-wider">Loại xe</th>
+                <th class="py-4 px-6 text-[12px] font-extrabold text-[#64748b] uppercase tracking-wider">Giờ vào bãi</th>
+                <th class="py-4 px-6 text-[12px] font-extrabold text-[#64748b] uppercase tracking-wider text-right">Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let vehicle of parkedVehicles" class="border-b border-gray-50 hover:bg-gray-50/80 transition-colors">
+                <td class="py-4 px-6 font-bold text-[#111827]">{{ vehicle.registerPlate || vehicle.plate }}</td>
+                <td class="py-4 px-6 font-semibold text-[#64748b]">{{ vehicle.vehicleType || vehicle.type }}</td>
+                <td class="py-4 px-6 font-semibold text-[#64748b]">{{ vehicle.timeIn || vehicle.startDate | slice:0:16 }}</td>
+                <td class="py-4 px-6 text-right">
+                  <span class="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-green-50 text-green-600 border border-green-200">Đang đỗ</span>
+                </td>
+              </tr>
+              
+              <tr *ngIf="parkedVehicles.length === 0">
+                <td colspan="4" class="py-10 text-center text-[#94a3b8] font-semibold">
+                  <ion-icon name="car-outline" class="text-[40px] mb-2 opacity-50"></ion-icon>
+                  <p class="m-0">Hiện không có xe nào trong bãi.</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
-
     </div>
+
   </div>
 </ion-content>

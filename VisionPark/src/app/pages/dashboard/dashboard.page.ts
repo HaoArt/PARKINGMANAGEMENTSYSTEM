@@ -1,111 +1,74 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { 
-  IonContent, IonHeader, IonTitle, IonToolbar, 
-  IonFooter, IonButtons, IonMenuButton, IonIcon, IonButton 
-} from '@ionic/angular/standalone';
-import { NavbarComponent } from '../../shared/components/navbar/navbar.component'; 
+import { IonContent, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonIcon } from '@ionic/angular/standalone';
+import { Api } from '../../services/api'; // Đường dẫn có thể khác tùy cấu trúc thư mục của bạn
+import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { addIcons } from 'ionicons';
-import { 
-  carOutline, cashOutline, searchOutline, chevronBackOutline, 
-  chevronForwardOutline, optionsOutline, car, arrowUpOutline, bicycle, cameraOutline, refreshOutline, scanOutline, chevronDownOutline, saveOutline } from 'ionicons/icons';
-import { Api } from '../../services/api';
-
-interface ParkingRecord {
-  id: string;
-  plateNumber: string;
-  vehicleType: string;
-  timeIn: string;
-  status: 'In' | 'Out';
-}
+import { businessOutline, carOutline, checkmarkCircleOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
   standalone: true,
-  imports: [ IonButton, IonIcon, CommonModule, FormsModule, IonContent, IonHeader, IonTitle, IonToolbar, IonFooter, IonButtons, IonMenuButton, NavbarComponent]
+  imports: [IonContent, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonIcon, CommonModule, FormsModule, NavbarComponent]
 })
 export class DashboardPage implements OnInit {
-  stats = {
-    totalVehicles: 0, availableSlots: 100, revenueToday: '0', fillRate: 0 
-  };
-  
-  allRecords: ParkingRecord[] = [];
-  filteredRecords: ParkingRecord[] = [];
-  paginatedRecords: ParkingRecord[] = [];
-  
-  searchTerm: string = '';
-  filterStatus: string = 'all'; 
-  
-  currentPage: number = 1;
-  itemsPerPage: number = 4;
-  totalPages: number = 1;
+  private api = inject(Api);
 
-  constructor(private api: Api) { 
-    addIcons({cameraOutline,refreshOutline,scanOutline,chevronDownOutline,saveOutline,optionsOutline,carOutline,cashOutline,searchOutline,chevronBackOutline,chevronForwardOutline,car,arrowUpOutline,bicycle});
+  // Khai báo các biến lưu trữ thống kê
+  maxCapacity: number = 0;
+  currentParked: number = 0; // Số xe đang đỗ trong bãi
+  availableSpots: number = 0; // Số chỗ trống
+
+  // Danh sách xe đang đỗ
+  parkedVehicles: any[] = [];
+
+  constructor() {
+    addIcons({ businessOutline, carOutline, checkmarkCircleOutline });
   }
 
   ngOnInit() {
-    this.loadDataFromDatabase();
+    this.loadDashboardData();
   }
 
-  loadDataFromDatabase() {
-    this.api.getParkingHistory().subscribe({
-      next: (response: any) => {
-        if (response && response.data) {
-          let totalRevenue = 0; 
-
-          this.allRecords = response.data.map((item: any) => {
-            const cost = item.totalCost || item.TotalCost || 0;
-            totalRevenue += cost;
-
-            return {
-              id: `NFC-${item.cardID || item.CardID}`, 
-              plateNumber: item.licensePlateIn || item.LicensePlateIn || 'N/A', 
-              vehicleType: item.vehicleTypeID === 1 ? 'Xe máy' : 'Ô tô', 
-              timeIn: item.checkInTime || item.CheckInTime, 
-              status: (item.status === "Đang đỗ" || item.status === "In") ? 'In' : 'Out'
-            };
-          });
-
-          const carsInParking = this.allRecords.filter(r => r.status === 'In').length;
-          this.stats.totalVehicles = carsInParking;
-          this.stats.availableSlots = 100 - carsInParking;
-          this.stats.fillRate = Math.round((carsInParking / 100) * 100);
-          this.stats.revenueToday = totalRevenue.toLocaleString('vi-VN'); 
-
-          this.applyFilters();
+  loadDashboardData() {
+    // 1. Gọi API lấy Cấu hình hệ thống để biết Sức chứa tối đa (MaxCapacity)
+    this.api.getSettings().subscribe({
+      next: (res: any) => {
+        if (res?.systemConfig) {
+          // Lấy giá trị MaxCapacity (hỗ trợ cả viết hoa và viết thường tùy backend trả về)
+          this.maxCapacity = res.systemConfig.maxCapacity || res.systemConfig.MaxCapacity || 0;
+          this.calculateAvailableSpots();
         }
       },
-      error: (err) => console.error('Lỗi API Dashboard:', err)
+      error: (err) => console.error('Lỗi khi lấy cấu hình bãi đỗ:', err)
+    });
+
+    // 2. LẤY DANH SÁCH XE ĐANG ĐỖ TỪ DATABASE
+    this.api.getParkingHistory({ status: 'In', pageNumber: 1, pageSize: 1000 }).subscribe({
+      next: (res: any) => {
+        if (res?.data) {
+          this.parkedVehicles = res.data.map((item: any) => ({
+            plate: item.licensePlateIn || '---',
+            type: item.vehicleTypeID === 1 ? 'Ô tô' : 'Xe máy',
+            timeIn: item.checkInTime
+          }));
+          this.currentParked = this.parkedVehicles.length;
+          this.calculateAvailableSpots();
+        }
+      },
+      error: (err) => console.error('Lỗi lấy danh sách xe đang đỗ:', err)
     });
   }
 
-  applyFilters() {
-    let temp = this.allRecords;
-    
-    if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
-      temp = temp.filter(r => r.plateNumber.toLowerCase().includes(term) || r.id.toLowerCase().includes(term));
+  // Hàm tính toán số chỗ còn trống
+  calculateAvailableSpots() {
+    this.availableSpots = this.maxCapacity - this.currentParked;
+    // Đảm bảo số chỗ trống không bị âm trong trường hợp lỗi data
+    if (this.availableSpots < 0) {
+      this.availableSpots = 0;
     }
-    
-    if (this.filterStatus !== 'all') {
-      temp = temp.filter(r => r.status === this.filterStatus);
-    }
-
-    this.filteredRecords = temp;
-    this.totalPages = Math.ceil(this.filteredRecords.length / this.itemsPerPage) || 1;
-    this.currentPage = 1; 
-    this.updatePagination();
   }
-
-  updatePagination() {
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    this.paginatedRecords = this.filteredRecords.slice(start, start + this.itemsPerPage);
-  }
-  
-  nextPage() { if (this.currentPage < this.totalPages) { this.currentPage++; this.updatePagination(); } }
-  prevPage() { if (this.currentPage > 1) { this.currentPage--; this.updatePagination(); } }
 }

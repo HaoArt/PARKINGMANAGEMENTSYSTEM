@@ -37,6 +37,8 @@ export class TicketParkingPage implements OnInit {
   monthlyTickets: MonthlyTicketRecord[] = [];    // Mảng hiển thị (đã qua bộ lọc)
   
   filterStatus: string = 'all'; // Biến lưu trạng thái lọc mặc định
+  searchTerm: string = '';      // Từ khóa tìm kiếm
+  currentPage: number = 1;      // Biến lưu trang hiện tại
   
   isLoading = false;
   isSubmitting = false;
@@ -80,13 +82,27 @@ export class TicketParkingPage implements OnInit {
 
   // Hàm xử lý Lọc dữ liệu
   applyFilters() {
+    this.currentPage = 1; // Luôn đưa về trang 1 mỗi khi gõ tìm kiếm hoặc đổi bộ lọc
+    
+    let temp = this.allMonthlyTickets;
+
+    // 1. Lọc theo trạng thái
     if (this.filterStatus === 'active') {
-      this.monthlyTickets = this.allMonthlyTickets.filter(item => item.isActive === true);
+      temp = temp.filter(item => item.isActive === true);
     } else if (this.filterStatus === 'inactive') {
-      this.monthlyTickets = this.allMonthlyTickets.filter(item => item.isActive === false);
-    } else {
-      this.monthlyTickets = [...this.allMonthlyTickets]; // Hiển thị tất cả
+      temp = temp.filter(item => item.isActive === false);
     }
+
+    // 2. Lọc theo từ khóa tìm kiếm (Biển số hoặc Mã thẻ)
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      temp = temp.filter(item => 
+        (item.registerPlate && item.registerPlate.toLowerCase().includes(term)) ||
+        (item.cardUID && item.cardUID.toLowerCase().includes(term))
+      );
+    }
+
+    this.monthlyTickets = temp;
   }
 
   onFileSelected(event: any) {

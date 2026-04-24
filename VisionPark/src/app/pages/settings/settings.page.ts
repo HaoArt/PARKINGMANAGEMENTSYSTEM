@@ -1,13 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Api } from '../../services/api';
-import { inject } from '@angular/core';
-import { ToastController } from '@ionic/angular/standalone';
 import { 
   IonContent, IonGrid, IonRow, IonCol, IonCard, 
   IonCardHeader, IonCardTitle, IonCardContent, 
-  IonItem, IonLabel, IonInput, 
+  IonItem, IonLabel, IonInput, ToastController,
   IonButton, IonIcon, IonSegment, IonSegmentButton, IonHeader, IonToolbar 
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -16,8 +13,8 @@ import {
   carOutline, bicycleOutline, businessOutline, timeOutline, callOutline 
 } from 'ionicons/icons';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
+import { Api } from '../../services/api';
 
-// Interface Bảng giá mới: Theo lượt, tháng, quý, năm
 interface PricingRule {
   RuleId: number;
   VehicleType: string;
@@ -40,27 +37,31 @@ interface PricingRule {
     CommonModule, FormsModule, NavbarComponent
   ]
 })
+export class SettingsPage implements OnInit {
 
-  export class SettingsPage implements OnInit {
   CurrentTab: string = 'general';
+
   SystemConfig: any = {};
-  PricingRules: any[] = [];
+  PricingRules: PricingRule[] = [];
 
   private api = inject(Api);
   private toastCtrl = inject(ToastController);
 
   constructor() {
-    addIcons({ saveOutline, settingsOutline, cashOutline, carOutline, bicycleOutline, businessOutline, timeOutline, callOutline });
+    addIcons({ 
+      saveOutline, settingsOutline, cashOutline, 
+      carOutline, bicycleOutline, businessOutline, timeOutline, callOutline 
+    });
   }
 
   ngOnInit() {
     this.loadSettings();
   }
 
+  // Tải dữ liệu từ Database lên Form
   loadSettings() {
     this.api.getSettings().subscribe({
       next: (res: any) => {
-        // Hứng dữ liệu Cài đặt chung
         if (res?.systemConfig) {
           this.SystemConfig = {
             ParkingName: res.systemConfig.parkingName || res.systemConfig.ParkingName,
@@ -71,7 +72,6 @@ interface PricingRule {
           };
         }
         
-        // Hứng dữ liệu Bảng giá
         if (res?.pricingRules) {
           this.PricingRules = res.pricingRules.map((r: any) => ({
             RuleId: r.ruleId || r.RuleId,
@@ -91,6 +91,7 @@ interface PricingRule {
     this.CurrentTab = event.detail.value;
   }
 
+  // GHI DỮ LIỆU TỪ FORM XUỐNG DATABASE
   async saveSettings() {
     const payload = {
       SystemConfig: this.SystemConfig,
@@ -100,15 +101,21 @@ interface PricingRule {
     this.api.saveSettings(payload).subscribe({
       next: async (res: any) => {
         const toast = await this.toastCtrl.create({
-          message: res.message || 'Lưu cấu hình thành công!',
-          duration: 2500, color: 'success', position: 'top', cssClass: 'toast-top-right toast-success'
+          message: res.message || 'Đã lưu cấu hình vào Database thành công!',
+          duration: 2500,
+          color: 'success',
+          position: 'top',
+          cssClass: 'toast-top-right toast-success',
         });
         toast.present();
       },
-      error: async (err) => {
+      error: async (err: any) => {
         const toast = await this.toastCtrl.create({
-          message: 'Lỗi khi lưu cài đặt!',
-          duration: 2500, color: 'danger', position: 'top', cssClass: 'toast-top-right toast-danger'
+          message: err.error?.Message || 'Lỗi khi lưu cài đặt!',
+          duration: 2500,
+          color: 'danger',
+          position: 'top',
+          cssClass: 'toast-top-right toast-danger',
         });
         toast.present();
       }

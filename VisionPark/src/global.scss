@@ -6,43 +6,77 @@
 ion-split-pane {
   --border: 0;
 }
-/* Ép Toast Notification hiển thị ở góc trên bên phải màn hình */
-ion-toast.toast-top-right {
-  text-align: right;
 
-  @media (min-width: 768px) {
-    --start: auto; /* Gỡ neo bên trái */
-    --end: 24px;   /* Neo vào lề phải 24px */
-    --top: 80px;   /* Neo ngay dưới thanh Navbar */
-    --width: 320px;
-    --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    --border-radius: 12px;
-  }
+/* --- NÂNG CẤP GIAO DIỆN CHUNG TOÀN HỆ THỐNG (MODERN UI) --- */
+
+/* 1. Nền hệ thống mượt mà, sạch sẽ hơn */
+ion-content {
+  --background: #f8fafc;
 }
-/* --- ÉP THÔNG BÁO TOAST NỔI LÊN TRÊN CÙNG, KHÔNG BỊ CHE --- */
-ion-toast.toast-top-right {
-  z-index: 99999 !important; /* Quan trọng: Ép nổi lên trên mọi thứ (kể cả Navbar) */
-  text-align: right;
 
-  /* Chỉnh lại phần chữ bên trong cho rõ nét */
-  &::part(message) {
-    font-weight: 700;
-    font-size: 14px;
-  }
-
-  @media (min-width: 768px) {
-    --start: auto;
-    --end: 30px;
-    --top: 20px; /* Đẩy lên cao hơn một chút để không dính Navbar */
-    --width: auto;
-    --box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-    --border-radius: 12px;
-  }
+/* 2. Tùy chỉnh thanh cuộn (Scrollbar) cho Web/Desktop đẹp như macOS */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
-/* --- ÉP THÔNG BÁO TOAST NỔI LÊN TRÊN CÙNG VÀ HIỂN THỊ MÀU RÕ RÀNG --- */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 3. Định dạng chung cho Card - Bo tròn 16px, bóng đổ nhẹ, hiệu ứng nổi (Hover) */
+ion-card {
+  --background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0,0,0,0.05) !important;
+  border: 1px solid #f1f5f9;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+ion-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0,0,0,0.04) !important;
+  transform: translateY(-2px);
+}
+
+/* 4. Nút bấm mềm mại và có hiệu ứng */
+ion-button {
+  --border-radius: 8px;
+  transition: filter 0.2s ease;
+}
+ion-button::part(native):hover {
+  filter: brightness(1.1);
+}
+
+/* --- ÉP THÔNG BÁO TOAST NỔI LÊN VÀ HIỆN MÀU RÕ RÀNG --- */
 ion-toast.toast-top-right {
   z-index: 99999 !important;
-  text-align: right;
+  
+  /* Đẩy thông báo xuống dưới thanh Navbar 80px (tránh bị Navbar đè lên gây ẩn) */
+  padding-top: 80px !important;
+  
+  /* Mặc định hiển thị thông báo ở giữa màn hình trên Mobile */
+  justify-content: center !important;
+
+  /* Ép màu Xanh lá cho thông báo thành công */
+  &.toast-success {
+    --background: #10b981 !important; 
+    --color: #ffffff !important;
+    --button-color: #ffffff !important;
+    &::part(icon) { color: #ffffff !important; }
+  }
+
+  /* Ép màu Đỏ cho thông báo lỗi */
+  &.toast-danger {
+    --background: #ef4444 !important; 
+    --color: #ffffff !important;
+    --button-color: #ffffff !important;
+    &::part(icon) { color: #ffffff !important; }
+  }
 
   &::part(message) {
     font-weight: 700;
@@ -53,35 +87,12 @@ ion-toast.toast-top-right {
     font-size: 20px;
   }
 
-  /* Ép màu nền mạnh mẽ để không bị lẫn vào nền trắng của web */
-  &.toast-success {
-    --background: #10b981 !important; /* Xanh lá cây đậm */
-    --color: #ffffff !important;
-    --button-color: #ffffff !important;
-  }
-
-  &.toast-danger {
-    --background: #ef4444 !important; /* Đỏ đậm */
-    --color: #ffffff !important;
-    --button-color: #ffffff !important;
-  }
-
   @media (min-width: 768px) {
-    --start: auto;
-    --end: 30px;
-    --top: 20px; 
+    /* Trên Desktop, dồn thông báo về góc phải và cách lề 30px */
+    padding-right: 30px !important;
+    justify-content: flex-end !important;
     --width: auto;
     --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     --border-radius: 12px;
   }
-}
-/* --- ẨN THANH CUỘN CỦA SIDEBAR BÊN TRÁI --- */
-ion-menu ion-content::part(scroll),
-app-sidebar ion-content::part(scroll),
-.sidebar-wrapper {
-  &::-webkit-scrollbar {
-    display: none !important;
-  }
-  -ms-overflow-style: none !important;
-  scrollbar-width: none !important;
 }

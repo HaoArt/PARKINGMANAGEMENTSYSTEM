@@ -1,5 +1,5 @@
 .custom-bg {
-  --background: #f4f6f8;
+  --background: #f8fafc; /* Nền sáng và trong trẻo hơn */
 }
 
 // Header
@@ -7,47 +7,64 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 16px;
 
   .page-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #1f2937;
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #0f172a;
     margin: 0;
+    letter-spacing: -0.5px;
   }
 
   .btn-export {
     text-transform: none;
     font-weight: 600;
-    --box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+    --border-radius: 8px;
+    --box-shadow: 0 4px 10px rgba(16, 185, 129, 0.15);
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
   }
 }
 
 // Card Bộ Lọc
 .filter-card {
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.02);
   
   .custom-input {
-    --background: #f9fafb;
-    --border-radius: 8px;
-    margin: 4px 0;
+    --background: #f1f5f9;
+    --border-radius: 10px;
+    --padding-start: 16px;
+    margin: 8px 0;
+    transition: all 0.3s ease;
+
+    &.ion-focused {
+      --background: #ffffff;
+      box-shadow: 0 0 0 2px rgba(0, 51, 153, 0.1);
+    }
   }
 
   .btn-reset {
     text-transform: none;
-    font-weight: 500;
-    margin-top: 8px;
+    font-weight: 600;
+    margin-top: 12px;
+    --border-radius: 8px;
   }
 }
 
 // Bảng dữ liệu
 .table-wrapper {
   background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+  border-radius: 16px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(226, 232, 240, 0.8);
   overflow: hidden;
 
   .custom-table {
@@ -55,31 +72,34 @@
 
     .table-header {
       background: #f8fafc;
-      border-bottom: 2px solid #e2e8f0;
-      font-weight: 600;
+      border-bottom: 1px solid #e2e8f0;
+      font-weight: 700;
       color: #475569;
-      padding: 12px 16px;
-      font-size: 0.9rem;
+      padding: 16px 20px;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .table-row {
-      padding: 12px 16px;
+      padding: 16px 20px;
       border-bottom: 1px solid #f1f5f9;
       align-items: center;
       transition: all 0.2s ease;
 
       &:hover {
         background-color: #f8fafc;
+        transform: scale(1.002);
       }
 
-      &:nth-child(even) {
-        background-color: #fcfcfd;
+      &:last-child {
+        border-bottom: none;
       }
 
       ion-col {
         display: flex;
         align-items: center;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         color: #334155;
       }
     }
@@ -87,83 +107,102 @@
 
   // Tùy chỉnh các thành phần trong bảng
   .status-badge {
-    padding: 6px 10px;
-    border-radius: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
     font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.3px;
   }
 
   .nfc-text {
-    font-weight: 500;
+    font-weight: 600;
     color: #64748b;
+    background: #f1f5f9;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.85rem;
   }
 
   .plate-style {
-    background: #0f172a;
-    color: #ffffff;
-    padding: 4px 10px;
+    background: #ffffff;
+    color: #0f172a;
+    padding: 6px 12px;
     border-radius: 6px;
-    font-family: "Courier New", Courier, monospace;
-    font-weight: bold;
-    letter-spacing: 1.5px;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-weight: 700;
+    letter-spacing: 1px;
     border: 2px solid #cbd5e1;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
   }
 
   .time-icon {
-    margin-right: 6px;
+    margin-right: 8px;
     color: #94a3b8;
+    font-size: 1.1rem;
   }
 
   .cost-text {
-    font-weight: 700;
-    color: #ef4444;
-    font-size: 1rem;
+    font-weight: 800;
+    color: #10b981;
+    font-size: 1.05rem;
   }
 }
 
 // Trạng thái trống
 .empty-state {
   text-align: center;
-  padding: 40px 20px;
+  padding: 60px 20px;
   color: #94a3b8;
 
   ion-icon {
-    font-size: 48px;
-    margin-bottom: 10px;
-    color: #cbd5e1;
+    font-size: 64px;
+    margin-bottom: 16px;
+    color: #e2e8f0;
   }
 
   p {
     margin: 0;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    font-weight: 500;
   }
 }
 
 // Responsive cho Mobile
 @media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .table-header {
-    display: none; // Ẩn header trên mobile
+    display: none;
   }
 
   .table-wrapper .custom-table .table-row {
     flex-direction: column;
-    padding: 16px;
+    padding: 20px;
     border: 1px solid #e2e8f0;
-    margin: 10px;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-    background: #fff !important; // Bỏ zebra stripe trên mobile
+    margin: 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    background: #fff !important; 
 
     ion-col {
       width: 100%;
-      padding: 8px 0;
-      justify-content: space-between; // Đẩy label và value về 2 phía
+      padding: 10px 0;
+      justify-content: space-between; 
+      border-bottom: 1px dashed #f1f5f9;
 
-      // Lấy nội dung từ data-label hiển thị ra làm tiêu đề
+      &:last-child {
+        border-bottom: none;
+      }
+
       &::before {
         content: attr(data-label);
         font-weight: 600;
         color: #64748b;
         font-size: 0.85rem;
+        text-transform: uppercase;
       }
     }
   }

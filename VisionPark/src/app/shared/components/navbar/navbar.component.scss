@@ -3,45 +3,63 @@
 }
 
 ion-toolbar {
-  --min-height: 64px;
+  --min-height: 70px;
+  --border-width: 0 0 1px 0;
+  --border-color: rgba(0,0,0,0.05);
+  --background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
 }
 
 /* Custom cho thẻ div bọc input tìm kiếm */
 .search-container {
-  transition: all 0.2s ease-in-out;
-  border: 1px solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid #e2e8f0;
+  border-radius: 20px; /* Bo tròn kiểu viên thuốc */
+  background-color: #f8fafc;
+  overflow: hidden;
 
   /* Hiệu ứng viền sáng lên khi bấm vào ô tìm kiếm */
   &:focus-within {
     background-color: #ffffff;
-    border-color: #0040a1;
-    box-shadow: 0 0 0 3px rgba(0, 64, 161, 0.1);
+    border-color: #003399;
+    box-shadow: 0 0 0 4px rgba(0, 51, 153, 0.1);
+    transform: translateY(-1px);
   }
 
   input {
     &::placeholder {
-      color: #737785;
-      opacity: 1;
+      color: #94a3b8;
+      font-weight: 500;
     }
   }
 }
 
 /* Hiệu ứng rung chuông khi hover vào nút thông báo */
-button.relative:hover .material-symbols-outlined {
-  animation: ring 0.5s ease-in-out;
+button.relative:hover .material-symbols-outlined,
+button.relative:hover ion-icon {
+  animation: ring 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  color: #003399;
 }
 
 @keyframes ring {
   0% { transform: rotate(0); }
-  25% { transform: rotate(15deg); }
-  50% { transform: rotate(-10deg); }
-  75% { transform: rotate(5deg); }
+  15% { transform: rotate(15deg); }
+  30% { transform: rotate(-10deg); }
+  45% { transform: rotate(10deg); }
+  60% { transform: rotate(-5deg); }
+  75% { transform: rotate(2deg); }
   100% { transform: rotate(0); }
 }
 
 /* Ẩn viền focus mặc định của menu button */
 ion-menu-button {
-  --color: #424654;
+  --color: #475569;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    --color: #003399;
+  }
+
   &::part(native) {
     outline: none;
   }

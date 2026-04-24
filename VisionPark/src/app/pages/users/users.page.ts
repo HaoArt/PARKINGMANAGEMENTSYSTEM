@@ -52,7 +52,9 @@ export class UsersPage implements OnInit {
 
   async showToast(message: string, color: 'success' | 'danger' = 'success') {
     const toast = await this.toastCtrl.create({
-      message: message, duration: 2500, color: color, position: 'top',
+      message: message,
+      duration: 2500,
+      position: 'top',
       cssClass: `toast-top-right toast-${color}`,
       icon: color === 'success' ? 'checkmark-circle-outline' : 'alert-circle-outline'
     });
@@ -112,8 +114,7 @@ export class UsersPage implements OnInit {
     this.showModal = false;
   }
 
-  // --- LOGIC LƯU DỮ LIỆU TỪ MODAL ---
-  // --- LOGIC LƯU DỮ LIỆU TỪ MODAL ---
+
   saveUser() {
     if (!this.editingUser.fullName || !this.editingUser.userName) {
       this.showToast('Họ tên và Tên đăng nhập không được để trống!', 'danger');

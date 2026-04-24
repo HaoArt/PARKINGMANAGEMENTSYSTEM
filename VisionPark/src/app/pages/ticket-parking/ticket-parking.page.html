@@ -67,6 +67,11 @@
       <div class="gray-panel">
         
         <div class="panel-header">
+          <div class="search-box" style="flex: 1; min-width: 200px; position: relative; margin-right: 12px;">
+            <ion-icon name="search-outline" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 16px;"></ion-icon>
+            <input type="text" placeholder="Tìm biển số, mã thẻ..." [(ngModel)]="searchTerm" (input)="applyFilters()" 
+                   style="width: 100%; padding: 8px 12px 8px 36px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; font-weight: 600; color: #1e293b; outline: none; background: #ffffff;">
+          </div>
           <div class="filter-box">
             <ion-icon name="options-outline"></ion-icon>
             <select [(ngModel)]="filterStatus" (change)="applyFilters()">
@@ -89,7 +94,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr class="row-card" *ngFor="let item of monthlyTickets">
+              <tr class="row-card" *ngFor="let item of monthlyTickets | slice: (currentPage - 1) * 10 : currentPage * 10">
                 <td class="nfc-col">{{ item.cardUID | slice:0:4 }}-<br>{{ item.cardUID | slice:4:8 }}</td>
                 <td class="plate-col">{{ item.registerPlate }}</td>
                 <td class="type-col">Vé tháng</td>
@@ -106,6 +111,26 @@
               </tr>
             </tbody>
           </table>
+
+          <!-- Phân trang (Chỉ hiển thị khi tổng số thẻ lớn hơn 10) -->
+          <div class="pagination-container" *ngIf="monthlyTickets.length > 10" style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid #f1f5f9;">
+            <span style="font-size: 13px; color: #64748b; font-weight: 500;">
+              Tổng: <strong>{{ monthlyTickets.length }}</strong> thẻ
+            </span>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button (click)="currentPage = currentPage - 1" [disabled]="currentPage === 1" 
+                      style="padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; color: #475569; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s;"
+                      [style.opacity]="currentPage === 1 ? '0.5' : '1'">
+                Trước
+              </button>
+              <span style="font-size: 13px; font-weight: 700; color: #0f172a;">Trang {{ currentPage }}</span>
+              <button (click)="currentPage = currentPage + 1" [disabled]="currentPage * 10 >= monthlyTickets.length" 
+                      style="padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; color: #475569; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s;"
+                      [style.opacity]="currentPage * 10 >= monthlyTickets.length ? '0.5' : '1'">
+                Sau
+              </button>
+            </div>
+          </div>
         </div>
 
       </div>
