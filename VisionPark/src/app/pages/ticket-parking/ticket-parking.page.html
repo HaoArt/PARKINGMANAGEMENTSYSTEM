@@ -89,7 +89,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr class="row-card" *ngFor="let item of monthlyTickets">
+              <tr class="row-card" *ngFor="let item of paginatedTickets">
                 <td class="nfc-col">{{ item.cardUID | slice:0:4 }}-<br>{{ item.cardUID | slice:4:8 }}</td>
                 <td class="plate-col">{{ item.registerPlate }}</td>
                 <td class="type-col">Vé tháng</td>
@@ -101,11 +101,20 @@
                 </td>
               </tr>
 
-              <tr *ngIf="monthlyTickets.length === 0 && !isLoading">
+              <tr *ngIf="paginatedTickets?.length === 0 && !isLoading">
                 <td colspan="5" class="empty-state">Chưa có thẻ nào được phát hành.</td>
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <div class="pagination" *ngIf="paginatedTickets?.length > 0">
+          <span class="page-info">Trang {{ currentPage }} / {{ totalPages }}</span>
+          <div class="page-controls">
+            <button (click)="prevPage()" [disabled]="currentPage === 1"><ion-icon name="chevron-back-outline"></ion-icon></button>
+            <button class="active">{{ currentPage }}</button>
+            <button (click)="nextPage()" [disabled]="currentPage === totalPages"><ion-icon name="chevron-forward-outline"></ion-icon></button>
+          </div>
         </div>
 
       </div>
