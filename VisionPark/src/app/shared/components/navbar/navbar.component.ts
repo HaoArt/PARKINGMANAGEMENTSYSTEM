@@ -1,17 +1,17 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import {
   IonHeader, IonToolbar, IonButtons, IonButton, IonIcon,
   IonAvatar, IonLabel, IonBadge, IonSearchbar, IonMenuButton,
-  IonPopover, IonContent, IonList, IonItem // <-- Bổ sung các thẻ này cho Dropdown Menu
+  IonPopover, IonContent, IonList, IonItem
 } from '@ionic/angular/standalone';
 import { NavController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { 
   searchOutline, notificationsOutline, personCircleOutline, 
-  logOutOutline, menuOutline, chevronDownOutline, personOutline 
+  logOutOutline, menuOutline, chevronDownOutline, personOutline, helpCircleOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -22,13 +22,18 @@ import {
   imports: [
     CommonModule, IonSearchbar, IonBadge, IonLabel, IonMenuButton,
     IonAvatar, IonHeader, IonToolbar, IonButtons, IonButton, IonIcon,
-    IonPopover, IonContent, IonList, IonItem // <-- Import vào đây
+    IonPopover, IonContent, IonList, IonItem
   ],
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit, OnDestroy {
   fullName: string = 'User';
   role: string = 'Security';
-  pageTitle: string = 'Tổng quan';
+  pageTitle: string = 'Tổng quan hệ thống';
+  
+  // BIẾN CHO ĐỒNG HỒ
+  isDashboard: boolean = false;
+  currentDate: string = '';
+  private clockInterval: any;
 
   private router = inject(Router);
   private navCtrl = inject(NavController);
@@ -42,12 +47,13 @@ export class NavbarComponent implements OnInit {
   };
 
   constructor() {
-    addIcons({ logOutOutline, searchOutline, notificationsOutline, personCircleOutline, menuOutline, chevronDownOutline, personOutline });
+    addIcons({ logOutOutline, searchOutline, notificationsOutline, personCircleOutline, menuOutline, chevronDownOutline, personOutline, helpCircleOutline });
   }
 
   ngOnInit() {
     this.updateUserInfo();
     this.updateTitle(this.router.url);
+    this.startClock(); // Khởi động đồng hồ
 
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -57,21 +63,39 @@ export class NavbarComponent implements OnInit {
     });
   }
 
+  ngOnDestroy() {
+    if (this.clockInterval) {
+      clearInterval(this.clockInterval); // Xóa bộ đếm khi hủy component
+    }
+  }
+
   updateUserInfo() {
-    this.fullName = localStorage.getItem('fullName') || 'User';
-    this.role = localStorage.getItem('userRole') || 'Security';
+    this.fullName = localStorage.getItem('fullName') || 'Admin Vision';
+    this.role = localStorage.getItem('userRole') || 'Quản trị viên';
   }
 
   updateTitle(url: string) {
     const cleanUrl = url.split('?')[0]; 
+    this.isDashboard = cleanUrl === '/dashboard'; // Nhận diện trang Dashboard
     this.pageTitle = this.pageTitles[cleanUrl] || 'VisionPark';
   }
 
-  // Nút Quản lý tài khoản
+  // LOGIC ĐỒNG HỒ CHẠY TỪNG GIÂY
+  startClock() {
+    const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+    this.updateClock(days);
+    this.clockInterval = setInterval(() => {
+      this.updateClock(days);
+    }, 1000);
+  }
+
+  updateClock(days: string[]) {
+    const now = new Date();
+    this.currentDate = `${days[now.getDay()]}, ${now.getDate().toString().padStart(2, '0')} Tháng ${(now.getMonth() + 1).toString().padStart(2, '0')}, ${now.getFullYear()} • ${now.toLocaleTimeString('vi-VN', { hour12: false })}`;
+  }
+
   manageAccount() {
     console.log('Mở trang Quản lý tài khoản');
-    // Mở comment dòng dưới khi bạn có trang Account
-    // this.navCtrl.navigateForward('/account'); 
   }
 
   logout() {

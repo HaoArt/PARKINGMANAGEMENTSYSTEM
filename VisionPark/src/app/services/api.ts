@@ -7,18 +7,25 @@ import { environment } from '@environments/environment';
   providedIn: 'root',
 })
 export class Api {
-  deleteUser(userID: number) {
-      throw new Error('Method not implemented.');
-  }
   private http = inject(HttpClient);
   private baseUrl = environment.apiUrl;
 
-  getCards(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/Card`);
+  getAllCards(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/Cards`);
   }
 
   createCard(cardData: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/Card`, cardData);
+    return this.http.post(`${this.baseUrl}/Cards`, cardData);
+  }
+
+  // Cập nhật thông tin thẻ
+  updateCard(cardId: number, cardData: any) {
+    return this.http.put(`${this.baseUrl}/Cards/${cardId}`, cardData);
+  }
+
+  // Xóa thẻ
+  deleteCard(cardId: number) {
+    return this.http.delete(`${this.baseUrl}/Cards/${cardId}`);
   }
   scanCard(cardUID: string): Observable<any> {
     return this.http.post(`${this.baseUrl}/Parking/scan-card`, { cardUID });
@@ -55,5 +62,32 @@ export class Api {
   }
   login(data: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/Auth/login`, data);
+  }
+  // Lấy danh sách nhân viên
+  getAllUsers(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/Users`);
+  }
+
+  // Thêm nhân viên
+  createUser(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/Users/create`, data);
+  }
+
+  // Sửa nhân viên
+  updateUser(id: number, data: any): Observable<any> {
+    return this.http.put(`${this.baseUrl}/Users/update/${id}`, data);
+  }
+
+  // Xóa nhân viên
+  deleteUser(id: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/Users/delete/${id}`);
+  }
+
+  getSettings(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/Settings`);
+  }
+
+  saveSettings(payload: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/Settings/update`, payload);
   }
 }

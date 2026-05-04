@@ -1,41 +1,56 @@
 /* ... Giữ nguyên các CSS cũ ở trên ... */
 
-  .search-box {
-    position: relative;
-    input { background: #f3f4f6; border: none; padding: 10px 16px 10px 36px; border-radius: 8px; font-size: 13px; font-weight: 600; outline: none; width: 250px; }
-    ion-icon { position: absolute; left: 12px; top: 12px; color: #9ca3af; font-size: 16px; }
-  }
-
-  /* CSS MỚI CHO BỘ LỌC */
-  .filter-box {
-    position: relative;
+.search-box {
+  position: relative;
+  input {
     background: #f3f4f6;
+    border: none;
+    padding: 10px 16px 10px 36px;
     border-radius: 8px;
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-    gap: 6px;
-
-    ion-icon {
-      color: #4b5563;
-      font-size: 16px;
-    }
-
-    select {
-      background: transparent;
-      border: none;
-      outline: none;
-      font-size: 13px;
-      font-weight: 700;
-      color: #4b5563;
-      cursor: pointer;
-      padding: 10px 0;
-      /* Ẩn mũi tên mặc định của trình duyệt */
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
-    }
+    font-size: 13px;
+    font-weight: 600;
+    outline: none;
+    width: 250px;
   }
+  ion-icon {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    color: #9ca3af;
+    font-size: 16px;
+  }
+}
+
+/* CSS MỚI CHO BỘ LỌC */
+.filter-box {
+  position: relative;
+  background: #f3f4f6;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 6px;
+
+  ion-icon {
+    color: #4b5563;
+    font-size: 16px;
+  }
+
+  select {
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 13px;
+    font-weight: 700;
+    color: #4b5563;
+    cursor: pointer;
+    padding: 10px 0;
+    /* Ẩn mũi tên mặc định của trình duyệt */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+}
 
 .dashboard-bg {
   --background: #f3f4f6;
@@ -45,14 +60,26 @@
   padding: 30px 40px;
   max-width: 1300px;
   margin: 0 auto;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
 }
 
 /* --- Header --- */
 .page-header {
   margin-bottom: 30px;
-  h2 { font-size: 28px; font-weight: 800; color: #111827; margin: 0 0 6px 0; }
-  p { color: #6b7280; font-size: 13px; font-weight: 500; margin: 0; }
+  h2 {
+    font-size: 28px;
+    font-weight: 800;
+    color: #111827;
+    margin: 0 0 6px 0;
+  }
+  p {
+    color: #6b7280;
+    font-size: 13px;
+    font-weight: 500;
+    margin: 0;
+  }
 }
 
 /* --- Thẻ Thống Kê --- */
@@ -74,79 +101,275 @@
   &.card-dark {
     background: #003399;
     box-shadow: 0 8px 20px rgba(0, 51, 153, 0.2);
-    .label { color: #93c5fd; }
-    .value, .unit { color: #ffffff; }
+    .label {
+      color: #93c5fd;
+    }
+    .value,
+    .unit {
+      color: #ffffff;
+    }
   }
 }
 
 .stat-info {
   display: flex;
   flex-direction: column;
-  &.full-width { width: 100%; }
+  &.full-width {
+    width: 100%;
+  }
 
-  .label { font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px; }
-  .value { font-size: 36px; font-weight: 900; color: #111827; line-height: 1; }
-  .unit { font-size: 14px; font-weight: 700; margin-top: 8px; }
-  
-  .value-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+  .label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+  }
+  .value {
+    font-size: 36px;
+    font-weight: 900;
+    color: #111827;
+    line-height: 1;
+  }
+  .unit {
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 8px;
+  }
 
-  .trend { font-size: 12px; font-weight: 700; margin-top: 12px; display: flex; align-items: center; gap: 4px; }
-  .trend.up { color: #10b981; }
-  .trend-text { font-size: 11px; font-weight: 600; color: #9ca3af; margin-top: 8px; }
+  .value-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+  }
 
-  .progress-bar { width: 100%; height: 6px; background: #f3f4f6; border-radius: 4px; overflow: hidden; }
-  .progress-fill { height: 100%; background: #059669; border-radius: 4px; transition: width 0.3s; }
+  .trend {
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .trend.up {
+    color: #10b981;
+  }
+  .trend-text {
+    font-size: 11px;
+    font-weight: 600;
+    color: #9ca3af;
+    margin-top: 8px;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #f3f4f6;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #059669;
+    border-radius: 4px;
+    transition: width 0.3s;
+  }
 }
 
 .stat-icon {
-  width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900;
-  &.icon-blue { background: #eff6ff; color: #3b82f6; }
-  &.icon-green { background: #064e3b; color: #ffffff; }
-  &.icon-transparent { background: rgba(255,255,255,0.1); color: #6ee7b7; border: 1px solid rgba(255,255,255,0.2); }
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 900;
+  &.icon-blue {
+    background: #eff6ff;
+    color: #3b82f6;
+  }
+  &.icon-green {
+    background: #064e3b;
+    color: #ffffff;
+  }
+  &.icon-transparent {
+    background: rgba(255, 255, 255, 0.1);
+    color: #6ee7b7;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
 }
 
 /* --- Bảng Dữ Liệu --- */
 .table-section {
-  background: #ffffff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
 }
 
 .table-header-row {
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;
-  h3 { font-size: 18px; font-weight: 800; color: #111827; margin: 0; }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  h3 {
+    font-size: 18px;
+    font-weight: 800;
+    color: #111827;
+    margin: 0;
+  }
 }
 
 .table-actions {
-  display: flex; gap: 12px;
+  display: flex;
+  gap: 12px;
   .search-box {
     position: relative;
-    input { background: #f3f4f6; border: none; padding: 10px 16px 10px 36px; border-radius: 8px; font-size: 13px; font-weight: 600; outline: none; width: 250px; }
-    ion-icon { position: absolute; left: 12px; top: 12px; color: #9ca3af; font-size: 16px; }
+    input {
+      background: #f3f4f6;
+      border: none;
+      padding: 10px 16px 10px 36px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      outline: none;
+      width: 250px;
+    }
+    ion-icon {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      color: #9ca3af;
+      font-size: 16px;
+    }
   }
-  .btn-filter { background: #f3f4f6; border: none; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; color: #4b5563; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .btn-filter {
+    background: #f3f4f6;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #4b5563;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
 }
 
 table {
-  width: 100%; border-collapse: collapse; text-align: left;
-  th { padding: 16px 10px; border-bottom: 1px solid #f3f4f6; font-size: 11px; font-weight: 800; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; }
-  td { padding: 16px 10px; border-bottom: 1px solid #f9fafb; font-size: 13px; }
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  th {
+    padding: 16px 10px;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 11px;
+    font-weight: 800;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  td {
+    padding: 16px 10px;
+    border-bottom: 1px solid #f9fafb;
+    font-size: 13px;
+  }
 }
 
-.nfc-col { font-weight: 700; color: #6b7280; }
-.plate-badge { background: #f3f4f6; padding: 6px 12px; border-radius: 6px; font-weight: 800; color: #111827; border: 1px solid #e5e7eb; }
-.type-col { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #4b5563; ion-icon { font-size: 18px; color: #9ca3af; } }
-.time-col { font-weight: 600; color: #6b7280; }
+.nfc-col {
+  font-weight: 700;
+  color: #6b7280;
+}
+.plate-badge {
+  background: #f3f4f6;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 800;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+}
+.type-col {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #4b5563;
+  ion-icon {
+    font-size: 18px;
+    color: #9ca3af;
+  }
+}
+.time-col {
+  font-weight: 600;
+  color: #6b7280;
+}
 
 .status-badge {
-  display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; border: 1px solid transparent;
-  .dot { width: 6px; height: 6px; border-radius: 50%; }
-  &.in { background: #ecfdf5; color: #10b981; border-color: #d1fae5; .dot { background: #10b981; } }
-  &.out { background: #f3f4f6; color: #6b7280; border-color: #e5e7eb; .dot { background: #9ca3af; } }
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  border: 1px solid transparent;
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+  &.in {
+    background: #ecfdf5;
+    color: #10b981;
+    border-color: #d1fae5;
+    .dot {
+      background: #10b981;
+    }
+  }
+  &.out {
+    background: #f3f4f6;
+    color: #6b7280;
+    border-color: #e5e7eb;
+    .dot {
+      background: #9ca3af;
+    }
+  }
 }
 
 .pagination {
-  display: flex; justify-content: space-between; align-items: center; margin-top: 20px;
-  .page-info { font-size: 12px; color: #9ca3af; font-weight: 500; }
-  .page-controls { display: flex; gap: 8px; }
-  button { border: none; background: transparent; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #6b7280; font-weight: 700; cursor: pointer; }
-  button.active { background: #111827; color: #ffffff; }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  .page-info {
+    font-size: 12px;
+    color: #9ca3af;
+    font-weight: 500;
+  }
+  .page-controls {
+    display: flex;
+    gap: 8px;
+  }
+  button {
+    border: none;
+    background: transparent;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  button.active {
+    background: #111827;
+    color: #ffffff;
+  }
 }

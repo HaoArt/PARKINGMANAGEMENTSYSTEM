@@ -12,12 +12,21 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-      <div class="bg-white rounded-[24px] p-7 shadow-[0_2px_15px_rgba(0,0,0,0.02)] flex flex-col justify-center">
+      <!-- CỘT 1: NHẬP/QUÉT THẺ -->
+      <div
+        class="bg-white rounded-[24px] p-7 shadow-[0_2px_15px_rgba(0,0,0,0.02)] flex flex-col justify-center"
+      >
         <div class="flex items-center gap-3 mb-6">
-          <div class="w-10 h-10 rounded-full bg-[#eff6ff] flex items-center justify-center text-[#3b82f6]">
+          <div
+            class="w-10 h-10 rounded-full bg-[#eff6ff] flex items-center justify-center text-[#3b82f6] cursor-pointer"
+            title="Bật kết nối NFC"
+            (click)="startNFC()"
+          >
             <ion-icon name="scan-outline" class="text-xl"></ion-icon>
           </div>
-          <h3 class="text-[18px] font-bold text-[#111827] m-0">Đầu Đọc Thẻ NFC</h3>
+          <h3 class="text-[18px] font-bold text-[#111827] m-0">
+            Đầu Đọc Thẻ NFC
+          </h3>
         </div>
 
         <div class="space-y-5">
@@ -27,80 +36,148 @@
           </p>
 
           <div>
-            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Mã thẻ NFC</label>
+            <label
+              class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2"
+              >Mã thẻ NFC</label
+            >
             <div class="relative">
-              <ion-icon name="id-card-outline" class="absolute left-3 top-3.5 text-gray-400 text-[18px]"></ion-icon>
-              <input type="text" placeholder="Chờ quẹt thẻ..."
-                class="w-full bg-[#f4f6f8] text-[#111827] text-[15px] border-none rounded-[12px] pl-10 pr-4 py-3.5 outline-none font-bold uppercase tracking-widest transition focus:ring-2 focus:ring-blue-100"
-                [(ngModel)]="inputNfcId" (keyup.enter)="onProcessCard(inputNfcId)" [disabled]="isLoading" />
+              <ion-icon
+                name="id-card-outline"
+                class="absolute left-3 top-3.5 text-gray-400 text-[18px]"
+              ></ion-icon>
+
+              <!-- ĐÃ XÓA PHẦN INPUT BỊ DƯ THỪA TRÙNG LẶP -->
+              <input
+                type="text"
+                placeholder="Chờ quẹt thẻ..."
+                class="w-full bg-[#f4f6f8] text-[#111827] text-[15px] border-none rounded-[12px] pl-10 pr-4 py-3.5 outline-none font-bold tracking-widest transition focus:ring-2 focus:ring-blue-100"
+                [(ngModel)]="inputNfcId"
+                (keyup.enter)="onProcessCard(inputNfcId)"
+                [disabled]="isLoading"
+              />
             </div>
           </div>
 
           <button
             class="w-full mt-2 bg-[#003399] hover:bg-[#002277] disabled:bg-gray-300 text-white font-bold text-[14px] py-4 rounded-[12px] transition-colors flex items-center justify-center gap-2 shadow-md shadow-blue-900/20 cursor-pointer"
-            (click)="onProcessCard(inputNfcId)" [disabled]="isLoading">
+            (click)="onProcessCard(inputNfcId)"
+            [disabled]="isLoading"
+          >
             <ion-icon name="radio-outline" class="text-lg"></ion-icon>
             {{ isLoading ? 'Đang xử lý...' : 'Xác thực thẻ' }}
           </button>
         </div>
       </div>
 
-      <div class="bg-white rounded-[24px] p-7 shadow-[0_2px_15px_rgba(0,0,0,0.02)] relative overflow-hidden">
-        <div *ngIf="scanResult" class="absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-10"
-          [ngClass]="scanResult.isSuccess ? 'bg-green-500' : 'bg-red-500'"></div>
+      <!-- CỘT 2: KẾT QUẢ QUÉT THẺ -->
+      <div
+        class="bg-white rounded-[24px] p-7 shadow-[0_2px_15px_rgba(0,0,0,0.02)] relative overflow-hidden"
+      >
+        <div
+          *ngIf="scanResult"
+          class="absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-10"
+          [ngClass]="scanResult.isSuccess ? 'bg-green-500' : 'bg-red-500'"
+        ></div>
 
         <div class="flex items-center gap-3 mb-6 relative z-10">
-          <div class="w-10 h-10 rounded-full flex items-center justify-center border"
-            [ngClass]="scanResult ? (scanResult.isSuccess ? 'bg-[#f0fdf4] text-[#22c55e] border-green-100' : 'bg-red-50 text-red-500 border-red-100') : 'bg-[#f8f9fa] text-gray-400 border-gray-100'">
+          <div
+            class="w-10 h-10 rounded-full flex items-center justify-center border"
+            [ngClass]="scanResult ? (scanResult.isSuccess ? 'bg-[#f0fdf4] text-[#22c55e] border-green-100' : 'bg-red-50 text-red-500 border-red-100') : 'bg-[#f8f9fa] text-gray-400 border-gray-100'"
+          >
             <ion-icon
               [name]="scanResult ? (scanResult.isSuccess ? 'checkmark-circle-outline' : 'close-circle-outline') : 'information-circle-outline'"
-              class="text-xl"></ion-icon>
+              class="text-xl"
+            ></ion-icon>
           </div>
           <div>
-            <h3 class="text-[18px] font-bold text-[#111827] m-0">Thông Tin Vé</h3>
-            <p *ngIf="scanResult" class="text-[12px] font-bold mt-1"
-              [ngClass]="scanResult.isSuccess ? 'text-green-600' : 'text-red-500'">
+            <h3 class="text-[18px] font-bold text-[#111827] m-0">
+              Thông Tin Vé
+            </h3>
+            <p
+              *ngIf="scanResult"
+              class="text-[12px] font-bold mt-1"
+              [ngClass]="scanResult.isSuccess ? 'text-green-600' : 'text-red-500'"
+            >
               {{ scanResult.message }}
             </p>
           </div>
         </div>
 
-        <div *ngIf="!scanResult" class="flex flex-col items-center justify-center h-[200px] text-gray-400">
-          <ion-icon name="card-outline" class="text-4xl mb-3 opacity-50"></ion-icon>
+        <div
+          *ngIf="!scanResult"
+          class="flex flex-col items-center justify-center h-[200px] text-gray-400"
+        >
+          <ion-icon
+            name="card-outline"
+            class="text-4xl mb-3 opacity-50"
+          ></ion-icon>
           <p class="text-[13px] font-medium">Chưa có dữ liệu thẻ</p>
         </div>
 
         <div *ngIf="scanResult" class="space-y-4 relative z-10 animate-fade-in">
           <div class="bg-[#f8f9fa] rounded-[16px] p-5 border border-gray-100">
-            <div class="flex justify-between items-center mb-3 pb-3 border-b border-gray-200">
-              <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Chủ thẻ</span>
-              <span class="text-[14px] font-black text-[#003399]">{{ scanResult.customerName }}</span>
+            <div
+              class="flex justify-between items-center mb-3 pb-3 border-b border-gray-200"
+            >
+              <span
+                class="text-[11px] font-bold text-gray-500 uppercase tracking-wider"
+                >Chủ thẻ</span
+              >
+              <span class="text-[14px] font-black text-[#003399]"
+                >{{ scanResult.customerName }}</span
+              >
             </div>
 
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Biển số xe</span>
-                <span class="inline-block bg-white border border-gray-200 px-3 py-1 rounded-md text-[13px] font-bold text-gray-800 tracking-widest uppercase shadow-sm">
+                <span
+                  class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1"
+                  >Biển số xe</span
+                >
+                <span
+                  class="inline-block bg-white border border-gray-200 px-3 py-1 rounded-md text-[13px] font-bold text-gray-800 tracking-widest uppercase shadow-sm"
+                >
                   {{ scanResult.plateNumber }}
                 </span>
               </div>
               <div class="text-right">
-                <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Loại xe</span>
-                <span class="text-[13px] font-bold text-gray-700">{{ scanResult.vehicleType }}</span>
+                <span
+                  class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1"
+                  >Loại xe</span
+                >
+                <span class="text-[13px] font-bold text-gray-700"
+                  >{{ scanResult.vehicleType }}</span
+                >
               </div>
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
-            <div class="bg-[#fcfcfd] border border-gray-100 rounded-[12px] p-4 text-center">
-              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Hạn sử dụng</span>
-              <span class="text-[13px] font-bold" [ngClass]="scanResult.status === 'Đã hết hạn' ? 'text-red-500' : 'text-gray-700'">
+            <div
+              class="bg-[#fcfcfd] border border-gray-100 rounded-[12px] p-4 text-center"
+            >
+              <span
+                class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1"
+                >Hạn sử dụng</span
+              >
+              <span
+                class="text-[13px] font-bold"
+                [ngClass]="scanResult.status === 'Đã hết hạn' ? 'text-red-500' : 'text-gray-700'"
+              >
                 {{ scanResult.expiryDate }}
               </span>
             </div>
-            <div class="bg-[#fcfcfd] border border-gray-100 rounded-[12px] p-4 text-center">
-              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Trạng thái vé</span>
-              <span class="text-[13px] font-bold" [ngClass]="scanResult.status === 'Hợp lệ' ? 'text-green-600' : 'text-red-500'">
+            <div
+              class="bg-[#fcfcfd] border border-gray-100 rounded-[12px] p-4 text-center"
+            >
+              <span
+                class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1"
+                >Trạng thái vé</span
+              >
+              <span
+                class="text-[13px] font-bold"
+                [ngClass]="scanResult.status === 'Hợp lệ' ? 'text-green-600' : 'text-red-500'"
+              >
                 {{ scanResult.status }}
               </span>
             </div>
@@ -109,63 +186,147 @@
       </div>
     </div>
 
-    <div class="bg-white p-7 rounded-[24px] shadow-[0_2px_15px_rgba(0,0,0,0.02)]">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h3 class="text-[16px] font-bold text-[#111827] m-0">Lịch sử Giao dịch</h3>
+    <!-- BẢNG LỊCH SỬ GIAO DỊCH DƯỚI CÙNG -->
+    <div
+      class="bg-white p-7 rounded-[24px] shadow-[0_2px_15px_rgba(0,0,0,0.02)]"
+    >
+      <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4"
+      >
+        <h3 class="text-[16px] font-bold text-[#111827] m-0">
+          Lịch sử Giao dịch
+        </h3>
 
         <div class="flex gap-3 w-full md:w-auto">
           <div class="relative">
-            <select class="bg-[#f4f6f8] text-gray-600 text-[12px] border-none rounded-[10px] pl-4 pr-9 py-2.5 outline-none font-medium appearance-none cursor-pointer"
-              [(ngModel)]="filterConfig.status" (change)="applyFilters()">
+            <select
+              class="bg-[#f4f6f8] text-gray-600 text-[12px] border-none rounded-[10px] pl-4 pr-9 py-2.5 outline-none font-medium appearance-none cursor-pointer"
+              [(ngModel)]="filterConfig.status"
+              (change)="applyFilters()"
+            >
               <option value="all">Tất cả trạng thái</option>
               <option value="In">Trong bãi</option>
               <option value="Out">Đã ra</option>
             </select>
-            <ion-icon name="chevron-down-outline" class="absolute right-3 top-3 text-gray-400 text-[14px]"></ion-icon>
+            <ion-icon
+              name="chevron-down-outline"
+              class="absolute right-3 top-3 text-gray-400 text-[14px]"
+            ></ion-icon>
           </div>
 
           <div class="relative w-full md:w-[220px]">
-            <input type="text" placeholder="Tìm biển số..."
+            <input
+              type="text"
+              placeholder="Tìm biển số..."
               class="w-full bg-[#f4f6f8] text-gray-700 text-[12px] border-none rounded-[10px] pl-9 pr-3 py-2.5 outline-none font-medium"
-              [(ngModel)]="filterConfig.plateNumber" (input)="applyFilters()" />
-            <ion-icon name="search-outline" class="absolute left-3 top-2.5 text-gray-400 text-[16px]"></ion-icon>
+              [(ngModel)]="filterConfig.plateNumber"
+              (input)="applyFilters()"
+            />
+            <ion-icon
+              name="search-outline"
+              class="absolute left-3 top-2.5 text-gray-400 text-[16px]"
+            ></ion-icon>
           </div>
         </div>
       </div>
 
-      <div *ngIf="parkingHistory.length === 0" class="py-16 flex flex-col items-center justify-center text-center">
-        <div class="w-16 h-16 bg-[#f4f6f8] rounded-full flex items-center justify-center mb-4 text-gray-400">
+      <div
+        *ngIf="parkingHistory.length === 0"
+        class="py-16 flex flex-col items-center justify-center text-center"
+      >
+        <div
+          class="w-16 h-16 bg-[#f4f6f8] rounded-full flex items-center justify-center mb-4 text-gray-400"
+        >
           <ion-icon name="document-text-outline" class="text-3xl"></ion-icon>
         </div>
-        <h4 class="text-[15px] font-bold text-[#111827] m-0 mb-1.5">Chưa có dữ liệu</h4>
-        <p class="text-[13px] text-gray-500 m-0">Không tìm thấy bản ghi giao dịch nào.</p>
+        <h4 class="text-[15px] font-bold text-[#111827] m-0 mb-1.5">
+          Chưa có dữ liệu
+        </h4>
+        <p class="text-[13px] text-gray-500 m-0">
+          Không tìm thấy bản ghi giao dịch nào.
+        </p>
       </div>
 
       <div *ngIf="parkingHistory.length > 0" class="overflow-x-auto">
         <table class="w-full text-left border-collapse whitespace-nowrap">
           <thead>
             <tr>
-              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-2">Mã NFC</th>
-              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center">Loại xe</th>
-              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center bg-blue-50/50 rounded-tl-lg">Biển VÀO</th>
-              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center bg-blue-50/50">Giờ VÀO</th>
-              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center bg-gray-50/50">Biển RA</th>
-              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center bg-gray-50/50 rounded-tr-lg">Giờ RA</th>
-              <th class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center pr-2">Trạng thái</th>
+              <th
+                class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-2"
+              >
+                Mã NFC
+              </th>
+              <th
+                class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center"
+              >
+                Loại xe
+              </th>
+              <th
+                class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center bg-blue-50/50 rounded-tl-lg"
+              >
+                Biển VÀO
+              </th>
+              <th
+                class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center bg-blue-50/50"
+              >
+                Giờ VÀO
+              </th>
+              <th
+                class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center bg-gray-50/50"
+              >
+                Biển RA
+              </th>
+              <th
+                class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center bg-gray-50/50 rounded-tr-lg"
+              >
+                Giờ RA
+              </th>
+              <th
+                class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center pr-2"
+              >
+                Trạng thái
+              </th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let item of parkingHistory" class="border-b border-gray-50 hover:bg-[#f4f6f8]/50 transition-colors">
-              <td class="py-4 text-[12px] font-bold text-[#374151] pl-2">{{ item.nfcId }}</td>
-              <td class="py-4 text-[12px] font-medium text-gray-500 text-center">{{ item.vehicleType }}</td>
-              <td class="py-4 text-[12px] font-bold text-[#003399] text-center bg-blue-50/20">{{ item.plateNumberIn }}</td>
-              <td class="py-4 text-[12px] font-medium text-gray-600 text-center bg-blue-50/20">{{ item.checkInTime }}</td>
-              <td class="py-4 text-[12px] font-bold text-gray-700 text-center bg-gray-50/30" [ngClass]="item.plateNumberOut === 'N/A' || item.plateNumberOut === '---' ? 'opacity-40' : ''">{{ item.plateNumberOut }}</td>
-              <td class="py-4 text-[12px] font-medium text-gray-500 text-center bg-gray-50/30" [ngClass]="item.checkOutTime === 'Chưa ra khỏi bãi' ? 'italic text-[11px] opacity-60' : ''">{{ item.checkOutTime }}</td>
+            <tr
+              *ngFor="let item of parkingHistory"
+              class="border-b border-gray-50 hover:bg-[#f4f6f8]/50 transition-colors"
+            >
+              <td class="py-4 text-[12px] font-bold text-[#374151] pl-2">
+                {{ item.nfcId }}
+              </td>
+              <td
+                class="py-4 text-[12px] font-medium text-gray-500 text-center"
+              >
+                {{ item.vehicleType }}
+              </td>
+              <td
+                class="py-4 text-[12px] font-bold text-[#003399] text-center bg-blue-50/20"
+              >
+                {{ item.plateNumberIn }}
+              </td>
+              <td
+                class="py-4 text-[12px] font-medium text-gray-600 text-center bg-blue-50/20"
+              >
+                {{ item.checkInTime }}
+              </td>
+              <td
+                class="py-4 text-[12px] font-bold text-gray-700 text-center bg-gray-50/30"
+                [ngClass]="item.plateNumberOut === 'N/A' || item.plateNumberOut === '---' ? 'opacity-40' : ''"
+              >
+                {{ item.plateNumberOut }}
+              </td>
+              <td
+                class="py-4 text-[12px] font-medium text-gray-500 text-center bg-gray-50/30"
+                [ngClass]="item.checkOutTime === 'Chưa ra khỏi bãi' ? 'italic text-[11px] opacity-60' : ''"
+              >
+                {{ item.checkOutTime }}
+              </td>
               <td class="py-4 text-center pr-2">
-                <span [class]="item.status === 'In' 
-                  ? 'bg-[#eff6ff] text-[#3b82f6] border border-blue-100 px-3 py-1.5 rounded-full text-[10px] font-bold inline-block min-w-[75px] text-center' 
-                  : 'bg-[#f0fdf4] text-[#22c55e] border border-green-100 px-3 py-1.5 rounded-full text-[10px] font-bold inline-block min-w-[75px] text-center'">
+                <span
+                  [class]="item.status === 'In' ? 'bg-[#eff6ff] text-[#3b82f6] border border-blue-100 px-3 py-1.5 rounded-full text-[10px] font-bold inline-block min-w-[75px] text-center' : 'bg-[#f0fdf4] text-[#22c55e] border border-green-100 px-3 py-1.5 rounded-full text-[10px] font-bold inline-block min-w-[75px] text-center'"
+                >
                   {{ item.status === 'In' ? 'Trong bãi' : 'Đã ra' }}
                 </span>
               </td>

@@ -1,5 +1,5 @@
 .custom-bg {
-  --background: #f4f6f8;
+  --background: #f8fafc; // Nền sáng hơn, sạch sẽ
 }
 
 // Header
@@ -7,32 +7,39 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 24px; // Tăng khoảng cách
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 16px;
 
   .page-title {
-    font-size: 1.5rem;
+    font-size: 1.75rem; // To, rõ ràng
     font-weight: 700;
-    color: #1f2937;
+    color: #1e293b; // Màu chữ đậm
     margin: 0;
   }
 
   .btn-export {
+    --background: #2563eb; // Dùng màu xanh chủ đạo
+    --background-hover: #1d4ed8;
+    --color: white;
     text-transform: none;
     font-weight: 600;
-    --box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+    --border-radius: 8px;
+    --box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
   }
 }
 
 // Card Bộ Lọc
 .filter-card {
   border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
-  
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+
   .custom-input {
-    --background: #f9fafb;
+    --background: #f8fafc;
+    --border-color: #e2e8f0;
     --border-radius: 8px;
+    --placeholder-color: #94a3b8;
     margin: 4px 0;
   }
 
@@ -47,7 +54,7 @@
 .table-wrapper {
   background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   overflow: hidden;
 
   .custom-table {
@@ -55,25 +62,27 @@
 
     .table-header {
       background: #f8fafc;
-      border-bottom: 2px solid #e2e8f0;
+      border-bottom: 1px solid #e2e8f0;
       font-weight: 600;
       color: #475569;
-      padding: 12px 16px;
-      font-size: 0.9rem;
+      padding: 14px 20px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .table-row {
-      padding: 12px 16px;
+      padding: 14px 20px;
       border-bottom: 1px solid #f1f5f9;
       align-items: center;
-      transition: all 0.2s ease;
+      transition: background-color 0.2s ease;
 
       &:hover {
-        background-color: #f8fafc;
+        background-color: #f0f9ff; // Hover màu xanh dương rất nhạt
       }
 
-      &:nth-child(even) {
-        background-color: #fcfcfd;
+      &:last-child {
+        border-bottom: none;
       }
 
       ion-col {
@@ -87,9 +96,12 @@
 
   // Tùy chỉnh các thành phần trong bảng
   .status-badge {
-    padding: 6px 10px;
-    border-radius: 6px;
+    padding: 5px 10px;
+    border-radius: 999px; // Bo tròn
     font-weight: 600;
+    font-size: 0.75rem;
+    background-color: #eef2ff; // Nền màu xanh indigo nhạt
+    color: #4338ca; // Chữ màu indigo đậm
   }
 
   .nfc-text {
@@ -98,18 +110,18 @@
   }
 
   .plate-style {
-    background: #0f172a;
-    color: #ffffff;
-    padding: 4px 10px;
+    background: #1e293b; // Nền xanh đen (slate-800)
+    color: #e2e8f0; // Chữ màu sáng (slate-200)
+    padding: 6px 12px;
     border-radius: 6px;
-    font-family: "Courier New", Courier, monospace;
-    font-weight: bold;
-    letter-spacing: 1.5px;
-    border: 2px solid #cbd5e1;
+    font-family: "Roboto Mono", monospace; // Font hiện đại
+    font-weight: 700;
+    letter-spacing: 1px;
+    border: none;
   }
 
   .time-icon {
-    margin-right: 6px;
+    margin-right: 8px;
     color: #94a3b8;
   }
 
@@ -123,18 +135,19 @@
 // Trạng thái trống
 .empty-state {
   text-align: center;
-  padding: 40px 20px;
+  padding: 50px 20px;
   color: #94a3b8;
 
   ion-icon {
-    font-size: 48px;
-    margin-bottom: 10px;
-    color: #cbd5e1;
+    font-size: 56px;
+    margin-bottom: 16px;
+    color: #dbeafe; // Màu xanh da trời nhạt
   }
 
   p {
     margin: 0;
     font-size: 1rem;
+    font-weight: 500;
   }
 }
 
@@ -148,9 +161,9 @@
     flex-direction: column;
     padding: 16px;
     border: 1px solid #e2e8f0;
-    margin: 10px;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    margin: 12px 8px; // Thêm margin
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04);
     background: #fff !important; // Bỏ zebra stripe trên mobile
 
     ion-col {

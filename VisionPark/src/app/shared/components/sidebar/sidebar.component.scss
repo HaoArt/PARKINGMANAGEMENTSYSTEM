@@ -1,78 +1,152 @@
 .custom-sidebar {
-  --width: 240px; /* Đồng bộ 170px */
-  border-right: 1px solid #f3f4f6;
+  --width: 250px; // Tăng nhẹ chiều rộng cho thoáng
+  border-right: 1px solid #e5e7eb; // Màu border nhẹ hơn
 }
 
 .sidebar-header {
-  padding: 24px 12px;
+  padding: 24px 16px;
+  text-align: center;
 
-  .logo-text { 
-    font-size: 14px; 
-    font-weight: 900; 
-    color: #003399; 
-    letter-spacing: 0.5px; 
-    margin: 0; 
-    text-transform: uppercase; 
-    text-align: center;
+  .logo-text {
+    font-size: 1.25rem; // 20px
+    font-weight: 800;
+    color: #2563eb; // Màu xanh chủ đạo mới
+    letter-spacing: -0.5px;
+    margin: 0;
+    text-transform: uppercase;
   }
 }
 
 .menu-list {
-  padding: 10px 12px; /* Tăng khoảng trống 2 bên */
-  
-  .menu-item {
-    display: flex; 
-    align-items: center; 
-    gap: 10px; 
-    padding: 12px; 
-    border-radius: 8px; 
-    margin-bottom: 4px; 
-    cursor: pointer; 
-    transition: all 0.2s;
+  padding: 8px 16px;
 
-    ion-icon { font-size: 16px; color: #9ca3af; min-width: 16px; }
-    
-    /* Chữ tăng lên 10px để dễ đọc hơn */
-    span { 
-      font-size: 10px; 
-      font-weight: 800; 
-      color: #6b7280; 
-      text-transform: uppercase; 
-      letter-spacing: 0.5px; 
-      white-space: nowrap; 
-      overflow: hidden; 
-      text-overflow: ellipsis; 
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 10px; // Bo tròn hơn
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.25s ease-in-out;
+
+    ion-icon {
+      font-size: 20px; // Icon to hơn
+      color: #6b7280;
+      min-width: 20px;
+      transition: all 0.2s ease;
     }
-    
-    &:hover { background: #f9fafb; span { color: #111827; } }
-    
-    &.active { 
-      background: #003399; 
-      box-shadow: 0 4px 10px rgba(0, 51, 153, 0.2); 
-      ion-icon, span { color: #ffffff; } 
+
+    span {
+      font-size: 0.875rem; // 14px, dễ đọc hơn
+      font-weight: 600; // Bớt đậm, thanh thoát hơn
+      color: #4b5563;
+      text-transform: none; // Bỏ uppercase cho thân thiện
+      letter-spacing: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: all 0.2s ease;
+    }
+
+    &:hover {
+      background: #eff6ff; // Màu xanh rất nhạt khi hover
+      span {
+        color: #1d4ed8;
+      }
+      ion-icon {
+        color: #1d4ed8;
+      }
+    }
+
+    &.active {
+      background: linear-gradient(
+        90deg,
+        #2563eb,
+        #3b82f6
+      ); // Gradient năng động
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      transform: translateY(-2px); // Hiệu ứng nổi lên
+
+      ion-icon,
+      span {
+        color: #ffffff;
+        font-weight: 700; // In đậm chữ khi active
+      }
     }
   }
 }
 
 .sidebar-footer {
-  padding: 16px 12px; 
-  
-  .btn-export { 
-    width: 100%; background: #003399; color: white; border: none; 
-    padding: 12px; border-radius: 8px; font-size: 11px; font-weight: 700; 
-    cursor: pointer; margin-bottom: 16px; transition: 0.2s; 
-    box-shadow: 0 4px 12px rgba(0, 51, 153, 0.2); 
+  padding: 20px 16px;
+
+  .btn-export {
+    width: 100%;
+    background: #1e40af; // Màu xanh đậm hơn
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 0.875rem; // 14px
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25);
   }
-  .btn-export:hover { background: #002277; }
-  
+  .btn-export:hover {
+    background: #1c3899;
+    transform: translateY(-1px);
+  }
+
   .footer-links {
-    display: flex; flex-direction: column; gap: 12px;
-    a { 
-      display: flex; align-items: center; gap: 8px; text-decoration: none; 
-      font-size: 10px; font-weight: 800; color: #6b7280; text-transform: uppercase; transition: 0.2s; 
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      ion-icon { font-size: 18px; min-width: 18px; } 
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      font-size: 0.8rem; // 12.8px
+      font-weight: 600;
+      color: #6b7280;
+      text-transform: none; // Bỏ uppercase
+      transition: color 0.2s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      ion-icon {
+        font-size: 20px;
+        min-width: 20px;
+      }
     }
-    a:hover { color: #111827; }
+    a:hover {
+      color: #2563eb;
+    }
   }
+}
+/* Ẩn thanh cuộn cho thẻ ion-content trong Sidebar */
+ion-content {
+  &::part(scroll) {
+    /* Ẩn trên Chrome, Safari và Opera */
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    /* Ẩn trên IE, Edge */
+    -ms-overflow-style: none;
+    /* Ẩn trên Firefox */
+    scrollbar-width: none;
+  }
+}
+
+/* Nếu bạn dùng thẻ div thường (không phải ion-content) làm container */
+.sidebar-container,
+.menu-list,
+:host {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

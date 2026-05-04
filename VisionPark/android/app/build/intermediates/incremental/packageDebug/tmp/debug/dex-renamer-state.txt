@@ -1,7 +1,9 @@
-#Mon Apr 20 17:50:43 ICT 2026
+#Mon May 04 14:03:44 ICT 2026
 base.0=D\:\\ParkingManagementSystem\\VisionPark\\android\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
-base.1=D\:\\ParkingManagementSystem\\VisionPark\\android\\app\\build\\intermediates\\dex\\debug\\mergeLibDexDebug\\14\\classes.dex
-base.2=D\:\\ParkingManagementSystem\\VisionPark\\android\\app\\build\\intermediates\\dex\\debug\\mergeLibDexDebug\\15\\classes.dex
+base.1=D\:\\ParkingManagementSystem\\VisionPark\\android\\app\\build\\intermediates\\dex\\debug\\mergeLibDexDebug\\10\\classes.dex
+base.10=D\:\\ParkingManagementSystem\\VisionPark\\android\\app\\build\\intermediates\\dex\\debug\\mergeLibDexDebug\\15\\classes.dex
+base.11=D\:\\ParkingManagementSystem\\VisionPark\\android\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes2.dex
+base.2=D\:\\ParkingManagementSystem\\VisionPark\\android\\app\\build\\intermediates\\dex\\debug\\mergeLibDexDebug\\14\\classes.dex
 base.3=D\:\\ParkingManagementSystem\\VisionPark\\android\\app\\build\\intermediates\\dex\\debug\\mergeLibDexDebug\\2\\classes.dex
 base.4=D\:\\ParkingManagementSystem\\VisionPark\\android\\app\\build\\intermediates\\dex\\debug\\mergeLibDexDebug\\4\\classes.dex
 base.5=D\:\\ParkingManagementSystem\\VisionPark\\android\\app\\build\\intermediates\\dex\\debug\\mergeLibDexDebug\\5\\classes.dex
@@ -10,8 +12,10 @@ base.7=D\:\\ParkingManagementSystem\\VisionPark\\android\\app\\build\\intermedia
 base.8=D\:\\ParkingManagementSystem\\VisionPark\\android\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
 base.9=D\:\\ParkingManagementSystem\\VisionPark\\android\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\7\\classes.dex
 path.0=classes.dex
-path.1=14/classes.dex
-path.2=15/classes.dex
+path.1=10/classes.dex
+path.10=15/classes.dex
+path.11=classes2.dex
+path.2=14/classes.dex
 path.3=2/classes.dex
 path.4=4/classes.dex
 path.5=5/classes.dex
@@ -21,6 +25,8 @@ path.8=0/classes.dex
 path.9=7/classes.dex
 renamed.0=classes.dex
 renamed.1=classes2.dex
+renamed.10=classes11.dex
+renamed.11=classes12.dex
 renamed.2=classes3.dex
 renamed.3=classes4.dex
 renamed.4=classes5.dex

@@ -1,0 +1,173 @@
+<ion-content class="app-bg">
+  <app-navbar></app-navbar>
+
+  <div class="page-container">
+    <div class="page-header">
+      <h2>Quản lý Kho Thẻ NFC</h2>
+      <p>Thêm mới, chỉnh sửa, khóa hoặc xóa thẻ từ khỏi hệ thống.</p>
+    </div>
+
+    <div class="split-layout">
+      <!-- CỘT TRÁI: FORM THÔNG TIN THẺ -->
+      <div class="gray-panel">
+        <h3 class="panel-title">
+          {{ isEditing ? 'Cập nhật thẻ #' + editingCardId : 'Đăng ký thẻ mới' }}
+        </h3>
+
+        <div class="form-group mt-6">
+          <label>MÃ THẺ UID (NFC)</label>
+          <div class="input-box">
+            <input
+              type="text"
+              placeholder="Chạm thẻ vào mặt lưng..."
+              [(ngModel)]="cardForm.cardUID"
+              readonly
+            />
+            <div class="icon-btn blue-icon" title="Đang chờ quét thẻ...">
+              <ion-icon name="wifi-outline" class="animate-pulse"></ion-icon>
+            </div>
+          </div>
+          <p *ngIf="!isEditing" class="text-xs text-gray-500 mt-2 italic">
+            *Hệ thống đang tự động lắng nghe thẻ NFC.
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label>PHÂN LOẠI THẺ</label>
+          <div class="input-box">
+            <select [(ngModel)]="cardForm.cardType">
+              <option value="Guest">Thẻ Lượt (Khách vãng lai)</option>
+              <option value="Monthly">Thẻ Tháng (Cố định)</option>
+              <option value="VIP">Thẻ VIP</option>
+            </select>
+            <ion-icon
+              name="chevron-down-outline"
+              class="dropdown-icon"
+            ></ion-icon>
+          </div>
+        </div>
+
+        <!-- Chỉ hiện chọn Trạng Thái khi Đang Edit để Admin có thể Khóa thẻ -->
+        <div class="form-group" *ngIf="isEditing">
+          <label>TRẠNG THÁI HOẠT ĐỘNG</label>
+          <div class="input-box">
+            <select [(ngModel)]="cardForm.status">
+              <option value="Active">Đang hoạt động (Active)</option>
+              <option value="Inactive">Khóa (Inactive/Locked)</option>
+            </select>
+            <ion-icon
+              name="chevron-down-outline"
+              class="dropdown-icon"
+            ></ion-icon>
+          </div>
+        </div>
+
+        <div class="flex gap-3 mt-4">
+          <button
+            *ngIf="isEditing"
+            class="submit-btn"
+            style="background: #94a3b8; flex: 1"
+            (click)="cancelEdit()"
+          >
+            <ion-icon name="close-outline"></ion-icon> Hủy
+          </button>
+
+          <button
+            class="submit-btn"
+            style="flex: 2"
+            (click)="saveCard()"
+            [disabled]="isSubmitting || !cardForm.cardUID"
+          >
+            <ion-icon
+              [name]="isEditing ? 'save-outline' : 'add-circle-outline'"
+            ></ion-icon>
+            {{ isSubmitting ? 'Đang xử lý...' : (isEditing ? 'Cập nhật' : 'Lưu
+            thẻ') }}
+          </button>
+        </div>
+      </div>
+
+      <!-- CỘT PHẢI: DANH SÁCH THẺ TRONG HỆ THỐNG -->
+      <div class="gray-panel">
+        <div class="panel-header">
+          <h3 class="panel-title">Kho thẻ hiện tại</h3>
+          <div class="filter-btn">
+            <ion-icon
+              name="refresh-outline"
+              class="cursor-pointer text-lg text-blue-600 hover:text-blue-800"
+              (click)="loadSystemCards()"
+              title="Làm mới"
+            ></ion-icon>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>MÃ UID</th>
+                <th>LOẠI THẺ</th>
+                <th class="text-center">TRẠNG THÁI</th>
+                <th class="text-right">THAO TÁC</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                class="row-card"
+                *ngFor="let item of systemCards"
+                [class.bg-blue-50]="editingCardId === item.cardID"
+              >
+                <td class="font-bold text-gray-500">#{{ item.cardID }}</td>
+                <td class="nfc-col font-mono">{{ item.cardUID }}</td>
+                <td class="font-bold text-gray-700">
+                  {{ item.cardType === 'Guest' ? 'Thẻ Lượt' : (item.cardType ===
+                  'Monthly' ? 'Thẻ Tháng' : 'VIP') }}
+                </td>
+                <td class="status-col text-center">
+                  <span
+                    class="badge"
+                    [class.active]="item.status === 'Active'"
+                    [class.inactive]="item.status !== 'Active'"
+                  >
+                    {{ item.status === 'Active' ? 'Sẵn sàng' : 'Đã Khóa' }}
+                  </span>
+                </td>
+                <!-- NÚT SỬA VÀ XÓA -->
+                <td class="text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <button
+                      class="p-2 text-blue-600 hover:bg-blue-100 rounded-md transition"
+                      title="Sửa"
+                      (click)="editCard(item)"
+                    >
+                      <ion-icon
+                        name="create-outline"
+                        class="text-lg"
+                      ></ion-icon>
+                    </button>
+                    <button
+                      class="p-2 text-red-500 hover:bg-red-50 rounded-md transition"
+                      title="Xóa"
+                      (click)="deleteCard(item.cardID)"
+                    >
+                      <ion-icon name="trash-outline" class="text-lg"></ion-icon>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr *ngIf="systemCards.length === 0 && !isLoading">
+                <td colspan="5" class="empty-state">
+                  <ion-icon name="cube-outline" class="text-4xl mb-2"></ion-icon
+                  ><br />
+                  Chưa có thẻ nào trong kho.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>

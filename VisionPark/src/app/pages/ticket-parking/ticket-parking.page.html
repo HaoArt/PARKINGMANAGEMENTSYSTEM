@@ -2,22 +2,29 @@
   <app-navbar></app-navbar>
 
   <div class="page-container">
-    
     <div class="page-header">
       <h2>Phát hành Thẻ VisionPark</h2>
       <p>Nhập thông tin chi tiết để cấp phát thẻ NFC mới cho phương tiện.</p>
     </div>
 
     <div class="split-layout">
-      
+      <!-- BẢNG TẠO THẺ MỚI -->
       <div class="gray-panel">
         <h3 class="panel-title">Phát hành thẻ mới</h3>
 
         <div class="form-group">
           <label>MÃ THẺ NFC</label>
           <div class="input-box">
-            <input type="text" placeholder="Quẹt thẻ hoặc nhập mã..." [(ngModel)]="regData.cardUID">
-            <div class="icon-btn blue-icon" title="Quét thẻ">
+            <input
+              type="text"
+              placeholder="Quẹt thẻ hoặc nhập mã..."
+              [(ngModel)]="regData.cardUID"
+            />
+            <div
+              class="icon-btn blue-icon"
+              title="Quét thẻ"
+              (click)="startNFC()"
+            >
               <ion-icon name="scan-outline"></ion-icon>
             </div>
           </div>
@@ -31,41 +38,73 @@
               <option [value]="3">Vé quý</option>
               <option [value]="12">Vé năm</option>
             </select>
-            <ion-icon name="chevron-down-outline" class="dropdown-icon"></ion-icon>
+            <ion-icon
+              name="chevron-down-outline"
+              class="dropdown-icon"
+            ></ion-icon>
           </div>
         </div>
 
         <div class="form-group">
           <label>HỌ VÀ TÊN CHỦ XE</label>
           <div class="input-box">
-            <input type="text" placeholder="Nhập họ và tên..." [(ngModel)]="regData.customerName">
+            <input
+              type="text"
+              placeholder="Nhập họ và tên..."
+              [(ngModel)]="regData.customerName"
+            />
           </div>
         </div>
 
         <div class="form-group">
           <label>BIỂN SỐ XE</label>
           <div class="input-box">
-            <input type="text" placeholder="VD: 51H-123.45" [(ngModel)]="regData.registerPlate">
-            
-            <input type="file" #fileInput class="hidden" accept="image/*" capture="environment" (change)="onFileSelected($event)">
-            <div class="icon-btn gray-icon" (click)="fileInput.click()" title="Chụp ảnh AI">
+            <input
+              type="text"
+              placeholder="VD: 51H-123.45"
+              [(ngModel)]="regData.registerPlate"
+            />
+
+            <!-- INPUT ẨN DÀNH CHO MÁY TÍNH -->
+            <input
+              type="file"
+              #fileInput
+              class="hidden"
+              accept="image/*"
+              (change)="onFileSelected($event)"
+            />
+
+            <!-- NÚT GỌI CHỌN FILE THÔNG MINH -->
+            <div
+              class="icon-btn gray-icon"
+              (click)="handleImageClick(fileInput)"
+              title="Chụp ảnh AI"
+            >
               <ion-icon name="camera-outline"></ion-icon>
             </div>
           </div>
+
+          <!-- KHUNG XEM TRƯỚC ẢNH -->
           <div class="image-preview-mini" *ngIf="imagePreview">
-            <img [src]="imagePreview" alt="Preview">
-            <span (click)="imagePreview = null; selectedImageFile = null">Xóa ảnh</span>
+            <img [src]="imagePreview" alt="Preview" />
+            <span (click)="imagePreview = null; selectedImageFile = null"
+              >Xóa ảnh</span
+            >
           </div>
         </div>
 
-        <button class="submit-btn" (click)="onSubmit()" [disabled]="isSubmitting">
-          <ion-icon name="save-outline"></ion-icon> 
+        <button
+          class="submit-btn"
+          (click)="onSubmit()"
+          [disabled]="isSubmitting"
+        >
+          <ion-icon name="save-outline"></ion-icon>
           {{ isSubmitting ? 'Đang xử lý...' : 'Lưu thông tin thẻ' }}
         </button>
       </div>
 
+      <!-- BẢNG DANH SÁCH THẺ -->
       <div class="gray-panel">
-        
         <div class="panel-header">
           <div class="filter-box">
             <ion-icon name="options-outline"></ion-icon>
@@ -90,26 +129,32 @@
             </thead>
             <tbody>
               <tr class="row-card" *ngFor="let item of monthlyTickets">
-                <td class="nfc-col">{{ item.cardUID | slice:0:4 }}-<br>{{ item.cardUID | slice:4:8 }}</td>
+                <td class="nfc-col">
+                  {{ item.cardUID ? item.cardUID : '---' }}
+                </td>
                 <td class="plate-col">{{ item.registerPlate }}</td>
                 <td class="type-col">Vé tháng</td>
                 <td class="date-col">{{ item.startDate | slice:0:10 }}</td>
                 <td class="status-col text-right">
-                  <span class="badge" [class.active]="item.isActive" [class.inactive]="!item.isActive">
+                  <span
+                    class="badge"
+                    [class.active]="item.isActive"
+                    [class.inactive]="!item.isActive"
+                  >
                     {{ item.isActive ? 'Hoạt động' : 'Đã khóa' }}
                   </span>
                 </td>
               </tr>
 
               <tr *ngIf="monthlyTickets.length === 0 && !isLoading">
-                <td colspan="5" class="empty-state">Chưa có thẻ nào được phát hành.</td>
+                <td colspan="5" class="empty-state">
+                  Chưa có thẻ nào được phát hành.
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
-
       </div>
-
     </div>
   </div>
 </ion-content>
