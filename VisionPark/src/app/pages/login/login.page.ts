@@ -79,12 +79,19 @@ export class LoginPage implements OnInit {
 
         const name = res.fullName || res.FullName || res.username || 'User';
         const role = res.role || res.Role || 'Security';
+        // Lấy token từ response (Tuỳ thuộc vào backend trả về object như thế nào)
+        const token = res.token || res.Token || res.data?.token || res.data?.Token;
 
         this.showToast(`Xin chào ${name}!`, 'success');
 
         // Lưu thông tin vào bộ nhớ trình duyệt
         localStorage.setItem('userRole', role);
         localStorage.setItem('fullName', name);
+        if (token) {
+          localStorage.setItem('token', token);
+        } else {
+          console.warn('Không tìm thấy token trong API response:', res);
+        }
 
         this.navCtrl.navigateRoot('/dashboard');
       },
