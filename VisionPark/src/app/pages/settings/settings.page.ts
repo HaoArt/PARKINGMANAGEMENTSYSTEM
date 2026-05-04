@@ -176,9 +176,8 @@ export class SettingsPage implements OnInit {
         const toast = await this.toastCtrl.create({
           message: res.message || 'Lưu cấu hình thành công!',
           duration: 2500,
-          color: 'success',
+          color: 'dark',
           position: 'top',
-          cssClass: 'toast-top-right toast-success',
         });
         toast.present();
         this.loadSettings(); // Tải lại để đồng bộ chắc chắn với DB
@@ -188,9 +187,8 @@ export class SettingsPage implements OnInit {
         const toast = await this.toastCtrl.create({
           message: err.error?.message || err.error?.Message || err.error?.title || 'Lỗi khi lưu cài đặt!',
           duration: 2500,
-          color: 'danger',
+          color: 'dark',
           position: 'top',
-          cssClass: 'toast-top-right toast-danger',
         });
         toast.present();
       },

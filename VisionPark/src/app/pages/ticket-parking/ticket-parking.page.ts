@@ -8,6 +8,7 @@ import {
   IonGrid,
   IonRow,
   IonCardContent,
+  Platform,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import * as icons from 'ionicons/icons';
@@ -54,6 +55,7 @@ interface MonthlyTicketRecord {
 })
 export class TicketParkingPage implements OnInit {
   private api = inject(Api);
+  private platform = inject(Platform);
 
 
   allMonthlyTickets: MonthlyTicketRecord[] = [];
@@ -229,16 +231,22 @@ export class TicketParkingPage implements OnInit {
 
 
   startNFC() {
-    this.nfc.addTagDiscoveredListener().subscribe((event: any) => {
-      const cardUID = this.nfc.bytesToHexString(event.tag.id).toUpperCase();
-      this.regData.cardUID = cardUID;
+    if (this.platform.is('capacitor') || this.platform.is('cordova')) {
+      this.nfc.addTagDiscoveredListener().subscribe({
+        next: (event: any) => {
+          const cardUID = this.nfc.bytesToHexString(event.tag.id).toUpperCase();
+          this.regData.cardUID = cardUID;
 
-      // Chìa khóa: Ép màn hình điền mã thẻ ngay lập tức khi quẹt
-      this.cdr.detectChanges();
+          // Chìa khóa: Ép màn hình điền mã thẻ ngay lập tức khi quẹt
+          this.cdr.detectChanges();
 
-      // Bạn có thể giữ alert hoặc bỏ đi vì giờ thẻ quẹt sẽ nhảy thẳng vào ô input rất mượt
-      alert('Đã nhận thẻ: ' + cardUID);
-    });
+          // Bạn có thể giữ alert hoặc bỏ đi vì giờ thẻ quẹt sẽ nhảy thẳng vào ô input rất mượt
+          alert('Đã nhận thẻ: ' + cardUID);
+        },
+        error: (err) => console.error('Lỗi NFC:', err)
+      });
+    } else {
+      console.warn('NFC plugin chỉ hoạt động trên thiết bị thực (Android/iOS). Môi trường hiện tại là trình duyệt.');
+    }
   }
 }
-
