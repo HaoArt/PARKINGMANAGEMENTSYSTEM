@@ -29,7 +29,8 @@ interface ParkingRecord {
 })
 export class DashboardPage implements OnInit {
   stats = {
-    totalVehicles: 0, availableSlots: 100, revenueToday: '0', fillRate: 0 
+    totalVehicles: 0, availableSlots: 100, revenueToday: '0', fillRate: 0,
+    maxCapacity: 100
   };
   
   allRecords: ParkingRecord[] = [];
@@ -48,7 +49,51 @@ export class DashboardPage implements OnInit {
   }
 
   ngOnInit() {
-    this.loadDataFromDatabase();
+    this.loadSettings();
+  }
+
+  loadSettings() {
+    this.api.getSettings().subscribe({
+      next: (res: any) => {
+        const settingsData = res?.data || res;
+        console.log('Dữ liệu Settings lấy từ API:', settingsData);
+
+        let capacity = 100;
+
+        // Xử lý các dạng dữ liệu C# API có thể trả về
+        if (settingsData?.systemConfig || settingsData?.SystemConfig) {
+          // Cấu trúc mới nhất của Settings API
+          const sysConfig = settingsData.systemConfig || settingsData.SystemConfig;
+          capacity = Number(sysConfig.maxCapacity || sysConfig.MaxCapacity || 100);
+        } else {
+          if (Array.isArray(settingsData)) {
+            // 1. Nếu API trả về mảng Key-Value (vd: [{ settingKey: 'MaxCapacity', settingValue: '150' }])
+            const capSetting = settingsData.find((s: any) => 
+              s.settingKey === 'MaxCapacity' || s.SettingKey === 'MaxCapacity' || s.key === 'MaxCapacity'
+            );
+            if (capSetting) {
+              capacity = Number(capSetting.settingValue || capSetting.SettingValue || capSetting.value);
+            } 
+            // 2. Nếu API trả về mảng Object 1 phần tử (vd: [{ id: 1, maxCapacity: 150 }])
+            else if (settingsData.length > 0) {
+              capacity = Number(settingsData[0].maxCapacity || settingsData[0].MaxCapacity || 100);
+            }
+          } else {
+            // 3. Nếu API trả về trực tiếp Object (vd: { maxCapacity: 150 })
+            capacity = Number(settingsData?.maxCapacity || settingsData?.MaxCapacity || 100);
+          }
+        }
+
+        // Đảm bảo kiểu số và tránh NaN (nếu lỗi sẽ fallback về 100)
+        this.stats.maxCapacity = (isNaN(capacity) || capacity <= 0) ? 100 : capacity;
+
+        this.loadDataFromDatabase();
+      },
+      error: (err) => {
+        console.error('Lỗi lấy cấu hình hệ thống (Settings API), dùng dung lượng mặc định:', err);
+        this.loadDataFromDatabase();
+      }
+    });
   }
 
   loadDataFromDatabase() {
@@ -72,8 +117,8 @@ export class DashboardPage implements OnInit {
 
           const carsInParking = this.allRecords.filter(r => r.status === 'In').length;
           this.stats.totalVehicles = carsInParking;
-          this.stats.availableSlots = 100 - carsInParking;
-          this.stats.fillRate = Math.round((carsInParking / 100) * 100);
+          this.stats.availableSlots = this.stats.maxCapacity - carsInParking;
+          this.stats.fillRate = this.stats.maxCapacity > 0 ? Math.round((carsInParking / this.stats.maxCapacity) * 100) : 0;
           this.stats.revenueToday = totalRevenue.toLocaleString('vi-VN'); 
 
           this.applyFilters();
