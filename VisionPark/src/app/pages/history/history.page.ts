@@ -20,6 +20,7 @@ import {
   IonCardHeader,
   IonCardTitle,
   ToastController,
+  Platform,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import * as icons from 'ionicons/icons';
@@ -81,6 +82,7 @@ interface ScanResultData {
 export class HistoryPage implements OnInit {
   private api = inject(Api);
   private toastCtrl = inject(ToastController);
+  private platform = inject(Platform);
 
   parkingHistory: ParkingRecord[] = [];
   isLoading = false;
@@ -105,16 +107,23 @@ export class HistoryPage implements OnInit {
 
   // 👉 HÀM LẮNG NGHE THẺ NFC CHẠM VÀO ĐIỆN THOẠI
   startNFC() {
-    this.nfc.addTagDiscoveredListener().subscribe((event: any) => {
-      const cardUID = this.nfc.bytesToHexString(event.tag.id).toUpperCase();
-      this.inputNfcId = cardUID; // Gán mã thẻ vào ô input
+    if (this.platform.is('capacitor') || this.platform.is('cordova')) {
+      this.nfc.addTagDiscoveredListener().subscribe({
+        next: (event: any) => {
+          const cardUID = this.nfc.bytesToHexString(event.tag.id).toUpperCase();
+          this.inputNfcId = cardUID; // Gán mã thẻ vào ô input
 
-      this.cdr.detectChanges(); // Ép giao diện hiển thị ngay mã thẻ
-      this.showToast('Đã nhận thẻ: ' + cardUID, 'success');
+          this.cdr.detectChanges(); // Ép giao diện hiển thị ngay mã thẻ
+          this.showToast('Đã nhận thẻ: ' + cardUID, 'success');
 
-      // Tự động gọi hàm quét thẻ (như kiểu bấm nút "Enter")
-      this.onProcessCard(cardUID);
-    });
+          // Tự động gọi hàm quét thẻ (như kiểu bấm nút "Enter")
+          this.onProcessCard(cardUID);
+        },
+        error: (err) => console.error('Lỗi NFC:', err)
+      });
+    } else {
+      console.warn('NFC plugin chỉ hoạt động trên thiết bị thực (Android/iOS). Môi trường hiện tại là trình duyệt.');
+    }
   }
 
   // Hàm gọi API lấy dữ liệu đã lọc từ Backend

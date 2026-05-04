@@ -6,6 +6,7 @@ import {
   IonIcon,
   ToastController,
   AlertController, // Thêm AlertController để làm hộp thoại xác nhận xóa
+  Platform,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import * as icons from 'ionicons/icons';
@@ -32,6 +33,7 @@ export class CardRegistrationPage implements OnInit {
   private api = inject(Api);
   private toastCtrl = inject(ToastController);
   private alertCtrl = inject(AlertController); // Tiêm Alert
+  private platform = inject(Platform);
 
   isLoading = false;
   isSubmitting = false;
@@ -60,12 +62,19 @@ export class CardRegistrationPage implements OnInit {
   }
 
   startNFC() {
-    this.nfc.addTagDiscoveredListener().subscribe((event: any) => {
-      const scannedUID = this.nfc.bytesToHexString(event.tag.id).toUpperCase();
-      this.cardForm.cardUID = scannedUID;
-      this.cdr.detectChanges(); 
-      this.showToast('Đã nhận mã thẻ: ' + scannedUID, 'success');
-    });
+    if (this.platform.is('capacitor') || this.platform.is('cordova')) {
+      this.nfc.addTagDiscoveredListener().subscribe({
+        next: (event: any) => {
+          const scannedUID = this.nfc.bytesToHexString(event.tag.id).toUpperCase();
+          this.cardForm.cardUID = scannedUID;
+          this.cdr.detectChanges(); 
+          this.showToast('Đã nhận mã thẻ: ' + scannedUID, 'success');
+        },
+        error: (err) => console.error('Lỗi NFC:', err)
+      });
+    } else {
+      console.warn('NFC plugin chỉ hoạt động trên thiết bị thực (Android/iOS). Môi trường hiện tại là trình duyệt.');
+    }
   }
 
   loadSystemCards() {
