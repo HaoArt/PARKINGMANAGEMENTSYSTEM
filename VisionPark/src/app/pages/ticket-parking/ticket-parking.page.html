@@ -2,19 +2,21 @@
   <app-navbar></app-navbar>
 
   <div class="page-container">
+
     <div class="page-header">
       <h2>Phát hành Thẻ VisionPark</h2>
       <p>Nhập thông tin chi tiết để cấp phát thẻ NFC mới cho phương tiện.</p>
     </div>
 
     <div class="split-layout">
-      <!-- BẢNG TẠO THẺ MỚI -->
+
       <div class="gray-panel">
         <h3 class="panel-title">Phát hành thẻ mới</h3>
 
         <div class="form-group">
           <label>MÃ THẺ NFC</label>
           <div class="input-box">
+
             <input
               type="text"
               placeholder="Quẹt thẻ hoặc nhập mã..."
@@ -25,6 +27,7 @@
               title="Quét thẻ"
               (click)="startNFC()"
             >
+
               <ion-icon name="scan-outline"></ion-icon>
             </div>
           </div>
@@ -38,27 +41,32 @@
               <option [value]="3">Vé quý</option>
               <option [value]="12">Vé năm</option>
             </select>
+
             <ion-icon
               name="chevron-down-outline"
               class="dropdown-icon"
             ></ion-icon>
+
           </div>
         </div>
 
         <div class="form-group">
           <label>HỌ VÀ TÊN CHỦ XE</label>
           <div class="input-box">
+
             <input
               type="text"
               placeholder="Nhập họ và tên..."
               [(ngModel)]="regData.customerName"
             />
+
           </div>
         </div>
 
         <div class="form-group">
           <label>BIỂN SỐ XE</label>
           <div class="input-box">
+
             <input
               type="text"
               placeholder="VD: 51H-123.45"

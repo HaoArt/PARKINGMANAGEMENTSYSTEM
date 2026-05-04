@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
 import { Api } from '../../services/api';
 import { inject } from '@angular/core';
 import { ToastController } from '@ionic/angular/standalone';
@@ -27,11 +28,13 @@ interface PricingRule {
   PricePerYear: number;
 }
 
+
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.page.html',
   styleUrls: ['./settings.page.scss'],
   standalone: true,
+
   imports: [IonToolbar, IonHeader, 
     IonContent, IonGrid, IonRow, IonCol, IonCard, 
     IonCardHeader, IonCardTitle, IonCardContent, 
@@ -42,19 +45,23 @@ interface PricingRule {
 })
 
   export class SettingsPage implements OnInit {
+
   CurrentTab: string = 'general';
   SystemConfig: any = {};
   PricingRules: any[] = [];
+
 
   private api = inject(Api);
   private toastCtrl = inject(ToastController);
 
   constructor() {
     addIcons({ saveOutline, settingsOutline, cashOutline, carOutline, bicycleOutline, businessOutline, timeOutline, callOutline });
+
   }
 
   ngOnInit() {
     this.loadSettings();
+
   }
 
   loadSettings() {
@@ -85,11 +92,13 @@ interface PricingRule {
       },
       error: (err) => console.error('Lỗi lấy settings:', err)
     });
+
   }
 
   segmentChanged(event: any) {
     this.CurrentTab = event.detail.value;
   }
+
 
   async saveSettings() {
     const payload = {
@@ -111,6 +120,7 @@ interface PricingRule {
           duration: 2500, color: 'danger', position: 'top', cssClass: 'toast-top-right toast-danger'
         });
         toast.present();
+
       }
     });
   }

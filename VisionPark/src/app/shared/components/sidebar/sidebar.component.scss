@@ -1,4 +1,5 @@
 .custom-sidebar {
+
   --width: 250px; // Tăng nhẹ chiều rộng cho thoáng
   border-right: 1px solid #e5e7eb; // Màu border nhẹ hơn
 }
@@ -14,10 +15,12 @@
     letter-spacing: -0.5px;
     margin: 0;
     text-transform: uppercase;
+
   }
 }
 
 .menu-list {
+
   padding: 8px 16px;
 
   .menu-item {
@@ -124,6 +127,7 @@
     a:hover {
       color: #2563eb;
     }
+
   }
 }
 /* Ẩn thanh cuộn cho thẻ ion-content trong Sidebar */
@@ -134,14 +138,18 @@ ion-content {
       display: none;
     }
     /* Ẩn trên IE, Edge */
+
     -ms-overflow-style: none;
     /* Ẩn trên Firefox */
     scrollbar-width: none;
+
   }
 }
 
 /* Nếu bạn dùng thẻ div thường (không phải ion-content) làm container */
+
 .sidebar-container,
+
 .menu-list,
 :host {
   &::-webkit-scrollbar {
@@ -149,4 +157,6 @@ ion-content {
   }
   -ms-overflow-style: none;
   scrollbar-width: none;
+
 }
+

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using VisionPark.API.Data;
 using VisionPark.API.DTOs.Requests;
@@ -6,6 +7,9 @@ using VisionPark.API.Models;
 
 namespace VisionPark.API.Controllers
 {
+
+    [Authorize(Roles = "Admin")]
+
     [Route("api/[controller]")]
     [ApiController]
     public class SettingsController : ControllerBase

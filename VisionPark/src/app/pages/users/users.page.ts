@@ -1,9 +1,11 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core'; 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
 import { IonContent, IonIcon, AlertController, ToastController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import * as icons from 'ionicons/icons';
+
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { Api } from '../../services/api';
 
@@ -43,7 +45,9 @@ export class UsersPage implements OnInit {
   editingUser: any = { userID: null, fullName: '', userName: '', password: '', role: 'Security', isActive: true };
 
   constructor() {
+
     addIcons({ ...icons, closeOutline: icons.closeOutline });
+
   }
 
   ngOnInit() {
@@ -53,6 +57,7 @@ export class UsersPage implements OnInit {
   async showToast(message: string, color: 'success' | 'danger' = 'success') {
     const toast = await this.toastCtrl.create({
       message: message, duration: 2500, color: color, position: 'top',
+
       cssClass: `toast-top-right toast-${color}`,
       icon: color === 'success' ? 'checkmark-circle-outline' : 'alert-circle-outline'
     });
@@ -112,8 +117,7 @@ export class UsersPage implements OnInit {
     this.showModal = false;
   }
 
-  // --- LOGIC LƯU DỮ LIỆU TỪ MODAL ---
-  // --- LOGIC LƯU DỮ LIỆU TỪ MODAL ---
+
   saveUser() {
     if (!this.editingUser.fullName || !this.editingUser.userName) {
       this.showToast('Họ tên và Tên đăng nhập không được để trống!', 'danger');

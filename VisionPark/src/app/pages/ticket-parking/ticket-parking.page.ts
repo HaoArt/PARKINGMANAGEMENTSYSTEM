@@ -2,6 +2,7 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core'; //
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
+
   IonContent,
   IonIcon,
   IonGrid,
@@ -16,6 +17,7 @@ import { NFC, Ndef } from '@awesome-cordova-plugins/nfc/ngx';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Capacitor } from '@capacitor/core';
 
+
 interface MonthlyTicketRecord {
   ticketId: number;
   customerName: string;
@@ -23,8 +25,10 @@ interface MonthlyTicketRecord {
   registerPlate: string;
   vehicleType: string;
   cardUID: string;
+
   startDate: string;
   endDate: string;
+
   isActive: boolean;
   status: string;
 }
@@ -34,6 +38,7 @@ interface MonthlyTicketRecord {
   templateUrl: './ticket-parking.page.html',
   styleUrls: ['./ticket-parking.page.scss'],
   standalone: true,
+
   imports: [
     IonCardContent,
     IonRow,
@@ -43,16 +48,19 @@ interface MonthlyTicketRecord {
     CommonModule,
     FormsModule,
     NavbarComponent,
+
   ],
   providers: [NFC, Ndef],
 })
 export class TicketParkingPage implements OnInit {
   private api = inject(Api);
 
+
   allMonthlyTickets: MonthlyTicketRecord[] = [];
   monthlyTickets: MonthlyTicketRecord[] = [];
 
   filterStatus: string = 'all';
+
   isLoading = false;
   isSubmitting = false;
 
@@ -60,8 +68,10 @@ export class TicketParkingPage implements OnInit {
     cardUID: '',
     customerName: '',
     phoneNumber: '',
+
     registerPlate: '',
     vehicleTypeID: 1,
+
     durationMonths: 1,
   };
 
@@ -87,7 +97,9 @@ export class TicketParkingPage implements OnInit {
       next: (res: any) => {
         if (res?.data) {
           this.allMonthlyTickets = res.data;
+
           this.applyFilters();
+
         }
         this.isLoading = false;
       },
@@ -97,6 +109,7 @@ export class TicketParkingPage implements OnInit {
       },
     });
   }
+
 
   applyFilters() {
     if (this.filterStatus === 'active') {
@@ -142,6 +155,7 @@ export class TicketParkingPage implements OnInit {
       }
     } catch (error) {
       console.log('User cancelled or error:', error);
+
     }
   }
 
@@ -159,6 +173,7 @@ export class TicketParkingPage implements OnInit {
   }
 
   onSubmit() {
+
     if (!this.regData.cardUID)
       return alert('Vui lòng quét hoặc nhập mã thẻ NFC!');
     if (!this.selectedImageFile)
@@ -167,12 +182,15 @@ export class TicketParkingPage implements OnInit {
       return alert('Vui lòng nhập tên khách hàng!');
 
     this.isSubmitting = true;
+
     const formData = new FormData();
     formData.append('CardUID', this.regData.cardUID);
     formData.append('CustomerName', this.regData.customerName);
     formData.append('PhoneNumber', this.regData.phoneNumber);
     if (this.regData.registerPlate) {
+
       formData.append('RegisterPlate', this.regData.registerPlate);
+
     }
     formData.append('VehicleTypeID', this.regData.vehicleTypeID.toString());
     formData.append('DurationMonths', this.regData.durationMonths.toString());
@@ -196,16 +214,19 @@ export class TicketParkingPage implements OnInit {
 
   resetForm() {
     this.regData = {
+
       cardUID: '',
       customerName: '',
       phoneNumber: '',
       registerPlate: '',
       vehicleTypeID: 1,
       durationMonths: 1,
+
     };
     this.selectedImageFile = null;
     this.imagePreview = null;
   }
+
 
   startNFC() {
     this.nfc.addTagDiscoveredListener().subscribe((event: any) => {
@@ -220,3 +241,4 @@ export class TicketParkingPage implements OnInit {
     });
   }
 }
+

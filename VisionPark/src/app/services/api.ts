@@ -1,7 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '@environments/environment';
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:5295/api'
+};
 
 @Injectable({
   providedIn: 'root',
@@ -12,6 +15,7 @@ export class Api {
 
   getAllCards(): Observable<any> {
     return this.http.get(`${this.baseUrl}/Cards`);
+
   }
 
   createCard(cardData: any): Observable<any> {
