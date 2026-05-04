@@ -12,13 +12,24 @@ export const environment = {
 export class Api {
   private http = inject(HttpClient);
   private baseUrl = environment.apiUrl;
-  
-  getCards(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/Card`);
+
+  getAllCards(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/Cards`);
+
   }
 
   createCard(cardData: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/Card`, cardData);
+    return this.http.post(`${this.baseUrl}/Cards`, cardData);
+  }
+
+  // Cập nhật thông tin thẻ
+  updateCard(cardId: number, cardData: any) {
+    return this.http.put(`${this.baseUrl}/Cards/${cardId}`, cardData);
+  }
+
+  // Xóa thẻ
+  deleteCard(cardId: number) {
+    return this.http.delete(`${this.baseUrl}/Cards/${cardId}`);
   }
   scanCard(cardUID: string): Observable<any> {
     return this.http.post(`${this.baseUrl}/Parking/scan-card`, { cardUID });
@@ -75,6 +86,7 @@ export class Api {
   deleteUser(id: number): Observable<any> {
     return this.http.delete(`${this.baseUrl}/Users/delete/${id}`);
   }
+
   getSettings(): Observable<any> {
     return this.http.get(`${this.baseUrl}/Settings`);
   }

@@ -5,7 +5,13 @@
 
     <uses-sdk android:minSdkVersion="24" />
 
-    <application>
+    <uses-permission android:name="android.permission.NFC" />
+
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="false" />
+
+    <application android:usesCleartextTraffic="true" >
     </application>
 
 </manifest>

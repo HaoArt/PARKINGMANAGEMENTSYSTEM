@@ -29,8 +29,10 @@ interface ParkingRecord {
 })
 export class DashboardPage implements OnInit {
   stats = {
+
     totalVehicles: 0, availableSlots: 100, revenueToday: '0', fillRate: 0,
     maxCapacity: 100
+
   };
   
   allRecords: ParkingRecord[] = [];
@@ -117,6 +119,7 @@ export class DashboardPage implements OnInit {
 
           const carsInParking = this.allRecords.filter(r => r.status === 'In').length;
           this.stats.totalVehicles = carsInParking;
+
           this.stats.availableSlots = this.stats.maxCapacity - carsInParking;
           this.stats.fillRate = this.stats.maxCapacity > 0 ? Math.round((carsInParking / this.stats.maxCapacity) * 100) : 0;
           this.stats.revenueToday = totalRevenue.toLocaleString('vi-VN'); 

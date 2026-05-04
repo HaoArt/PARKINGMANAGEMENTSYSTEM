@@ -28,7 +28,10 @@ export class SidebarComponent implements OnInit {
 
   adminPages = [
     { title: 'Tổng quan', url: '/dashboard', icon: 'eye' },
-    { title: 'Tạo thẻ', url: '/ticket-parking', icon: 'car-outline' },
+
+    { title: 'Tạo thông tin thẻ', url: '/card-registration', icon: 'car-outline' },
+    { title: 'Tạo thẻ theo kì', url: '/ticket-parking', icon: 'car-outline' },
+
     { title: 'Lịch sử', url: '/history', icon: 'time-outline' },
     { title: 'Nhân viên', url: '/users', icon: 'people-outline' },
     { title: 'Cài đặt', url: '/settings', icon: 'settings-outline' },

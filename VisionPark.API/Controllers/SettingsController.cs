@@ -7,7 +7,9 @@ using VisionPark.API.Models;
 
 namespace VisionPark.API.Controllers
 {
+
     [Authorize(Roles = "Admin")]
+
     [Route("api/[controller]")]
     [ApiController]
     public class SettingsController : ControllerBase

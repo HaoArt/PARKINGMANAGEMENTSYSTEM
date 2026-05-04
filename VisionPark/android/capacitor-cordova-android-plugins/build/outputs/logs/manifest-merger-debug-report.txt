@@ -1,7 +1,7 @@
 -- Merging decision tree log ---
 manifest
-ADDED from D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:2:1-8:12
-INJECTED from D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:2:1-8:12
+ADDED from D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:2:1-9:12
+INJECTED from D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:2:1-9:12
 	package
 		INJECTED from D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml
 	xmlns:amazon
@@ -10,6 +10,18 @@ INJECTED from D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-an
 		ADDED from D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:2:11-69
 application
 ADDED from D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:4:1-6:15
+	android:usesCleartextTraffic
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:4:15-50
+uses-permission#android.permission.NFC
+ADDED from D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:7:1-57
+	android:name
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:7:18-55
+uses-feature#android.hardware.nfc
+ADDED from D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:8:1-77
+	android:required
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:8:51-75
+	android:name
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:8:15-50
 uses-sdk
 INJECTED from D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml

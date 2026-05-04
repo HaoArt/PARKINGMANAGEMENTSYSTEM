@@ -4,23 +4,28 @@
 
 ion-toolbar {
   --min-height: 64px;
+  --background: #ffffff; // Nền trắng cho navbar
+  --border-width: 0 0 1px 0; // Thêm đường viền mỏng bên dưới
+  --border-color: #e5e7eb;
 }
 
 /* Custom cho thẻ div bọc input tìm kiếm */
 .search-container {
   transition: all 0.2s ease-in-out;
   border: 1px solid transparent;
+  border-radius: 8px; // Thêm bo tròn
+  background-color: #f3f4f6; // Nền xám mặc định
 
   /* Hiệu ứng viền sáng lên khi bấm vào ô tìm kiếm */
   &:focus-within {
     background-color: #ffffff;
-    border-color: #0040a1;
-    box-shadow: 0 0 0 3px rgba(0, 64, 161, 0.1);
+    border-color: #3b82f6; // Màu xanh chủ đạo
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); // Shadow màu xanh
   }
 
   input {
     &::placeholder {
-      color: #737785;
+      color: #9ca3af; // Màu placeholder xám hơn
       opacity: 1;
     }
   }
@@ -32,16 +37,26 @@ button.relative:hover .material-symbols-outlined {
 }
 
 @keyframes ring {
-  0% { transform: rotate(0); }
-  25% { transform: rotate(15deg); }
-  50% { transform: rotate(-10deg); }
-  75% { transform: rotate(5deg); }
-  100% { transform: rotate(0); }
+  0% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(15deg);
+  }
+  50% {
+    transform: rotate(-10deg);
+  }
+  75% {
+    transform: rotate(5deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
 }
 
 /* Ẩn viền focus mặc định của menu button */
 ion-menu-button {
-  --color: #424654;
+  --color: #4b5563; // Màu icon xám đậm
   &::part(native) {
     outline: none;
   }

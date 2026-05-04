@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core'; // Thêm ChangeDetectorRef
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -25,6 +25,8 @@ import { addIcons } from 'ionicons';
 import * as icons from 'ionicons/icons';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { Api } from '../../services/api';
+// 👉 THÊM PLUGIN NFC
+import { NFC, Ndef } from '@awesome-cordova-plugins/nfc/ngx';
 
 interface ParkingRecord {
   nfcId: string;
@@ -74,6 +76,7 @@ interface ScanResultData {
     FormsModule,
     NavbarComponent,
   ],
+  providers: [NFC, Ndef], // 👉 CẤP QUYỀN SỬ DỤNG NFC CHO COMPONENT NÀY
 })
 export class HistoryPage implements OnInit {
   private api = inject(Api);
@@ -88,12 +91,30 @@ export class HistoryPage implements OnInit {
 
   scanResult: ScanResultData | null = null;
 
-  constructor() {
+  constructor(
+    private nfc: NFC, // Tiêm NFC
+    private cdr: ChangeDetectorRef, // Tiêm ChangeDetectorRef để chống đơ màn hình
+  ) {
     addIcons({ ...icons });
   }
 
   ngOnInit() {
     this.fetchData();
+    this.startNFC(); // 👉 KÍCH HOẠT LẮNG NGHE QUẸT THẺ TỰ ĐỘNG
+  }
+
+  // 👉 HÀM LẮNG NGHE THẺ NFC CHẠM VÀO ĐIỆN THOẠI
+  startNFC() {
+    this.nfc.addTagDiscoveredListener().subscribe((event: any) => {
+      const cardUID = this.nfc.bytesToHexString(event.tag.id).toUpperCase();
+      this.inputNfcId = cardUID; // Gán mã thẻ vào ô input
+
+      this.cdr.detectChanges(); // Ép giao diện hiển thị ngay mã thẻ
+      this.showToast('Đã nhận thẻ: ' + cardUID, 'success');
+
+      // Tự động gọi hàm quét thẻ (như kiểu bấm nút "Enter")
+      this.onProcessCard(cardUID);
+    });
   }
 
   // Hàm gọi API lấy dữ liệu đã lọc từ Backend
@@ -116,11 +137,13 @@ export class HistoryPage implements OnInit {
           this.parkingHistory = [];
         }
         this.isLoading = false;
+        this.cdr.detectChanges(); // Update UI
       },
       error: (err) => {
         console.error('Lỗi API:', err);
         this.isLoading = false;
         this.showToast('Lỗi khi tải lịch sử dữ liệu!', 'danger');
+        this.cdr.detectChanges();
       },
     });
   }
@@ -168,7 +191,7 @@ export class HistoryPage implements OnInit {
           isSuccess: res.action === 'CHECK_IN' || res.action === 'CHECK_OUT',
         };
 
-        this.inputNfcId = '';
+        this.inputNfcId = ''; // Xoá trắng ô text box
         this.fetchData(); // Quẹt xong thì load lại bảng lịch sử mới nhất
       },
       error: (err) => {
@@ -183,6 +206,7 @@ export class HistoryPage implements OnInit {
           isSuccess: false,
         };
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
     });
   }

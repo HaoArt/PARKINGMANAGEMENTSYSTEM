@@ -1,5 +1,9 @@
 {
 	"appId": "io.ionic.starter",
 	"appName": "VisionPark",
-	"webDir": "www"
+	"webDir": "www",
+	"server": {
+		"cleartext": true,
+		"androidScheme": "http"
+	}
 }
