@@ -32,37 +32,39 @@
         </button>
       </div>
 
-      <div id="profile-trigger" class="flex items-center gap-3 cursor-pointer hover:bg-gray-100 p-2 rounded-2xl transition-colors">
-        <div class="hidden sm:flex flex-col text-right">
-          <span class="text-[14px] font-bold text-[#111827]">{{ fullName }}</span>
-          <span class="text-[11px] font-bold text-[#003399] uppercase tracking-wider">{{ role }}</span>
-        </div>
-        <div class="w-11 h-11 rounded-full border-2 border-white overflow-hidden shadow-md">
-          <img src="https://i.pravatar.cc/150?img=11" alt="Avatar" class="w-full h-full object-cover">
-        </div>
-        <ion-icon name="chevron-down-outline" class="text-gray-400 text-sm hidden sm:block"></ion-icon>
-      </div>
+      <!-- Khung chứa Dropdown Tùy chỉnh (Mượt hơn ion-popover) -->
+      <div class="relative z-50">
+        <!-- Màn che vô hình để tự đóng menu khi click ra ngoài -->
+        <div *ngIf="isProfileMenuOpen" class="fixed inset-0 z-40" (click)="isProfileMenuOpen = false"></div>
 
-      <ion-popover #profileMenu trigger="profile-trigger" triggerAction="click" alignment="end" class="profile-dropdown">
-        <ng-template>
-          <ion-content class="ion-padding-vertical">
-            <ion-list lines="none" class="m-0 p-0">
-              <div class="px-4 py-3 mb-2 border-b border-gray-100 sm:hidden block">
-                <p class="font-bold text-[#111827] m-0 text-sm">{{ fullName }}</p>
-                <p class="font-bold text-[#003399] m-0 text-[11px] uppercase mt-1">{{ role }}</p>
-              </div>
-              <ion-item button detail="false" (click)="profileMenu.dismiss(); manageAccount()" class="hover:bg-gray-50 transition-colors">
-                <ion-icon name="person-outline" slot="start" class="text-gray-500 text-[18px] mr-3"></ion-icon>
-                <span class="text-sm font-bold text-gray-700">Quản lý tài khoản</span>
-              </ion-item>
-              <ion-item button detail="false" (click)="profileMenu.dismiss(); logout()" class="hover:bg-red-50 transition-colors">
-                <ion-icon name="log-out-outline" slot="start" class="text-red-500 text-[18px] mr-3"></ion-icon>
-                <span class="text-sm font-bold text-red-600">Đăng xuất</span>
-              </ion-item>
-            </ion-list>
-          </ion-content>
-        </ng-template>
-      </ion-popover>
+        <!-- Nút Bấm -->
+        <div class="relative z-50 flex items-center gap-3 cursor-pointer hover:bg-gray-100 p-2 rounded-2xl transition-colors" (click)="isProfileMenuOpen = !isProfileMenuOpen">
+          <div class="hidden sm:flex flex-col text-right">
+            <span class="text-[14px] font-bold text-[#111827]">{{ fullName }}</span>
+            <span class="text-[11px] font-bold text-[#003399] uppercase tracking-wider">{{ role }}</span>
+          </div>
+          <div class="w-11 h-11 rounded-full border-2 border-white overflow-hidden shadow-md">
+            <img src="https://i.pravatar.cc/150?img=11" alt="Avatar" class="w-full h-full object-cover">
+          </div>
+          <ion-icon name="chevron-down-outline" class="text-gray-400 text-sm hidden sm:block transition-transform" [class.rotate-180]="isProfileMenuOpen"></ion-icon>
+        </div>
+
+        <!-- Menu Dropdown Xổ Xuống -->
+        <div *ngIf="isProfileMenuOpen" class="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden transform origin-top-right transition-all z-50">
+          <div class="px-4 py-3 border-b border-gray-100 sm:hidden block">
+            <p class="font-bold text-[#111827] m-0 text-sm">{{ fullName }}</p>
+            <p class="font-bold text-[#003399] m-0 text-[11px] uppercase mt-1">{{ role }}</p>
+          </div>
+          <div class="py-2">
+            <button (click)="isProfileMenuOpen = false; manageAccount()" class="w-full flex items-center px-5 py-3 text-[14px] font-bold text-gray-700 hover:bg-gray-50 transition-colors border-none bg-transparent cursor-pointer">
+              <ion-icon name="person-outline" class="text-[18px] mr-3 text-gray-400"></ion-icon> Quản lý tài khoản
+            </button>
+            <button (click)="isProfileMenuOpen = false; logout()" class="w-full flex items-center px-5 py-3 text-[14px] font-bold text-red-600 hover:bg-red-50 transition-colors border-none bg-transparent cursor-pointer">
+              <ion-icon name="log-out-outline" class="text-[18px] mr-3 text-red-500"></ion-icon> Đăng xuất
+            </button>
+          </div>
+        </div>
+      </div>
 
     </div>
   </ion-toolbar>

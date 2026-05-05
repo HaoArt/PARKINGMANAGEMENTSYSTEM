@@ -115,7 +115,7 @@
             <tbody>
               <tr
                 class="row-card"
-                *ngFor="let item of systemCards"
+                *ngFor="let item of paginatedCards"
                 [class.bg-blue-50]="editingCardId === item.cardID"
               >
                 <td class="font-bold text-gray-500">#{{ item.cardID }}</td>
@@ -157,7 +157,7 @@
                 </td>
               </tr>
 
-              <tr *ngIf="systemCards.length === 0 && !isLoading">
+              <tr *ngIf="paginatedCards.length === 0 && !isLoading">
                 <td colspan="5" class="empty-state">
                   <ion-icon name="cube-outline" class="text-4xl mb-2"></ion-icon
                   ><br />
@@ -166,6 +166,23 @@
               </tr>
             </tbody>
           </table>
+        </div>
+        
+        <!-- PHÂN TRANG -->
+        <div class="pagination" *ngIf="totalPages > 0">
+          <span class="page-info">Trang {{ currentPage }} / {{ totalPages }}</span>
+          <div class="page-controls">
+            <button (click)="prevPage()" [disabled]="currentPage === 1"><ion-icon name="chevron-back-outline"></ion-icon></button>
+            
+            <ng-container *ngFor="let page of visiblePages">
+              <button 
+                [class.active]="page === currentPage" 
+                [disabled]="page === '...'"
+                (click)="goToPage(page)">{{ page }}</button>
+            </ng-container>
+            
+            <button (click)="nextPage()" [disabled]="currentPage === totalPages"><ion-icon name="chevron-forward-outline"></ion-icon></button>
+          </div>
         </div>
       </div>
     </div>

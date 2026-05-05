@@ -41,6 +41,13 @@ export class CardRegistrationPage implements OnInit {
   editingCardId: number | null = null; // Lưu ID thẻ đang sửa
 
   systemCards: CardRecord[] = [];
+  paginatedCards: CardRecord[] = [];
+
+  // Phân trang
+  currentPage: number = 1;
+  itemsPerPage: number = 5;
+  totalPages: number = 1;
+  visiblePages: (number | string)[] = [];
 
   // Dữ liệu thẻ trên Form (Thêm trường status để Admin có thể khóa thẻ)
   cardForm = {
@@ -97,6 +104,9 @@ export class CardRegistrationPage implements OnInit {
             status: item.status || item.Status
           };
         });
+
+        this.currentPage = 1;
+        this.calculatePagination();
 
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -217,5 +227,82 @@ export class CardRegistrationPage implements OnInit {
       position: 'top',
     });
     toast.present();
+  }
+
+  // --- LOGIC PHÂN TRANG ---
+  calculatePagination() {
+    this.totalPages = Math.ceil(this.systemCards.length / this.itemsPerPage);
+    
+    if (this.currentPage > this.totalPages && this.totalPages > 0) {
+      this.currentPage = this.totalPages;
+    } else if (this.totalPages === 0) {
+      this.currentPage = 1;
+    }
+    
+    this.updatePaginatedCards();
+    this.generatePages();
+  }
+
+  updatePaginatedCards() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedCards = this.systemCards.slice(startIndex, endIndex);
+  }
+
+  generatePages() {
+    const current = this.currentPage;
+    const total = this.totalPages;
+    const delta = 1;
+    const range = [];
+    const rangeWithDots: (number | string)[] = [];
+    let l: number | undefined;
+
+    range.push(1);
+    for (let i = current - delta; i <= current + delta; i++) {
+      if (i < total && i > 1) {
+        range.push(i);
+      }
+    }
+    if (total > 1) {
+      range.push(total);
+    }
+
+    for (let i of range) {
+      if (l) {
+        if (i - l === 2) {
+          rangeWithDots.push(l + 1);
+        } else if (i - l !== 1) {
+          rangeWithDots.push('...');
+        }
+      }
+      rangeWithDots.push(i);
+      l = i;
+    }
+
+    this.visiblePages = rangeWithDots;
+  }
+
+  goToPage(page: number | string) {
+    if (typeof page === 'number' && page !== this.currentPage) {
+      this.currentPage = page;
+      this.updatePaginatedCards();
+      this.generatePages();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePaginatedCards();
+      this.generatePages();
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePaginatedCards();
+      this.generatePages();
+    }
   }
 }

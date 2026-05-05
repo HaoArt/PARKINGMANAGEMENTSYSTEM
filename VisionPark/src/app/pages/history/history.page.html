@@ -233,7 +233,7 @@
       </div>
 
       <div
-        *ngIf="parkingHistory.length === 0"
+        *ngIf="paginatedHistory.length === 0"
         class="py-16 flex flex-col items-center justify-center text-center"
       >
         <div
@@ -249,7 +249,7 @@
         </p>
       </div>
 
-      <div *ngIf="parkingHistory.length > 0" class="overflow-x-auto">
+      <div *ngIf="paginatedHistory.length > 0" class="overflow-x-auto">
         <table class="w-full text-left border-collapse whitespace-nowrap">
           <thead>
             <tr>
@@ -292,7 +292,7 @@
           </thead>
           <tbody>
             <tr
-              *ngFor="let item of parkingHistory"
+              *ngFor="let item of paginatedHistory"
               class="border-b border-gray-50 hover:bg-[#f4f6f8]/50 transition-colors"
             >
               <td class="py-4 text-[12px] font-bold text-[#374151] pl-2">
@@ -335,6 +335,23 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- PHÂN TRANG -->
+      <div class="pagination" *ngIf="totalPages > 0">
+        <span class="page-info">Trang {{ currentPage }} / {{ totalPages }}</span>
+        <div class="page-controls">
+          <button (click)="prevPage()" [disabled]="currentPage === 1"><ion-icon name="chevron-back-outline"></ion-icon></button>
+          
+          <ng-container *ngFor="let page of visiblePages">
+            <button 
+              [class.active]="page === currentPage" 
+              [disabled]="page === '...'"
+              (click)="goToPage(page)">{{ page }}</button>
+          </ng-container>
+          
+          <button (click)="nextPage()" [disabled]="currentPage === totalPages"><ion-icon name="chevron-forward-outline"></ion-icon></button>
+        </div>
       </div>
     </div>
   </div>
