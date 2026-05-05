@@ -38,75 +38,68 @@ body, html {
 ion-split-pane {
   --border: 0;
 }
-/* Ép Toast Notification hiển thị ở góc trên bên phải màn hình */
-ion-toast.toast-top-right {
-  text-align: right;
+/* --- TÙY CHỈNH THÔNG BÁO (TOAST) MỀM MẠI, NỔI BẬT VÀ KHÔNG BỊ CHÌM --- */
+ion-toast {
+  z-index: 99999 !important; /* Luôn nổi trên cùng */
 
-  @media (min-width: 768px) {
-    --start: auto; /* Gỡ neo bên trái */
-    --end: 24px;   /* Neo vào lề phải 24px */
-    --top: 80px;   /* Neo ngay dưới thanh Navbar */
-    --width: 320px;
-    --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    --border-radius: 12px;
-  }
-}
-/* --- ÉP THÔNG BÁO TOAST NỔI LÊN TRÊN CÙNG, KHÔNG BỊ CHE --- */
-ion-toast.toast-top-right {
-  z-index: 99999 !important; /* Quan trọng: Ép nổi lên trên mọi thứ (kể cả Navbar) */
-  text-align: right;
+  /* Bo góc mềm mại và tạo bóng đổ sâu 3D */
+  --border-radius: 16px !important;
+  --box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 0.4) !important;
+  --opacity: 1 !important; /* Khắc phục lỗi mờ/trong suốt mặc định của iOS/Android */
 
-  /* Chỉnh lại phần chữ bên trong cho rõ nét */
-  &::part(message) {
-    font-weight: 700;
-    font-size: 14px;
+  &::part(container) {
+    padding: 4px 8px; /* Cho nội dung thoáng hơn */
+    border: 1px solid rgba(255, 255, 255, 0.15); /* Viền kính nhẹ */
+    background: var(--background, #1e293b) !important; /* Ép màu nền cứng để ngăn chặn trong suốt */
+    opacity: 1 !important; /* Bắt buộc khung thông báo phải đặc 100% */
   }
-
-  @media (min-width: 768px) {
-    --start: auto;
-    --end: 30px;
-    --top: 20px; /* Đẩy lên cao hơn một chút để không dính Navbar */
-    --width: auto;
-    --box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-    --border-radius: 12px;
-  }
-}
-/* --- ÉP THÔNG BÁO TOAST NỔI LÊN TRÊN CÙNG VÀ HIỂN THỊ MÀU RÕ RÀNG --- */
-ion-toast.toast-top-right {
-  z-index: 99999 !important;
-  text-align: right;
 
   &::part(message) {
-    font-weight: 700;
-    font-size: 14px;
+    font-size: 14.5px;
+    font-weight: 600;
+    line-height: 1.5;
+    letter-spacing: 0.2px;
+    color: var(--color, #ffffff) !important; /* Xử lý tình trạng chữ bị tàng hình / mất màu */
+    opacity: 1 !important; /* Ép chữ hiển thị rõ nét 100% */
   }
 
   &::part(icon) {
-    font-size: 20px;
+    font-size: 24px;
+    margin-right: 12px;
   }
 
-  /* Ép màu nền mạnh mẽ để không bị lẫn vào nền trắng của web */
-  &.toast-success {
-    --background: #10b981 !important; /* Xanh lá cây đậm */
+  /* Nâng cấp màu sắc cho rực rỡ và rõ ràng */
+  &[color="success"], &.toast-success {
+    --background: #059669 !important; /* Xanh ngọc lục bảo */
     --color: #ffffff !important;
-    --button-color: #ffffff !important;
   }
 
-  &.toast-danger {
-    --background: #ef4444 !important; /* Đỏ đậm */
+  &[color="danger"], &.toast-danger {
+    --background: #dc2626 !important; /* Đỏ ruby rực rỡ */
     --color: #ffffff !important;
-    --button-color: #ffffff !important;
   }
 
-  @media (min-width: 768px) {
-    --start: auto;
-    --end: 30px;
-    --top: 20px; 
-    --width: auto;
-    --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    --border-radius: 12px;
+  &[color="warning"] {
+    --background: #ea580c !important; /* Cam rực rỡ */
+    --color: #ffffff !important;
   }
 
+  &[color="dark"] {
+    --background: #1e293b !important; /* Đen xanh slate */
+    --color: #ffffff !important;
+  }
+
+  /* Dành riêng cho toast đặt ở góc trên cùng bên phải trên PC */
+  &.toast-top-right {
+    text-align: left; /* Chữ căn trái dễ đọc hơn */
+    
+    @media (min-width: 768px) {
+      --start: auto;
+      --end: 30px;
+      --top: 25px; 
+      --width: 350px;
+    }
+  }
 }
 /* --- ẨN THANH CUỘN CỦA SIDEBAR BÊN TRÁI --- */
 ion-menu ion-content::part(scroll),

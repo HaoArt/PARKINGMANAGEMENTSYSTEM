@@ -174,6 +174,12 @@ export class HistoryPage implements OnInit {
     this.fetchData();
   }
 
+  // Nhận từ khóa tìm kiếm từ Navbar và tự động cập nhật bảng
+  onNavbarSearch(searchTerm: string) {
+    this.filterConfig.plateNumber = searchTerm;
+    this.applyFilters();
+  }
+
   private mapBackendToFrontend(item: any): ParkingRecord {
     return {
       nfcId: item.cardID,
@@ -236,11 +242,17 @@ export class HistoryPage implements OnInit {
     message: string,
     color: 'success' | 'danger' | 'warning' = 'danger',
   ) {
+    let iconName = 'alert-circle-outline';
+    if (color === 'success') iconName = 'checkmark-circle-outline';
+    else if (color === 'warning') iconName = 'warning-outline';
+
     const toast = await this.toastCtrl.create({
       message,
       duration: 3000,
       color,
       position: 'top',
+      icon: iconName,
+      cssClass: 'toast-top-right'
     });
     toast.present();
   }
@@ -302,4 +314,8 @@ export class HistoryPage implements OnInit {
   nextPage() { if (this.currentPage < this.totalPages) { this.currentPage++; this.updatePaginatedHistory(); this.generatePages(); } }
 
   prevPage() { if (this.currentPage > 1) { this.currentPage--; this.updatePaginatedHistory(); this.generatePages(); } }
+
+  exportReport() {
+    this.showToast('Tính năng Xuất báo cáo Excel đang được phát triển!', 'warning');
+  }
 }

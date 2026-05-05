@@ -1,12 +1,9 @@
 :host {
   display: block;
-}
-
-ion-toolbar {
-  --min-height: 64px;
-  --background: #ffffff; // Nền trắng cho navbar
-  --border-width: 0 0 1px 0; // Thêm đường viền mỏng bên dưới
-  --border-color: #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 99999 !important; /* Tăng tối đa để đè lên mọi thành phần khác */
+  background-color: #ffffff; /* Đổ nền cứng cho block chứa Navbar ngăn hiện tượng xuyên thấu */
 }
 
 /* Custom cho thẻ div bọc input tìm kiếm */

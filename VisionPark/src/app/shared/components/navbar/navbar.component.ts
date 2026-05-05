@@ -1,7 +1,8 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, Output, EventEmitter } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import {
   IonHeader, IonToolbar, IonButtons, IonButton, IonIcon,
   IonAvatar, IonLabel, IonBadge, IonSearchbar, IonMenuButton,
@@ -21,7 +22,7 @@ import {
   standalone: true,
   imports: [
     CommonModule, IonSearchbar, IonBadge, IonLabel, IonMenuButton,
-    IonAvatar, IonHeader, IonToolbar, IonButtons, IonButton, IonIcon,
+    IonAvatar, IonHeader, IonToolbar, IonButtons, IonButton, IonIcon, FormsModule,
     IonPopover, IonContent, IonList, IonItem
   ],
 })
@@ -34,6 +35,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
   isDashboard: boolean = false;
   currentDate: string = '';
   private clockInterval: any;
+  
+  isProfileMenuOpen: boolean = false; // Biến kiểm soát popup mượt mà
+
+  searchTerm: string = '';
+  @Output() searchChange = new EventEmitter<string>();
 
   private router = inject(Router);
   private navCtrl = inject(NavController);
@@ -92,6 +98,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
   updateClock(days: string[]) {
     const now = new Date();
     this.currentDate = `${days[now.getDay()]}, ${now.getDate().toString().padStart(2, '0')} Tháng ${(now.getMonth() + 1).toString().padStart(2, '0')}, ${now.getFullYear()} • ${now.toLocaleTimeString('vi-VN', { hour12: false })}`;
+  }
+
+  onSearch() {
+    this.searchChange.emit(this.searchTerm);
   }
 
   manageAccount() {

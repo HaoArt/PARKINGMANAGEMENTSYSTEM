@@ -9,7 +9,7 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
 import { addIcons } from 'ionicons';
 import { 
   carOutline, cashOutline, searchOutline, chevronBackOutline, 
-  chevronForwardOutline, optionsOutline, car, arrowUpOutline, bicycle, cameraOutline, refreshOutline, scanOutline, chevronDownOutline, saveOutline } from 'ionicons/icons';
+  chevronForwardOutline, optionsOutline, car, arrowUpOutline, bicycle, cameraOutline, refreshOutline, scanOutline, chevronDownOutline, saveOutline, downloadOutline } from 'ionicons/icons';
 import { Api } from '../../services/api';
 
 interface ParkingRecord {
@@ -48,7 +48,7 @@ export class DashboardPage implements OnInit {
   visiblePages: (number | string)[] = [];
 
   constructor(private api: Api) { 
-    addIcons({cameraOutline,refreshOutline,scanOutline,chevronDownOutline,saveOutline,optionsOutline,carOutline,cashOutline,searchOutline,chevronBackOutline,chevronForwardOutline,car,arrowUpOutline,bicycle});
+    addIcons({cameraOutline,refreshOutline,scanOutline,chevronDownOutline,saveOutline,optionsOutline,carOutline,cashOutline,searchOutline,chevronBackOutline,chevronForwardOutline,car,arrowUpOutline,bicycle,downloadOutline});
   }
 
   ngOnInit() {
@@ -211,5 +211,9 @@ export class DashboardPage implements OnInit {
       this.updatePagination(); 
       this.generatePages(); 
     } 
+  }
+
+  exportReport() {
+    alert('Tính năng Xuất báo cáo Excel đang được phát triển!');
   }
 }

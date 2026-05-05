@@ -220,11 +220,17 @@ export class CardRegistrationPage implements OnInit {
   }
 
   async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'danger') {
+    let iconName = 'alert-circle-outline';
+    if (color === 'success') iconName = 'checkmark-circle-outline';
+    else if (color === 'warning') iconName = 'warning-outline';
+
     const toast = await this.toastCtrl.create({
       message,
       duration: 2500,
       color,
       position: 'top',
+      icon: iconName,
+      cssClass: 'toast-top-right'
     });
     toast.present();
   }
