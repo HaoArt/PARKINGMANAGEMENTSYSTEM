@@ -43,8 +43,9 @@ export class DashboardPage implements OnInit {
   filterStatus: string = 'all'; 
   
   currentPage: number = 1;
-  itemsPerPage: number = 4;
+  itemsPerPage: number = 5;
   totalPages: number = 1;
+  visiblePages: (number | string)[] = [];
 
   constructor(private api: Api) { 
     addIcons({cameraOutline,refreshOutline,scanOutline,chevronDownOutline,saveOutline,optionsOutline,carOutline,cashOutline,searchOutline,chevronBackOutline,chevronForwardOutline,car,arrowUpOutline,bicycle});
@@ -147,6 +148,7 @@ export class DashboardPage implements OnInit {
     this.totalPages = Math.ceil(this.filteredRecords.length / this.itemsPerPage) || 1;
     this.currentPage = 1; 
     this.updatePagination();
+    this.generatePages();
   }
 
   updatePagination() {
@@ -154,6 +156,60 @@ export class DashboardPage implements OnInit {
     this.paginatedRecords = this.filteredRecords.slice(start, start + this.itemsPerPage);
   }
   
-  nextPage() { if (this.currentPage < this.totalPages) { this.currentPage++; this.updatePagination(); } }
-  prevPage() { if (this.currentPage > 1) { this.currentPage--; this.updatePagination(); } }
+  generatePages() {
+    const current = this.currentPage;
+    const total = this.totalPages;
+    const delta = 1;
+    const range = [];
+    const rangeWithDots: (number | string)[] = [];
+    let l: number | undefined;
+
+    range.push(1);
+    for (let i = current - delta; i <= current + delta; i++) {
+      if (i < total && i > 1) {
+        range.push(i);
+      }
+    }
+    if (total > 1) {
+      range.push(total);
+    }
+
+    for (let i of range) {
+      if (l) {
+        if (i - l === 2) {
+          rangeWithDots.push(l + 1);
+        } else if (i - l !== 1) {
+          rangeWithDots.push('...');
+        }
+      }
+      rangeWithDots.push(i);
+      l = i;
+    }
+
+    this.visiblePages = rangeWithDots;
+  }
+
+  goToPage(page: number | string) {
+    if (typeof page === 'number' && page !== this.currentPage) {
+      this.currentPage = page;
+      this.updatePagination();
+      this.generatePages();
+    }
+  }
+
+  nextPage() { 
+    if (this.currentPage < this.totalPages) { 
+      this.currentPage++; 
+      this.updatePagination(); 
+      this.generatePages(); 
+    } 
+  }
+  
+  prevPage() { 
+    if (this.currentPage > 1) { 
+      this.currentPage--; 
+      this.updatePagination(); 
+      this.generatePages(); 
+    } 
+  }
 }

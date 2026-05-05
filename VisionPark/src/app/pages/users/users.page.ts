@@ -33,6 +33,13 @@ export class UsersPage implements OnInit {
 
   allUsers: UserRecord[] = [];
   users: UserRecord[] = [];
+  paginatedUsers: UserRecord[] = [];
+
+  // Phân trang
+  currentPage: number = 1;
+  itemsPerPage: number = 5;
+  totalPages: number = 1;
+  visiblePages: (number | string)[] = [];
   
   searchTerm: string = '';
   filterRole: string = 'all';
@@ -94,7 +101,9 @@ export class UsersPage implements OnInit {
     if (this.filterRole !== 'all') temp = temp.filter(u => u.role === this.filterRole);
     if (this.filterStatus !== 'all') temp = temp.filter(u => u.isActive === (this.filterStatus === 'active'));
     this.users = temp;
-    this.cdr.detectChanges();
+    
+    this.currentPage = 1;
+    this.calculatePagination();
   }
 
   // --- LOGIC MỞ/ĐÓNG MODAL ---
@@ -199,5 +208,83 @@ export class UsersPage implements OnInit {
       ]
     });
     await alert.present();
+  }
+
+  // --- LOGIC PHÂN TRANG ---
+  calculatePagination() {
+    this.totalPages = Math.ceil(this.users.length / this.itemsPerPage); 
+    
+    if (this.currentPage > this.totalPages && this.totalPages > 0) {
+      this.currentPage = this.totalPages;
+    } else if (this.totalPages === 0) {
+      this.currentPage = 1;
+    }
+    
+    this.updatePaginatedUsers();
+    this.generatePages();
+    this.cdr.detectChanges();
+  }
+
+  updatePaginatedUsers() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedUsers = this.users.slice(startIndex, endIndex);
+  }
+
+  generatePages() {
+    const current = this.currentPage;
+    const total = this.totalPages;
+    const delta = 1;
+    const range = [];
+    const rangeWithDots: (number | string)[] = [];
+    let l: number | undefined;
+
+    range.push(1);
+    for (let i = current - delta; i <= current + delta; i++) {
+      if (i < total && i > 1) {
+        range.push(i);
+      }
+    }
+    if (total > 1) {
+      range.push(total);
+    }
+
+    for (let i of range) {
+      if (l) {
+        if (i - l === 2) {
+          rangeWithDots.push(l + 1);
+        } else if (i - l !== 1) {
+          rangeWithDots.push('...');
+        }
+      }
+      rangeWithDots.push(i);
+      l = i;
+    }
+
+    this.visiblePages = rangeWithDots;
+  }
+
+  goToPage(page: number | string) {
+    if (typeof page === 'number' && page !== this.currentPage) {
+      this.currentPage = page;
+      this.updatePaginatedUsers();
+      this.generatePages();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePaginatedUsers();
+      this.generatePages();
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePaginatedUsers();
+      this.generatePages();
+    }
   }
 }

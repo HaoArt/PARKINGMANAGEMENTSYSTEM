@@ -136,7 +136,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr class="row-card" *ngFor="let item of monthlyTickets">
+              <tr class="row-card" *ngFor="let item of paginatedTickets">
                 <td class="nfc-col">
                   {{ item.cardUID ? item.cardUID : '---' }}
                 </td>
@@ -154,13 +154,30 @@
                 </td>
               </tr>
 
-              <tr *ngIf="monthlyTickets.length === 0 && !isLoading">
+              <tr *ngIf="paginatedTickets.length === 0 && !isLoading">
                 <td colspan="5" class="empty-state">
                   Chưa có thẻ nào được phát hành.
                 </td>
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- PHÂN TRANG -->
+        <div class="pagination" *ngIf="totalPages > 0">
+          <span class="page-info">Trang {{ currentPage }} / {{ totalPages }}</span>
+          <div class="page-controls">
+            <button (click)="prevPage()" [disabled]="currentPage === 1"><ion-icon name="chevron-back-outline"></ion-icon></button>
+            
+            <ng-container *ngFor="let page of visiblePages">
+              <button 
+                [class.active]="page === currentPage" 
+                [disabled]="page === '...'"
+                (click)="goToPage(page)">{{ page }}</button>
+            </ng-container>
+            
+            <button (click)="nextPage()" [disabled]="currentPage === totalPages"><ion-icon name="chevron-forward-outline"></ion-icon></button>
+          </div>
         </div>
       </div>
     </div>

@@ -102,11 +102,18 @@
         </table>
       </div>
 
-      <div class="pagination" *ngIf="paginatedRecords.length > 0">
+      <div class="pagination" *ngIf="totalPages > 0">
         <span class="page-info">Trang {{ currentPage }} / {{ totalPages }}</span>
         <div class="page-controls">
           <button (click)="prevPage()" [disabled]="currentPage === 1"><ion-icon name="chevron-back-outline"></ion-icon></button>
-          <button class="active">{{ currentPage }}</button>
+          
+          <ng-container *ngFor="let page of visiblePages">
+            <button 
+              [class.active]="page === currentPage" 
+              [disabled]="page === '...'"
+              (click)="goToPage(page)">{{ page }}</button>
+          </ng-container>
+          
           <button (click)="nextPage()" [disabled]="currentPage === totalPages"><ion-icon name="chevron-forward-outline"></ion-icon></button>
         </div>
       </div>
