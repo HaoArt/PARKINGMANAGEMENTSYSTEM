@@ -1,7 +1,7 @@
-<ion-header class="ion-no-border">
-  <ion-toolbar style="--background: transparent; --padding-start: 16px; --padding-end: 32px; --padding-top: 20px; --padding-bottom: 16px;">
+<!-- Thay thế ion-header bằng thẻ HTML thuần để loại bỏ hoàn toàn giới hạn Shadow DOM của Ionic -->
+<header class="flex items-center justify-between bg-white w-full border-b border-gray-200 transition-all" style="padding: 20px 32px 16px 16px;">
     
-    <ion-buttons slot="start" class="items-center">
+    <div class="flex items-center">
       <ion-menu-button color="dark" auto-hide="false" class="bg-white rounded-xl shadow-sm border border-gray-100 mr-2 lg:hidden"></ion-menu-button>
       
       <div class="page-title hidden lg:flex flex-col justify-center ml-4">
@@ -13,14 +13,14 @@
         <h1 class="text-[20px] font-black text-[#111827] m-0 tracking-tight leading-none">{{ pageTitle }}</h1>
         <p *ngIf="isDashboard" class="text-[11px] font-semibold text-gray-500 m-0 mt-1.5">{{ currentDate }}</p>
       </div>
-    </ion-buttons>
+    </div>
 
     <div class="hidden lg:flex flex-1 justify-center px-12 relative w-full max-w-[600px] mx-auto">
       <ion-icon name="search-outline" class="absolute left-16 top-1/2 -translate-y-1/2 text-gray-400 text-[18px] z-10"></ion-icon>
-      <input type="text" placeholder="Tìm kiếm phương tiện..." class="w-full bg-white border border-gray-200 rounded-full py-2.5 pl-12 pr-4 text-[13px] font-semibold text-gray-700 outline-none focus:border-[#003399] focus:ring-4 focus:ring-[#003399]/10 transition-all shadow-sm">
+      <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearch()" placeholder="Tìm kiếm biển số xe..." class="w-full bg-white border border-gray-200 rounded-full py-2.5 pl-12 pr-4 text-[13px] font-semibold text-gray-700 outline-none focus:border-[#003399] focus:ring-4 focus:ring-[#003399]/10 transition-all shadow-sm">
     </div>
 
-    <div slot="end" class="flex items-center gap-4">
+    <div class="flex items-center gap-4">
       
       <div class="hidden sm:flex items-center gap-3 mr-2">
         <button class="relative bg-white w-10 h-10 rounded-full flex items-center justify-center border border-gray-200 text-gray-500 hover:text-[#003399] hover:bg-blue-50 transition-colors shadow-sm cursor-pointer">
@@ -67,5 +67,4 @@
       </div>
 
     </div>
-  </ion-toolbar>
-</ion-header>
+</header>
