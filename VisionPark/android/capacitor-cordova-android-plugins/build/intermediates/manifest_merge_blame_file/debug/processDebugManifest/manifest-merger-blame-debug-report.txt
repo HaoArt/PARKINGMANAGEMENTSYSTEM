@@ -6,19 +6,19 @@
 6    <uses-sdk android:minSdkVersion="24" />
 7
 8    <uses-permission android:name="android.permission.NFC" />
-8-->D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:7:1-57
-8-->D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:7:18-55
+8-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:7:1-57
+8-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:7:18-55
 9
 10    <uses-feature
-10-->D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:8:1-77
+10-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:8:1-77
 11        android:name="android.hardware.nfc"
-11-->D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:8:15-50
+11-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:8:15-50
 12        android:required="false" />
-12-->D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:8:51-75
+12-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:8:51-75
 13
 14    <application android:usesCleartextTraffic="true" >
-14-->D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:4:1-6:15
-14-->D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:4:15-50
+14-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:4:1-6:15
+14-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\capacitor-cordova-android-plugins\src\main\AndroidManifest.xml:4:15-50
 15    </application>
 16
 17</manifest>

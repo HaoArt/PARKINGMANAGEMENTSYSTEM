@@ -11,259 +11,259 @@
 11    <!-- Permissions -->
 12
 13    <uses-permission android:name="android.permission.INTERNET" />
-13-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:40:5-67
-13-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:40:22-64
+13-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:40:5-67
+13-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:40:22-64
 14
 15    <queries>
-15-->[:capacitor-camera] D:\ParkingManagementSystem\VisionPark\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:7:5-17:15
+15-->[:capacitor-camera] D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:7:5-17:15
 16        <intent>
-16-->[:capacitor-camera] D:\ParkingManagementSystem\VisionPark\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:9-10:18
+16-->[:capacitor-camera] D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:9-10:18
 17            <action android:name="android.media.action.IMAGE_CAPTURE" />
-17-->[:capacitor-camera] D:\ParkingManagementSystem\VisionPark\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:9:13-73
-17-->[:capacitor-camera] D:\ParkingManagementSystem\VisionPark\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:9:21-70
+17-->[:capacitor-camera] D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:9:13-73
+17-->[:capacitor-camera] D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:9:21-70
 18        </intent>
 19        <intent>
-19-->[:capacitor-camera] D:\ParkingManagementSystem\VisionPark\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:11:9-13:18
+19-->[:capacitor-camera] D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:11:9-13:18
 20            <action android:name="android.intent.action.GET_CONTENT" />
-20-->[:capacitor-camera] D:\ParkingManagementSystem\VisionPark\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:12:13-72
-20-->[:capacitor-camera] D:\ParkingManagementSystem\VisionPark\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:12:21-69
+20-->[:capacitor-camera] D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:12:13-72
+20-->[:capacitor-camera] D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:12:21-69
 21        </intent>
 22        <intent>
-22-->[:capacitor-camera] D:\ParkingManagementSystem\VisionPark\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:14:9-16:18
+22-->[:capacitor-camera] D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:14:9-16:18
 23            <action android:name="android.intent.action.PICK" />
-23-->[:capacitor-camera] D:\ParkingManagementSystem\VisionPark\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:15:13-65
-23-->[:capacitor-camera] D:\ParkingManagementSystem\VisionPark\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:15:21-62
+23-->[:capacitor-camera] D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:15:13-65
+23-->[:capacitor-camera] D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:15:21-62
 24        </intent>
 25    </queries>
 26
 27    <uses-permission android:name="android.permission.VIBRATE" />
-27-->[:capacitor-haptics] D:\ParkingManagementSystem\VisionPark\node_modules\@capacitor\haptics\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:7:5-66
-27-->[:capacitor-haptics] D:\ParkingManagementSystem\VisionPark\node_modules\@capacitor\haptics\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:7:22-63
+27-->[:capacitor-haptics] D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\node_modules\@capacitor\haptics\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:7:5-66
+27-->[:capacitor-haptics] D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\node_modules\@capacitor\haptics\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:7:22-63
 28    <uses-permission android:name="android.permission.NFC" />
-28-->[:capacitor-cordova-android-plugins] D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:5-62
-28-->[:capacitor-cordova-android-plugins] D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:22-59
+28-->[:capacitor-cordova-android-plugins] D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:5-62
+28-->[:capacitor-cordova-android-plugins] D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:22-59
 29
 30    <uses-feature
-30-->[:capacitor-cordova-android-plugins] D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:10:5-12:36
+30-->[:capacitor-cordova-android-plugins] D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:10:5-12:36
 31        android:name="android.hardware.nfc"
-31-->[:capacitor-cordova-android-plugins] D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:11:9-44
+31-->[:capacitor-cordova-android-plugins] D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:11:9-44
 32        android:required="false" />
-32-->[:capacitor-cordova-android-plugins] D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:12:9-33
+32-->[:capacitor-cordova-android-plugins] D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:12:9-33
 33
 34    <permission
-34-->[androidx.core:core:1.17.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:22:5-24:47
+34-->[androidx.core:core:1.17.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:22:5-24:47
 35        android:name="io.ionic.starter.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
-35-->[androidx.core:core:1.17.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:23:9-81
+35-->[androidx.core:core:1.17.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:23:9-81
 36        android:protectionLevel="signature" />
-36-->[androidx.core:core:1.17.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:24:9-44
+36-->[androidx.core:core:1.17.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:24:9-44
 37
 38    <uses-permission android:name="io.ionic.starter.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
-38-->[androidx.core:core:1.17.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:26:5-97
-38-->[androidx.core:core:1.17.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:26:22-94
+38-->[androidx.core:core:1.17.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:26:5-97
+38-->[androidx.core:core:1.17.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:26:22-94
 39
 40    <application
-40-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:4:5-36:19
+40-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:4:5-36:19
 41        android:allowBackup="true"
-41-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:5:9-35
+41-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:5:9-35
 42        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
-42-->[androidx.core:core:1.17.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:28:18-86
+42-->[androidx.core:core:1.17.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:28:18-86
 43        android:debuggable="true"
 44        android:extractNativeLibs="false"
 45        android:icon="@mipmap/ic_launcher"
-45-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:6:9-43
+45-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:6:9-43
 46        android:label="@string/app_name"
-46-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:7:9-41
+46-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:7:9-41
 47        android:requestLegacyExternalStorage="true"
-47-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:8:18-61
+47-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:8:18-61
 48        android:roundIcon="@mipmap/ic_launcher_round"
-48-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:8:9-54
+48-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:8:9-54
 49        android:supportsRtl="true"
-49-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:9:9-35
+49-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:9:9-35
 50        android:testOnly="true"
 51        android:theme="@style/AppTheme"
-51-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:10:9-40
+51-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:10:9-40
 52        android:usesCleartextTraffic="true" >
-52-->[:capacitor-cordova-android-plugins] D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:14:18-53
+52-->[:capacitor-cordova-android-plugins] D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:14:18-53
 53        <activity
-53-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:12:9-25:20
+53-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:12:9-25:20
 54            android:name="io.ionic.starter.MainActivity"
-54-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:14:13-41
+54-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:14:13-41
 55            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
-55-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:13:13-148
+55-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:13:13-148
 56            android:exported="true"
-56-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:18:13-36
+56-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:18:13-36
 57            android:label="@string/title_activity_main"
-57-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:15:13-56
+57-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:15:13-56
 58            android:launchMode="singleTop"
-58-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:17:13-43
+58-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:17:13-43
 59            android:theme="@style/AppTheme.NoActionBarLaunch" >
-59-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:16:13-62
+59-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:16:13-62
 60            <intent-filter>
-60-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:20:13-23:29
+60-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:20:13-23:29
 61                <action android:name="android.intent.action.MAIN" />
-61-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:21:17-69
-61-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:21:25-66
+61-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:21:17-69
+61-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:21:25-66
 62
 63                <category android:name="android.intent.category.LAUNCHER" />
-63-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:22:17-77
-63-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:22:27-74
+63-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:22:17-77
+63-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:22:27-74
 64            </intent-filter>
 65        </activity>
 66
 67        <provider
 68            android:name="androidx.core.content.FileProvider"
-68-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:28:13-62
+68-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:28:13-62
 69            android:authorities="io.ionic.starter.fileprovider"
-69-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:29:13-64
+69-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:29:13-64
 70            android:exported="false"
-70-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:30:13-37
+70-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:30:13-37
 71            android:grantUriPermissions="true" >
-71-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:31:13-47
+71-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:31:13-47
 72            <meta-data
-72-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:32:13-34:64
+72-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:32:13-34:64
 73                android:name="android.support.FILE_PROVIDER_PATHS"
-73-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:33:17-67
+73-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:33:17-67
 74                android:resource="@xml/file_paths" />
-74-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:34:17-51
+74-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:34:17-51
 75        </provider>
 76
 77        <activity
-77-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:9:9-11:86
+77-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:9:9-11:86
 78            android:name="io.ionic.libs.ioncameralib.view.IONCAMRLoadingActivity"
-78-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:10:13-82
+78-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:10:13-82
 79            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
-79-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:11:13-83
+79-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:11:13-83
 80        <activity
-80-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:12:9-16:36
+80-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:12:9-16:36
 81            android:name="io.ionic.libs.ioncameralib.view.IONCAMRImageEditorActivity"
-81-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:13:13-86
+81-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:13:13-86
 82            android:enableOnBackInvokedCallback="true"
-82-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:14:13-55
+82-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:14:13-55
 83            android:theme="@android:style/Theme.Black.NoTitleBar" />
-83-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:15:13-66
+83-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:15:13-66
 84        <activity
-84-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:17:9-20:86
+84-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:17:9-20:86
 85            android:name="io.ionic.libs.ioncameralib.view.IONCAMROpenPhotoPickerActivity"
-85-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:18:13-90
+85-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:18:13-90
 86            android:exported="false"
-86-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:19:13-37
+86-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:19:13-37
 87            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" /> <!-- Trigger Google Play services to install the backported photo picker module. -->
-87-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:20:13-83
+87-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:20:13-83
 88        <service
-88-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:22:9-34:19
+88-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:22:9-34:19
 89            android:name="com.google.android.gms.metadata.ModuleDependencies"
-89-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:23:13-78
+89-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:23:13-78
 90            android:enabled="false"
-90-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:24:13-36
+90-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:24:13-36
 91            android:exported="false" >
-91-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:25:13-37
+91-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:25:13-37
 92            <intent-filter>
-92-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:27:13-29:29
+92-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:27:13-29:29
 93                <action android:name="com.google.android.gms.metadata.MODULE_DEPENDENCIES" />
-93-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:28:17-94
-93-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:28:25-91
+93-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:28:17-94
+93-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:28:25-91
 94            </intent-filter>
 95
 96            <meta-data
-96-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:31:13-33:36
+96-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:31:13-33:36
 97                android:name="photopicker_activity:0:required"
-97-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:32:17-63
+97-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:32:17-63
 98                android:value="" />
-98-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:33:17-33
+98-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:33:17-33
 99        </service>
 100
 101        <provider
-101-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:36:9-44:20
+101-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:36:9-44:20
 102            android:name="io.ionic.libs.ioncameralib.IONCAMRFileProvider"
-102-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:37:13-74
+102-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:37:13-74
 103            android:authorities="io.ionic.starter.camera.provider"
-103-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:38:13-67
+103-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:38:13-67
 104            android:exported="false"
-104-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:39:13-37
+104-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:39:13-37
 105            android:grantUriPermissions="true" >
-105-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:40:13-47
+105-->[io.ionic.libs:ioncamera-android:1.0.1] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:40:13-47
 106            <meta-data
-106-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:32:13-34:64
+106-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:32:13-34:64
 107                android:name="android.support.FILE_PROVIDER_PATHS"
-107-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:33:17-67
+107-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:33:17-67
 108                android:resource="@xml/ioncamera_paths" />
-108-->D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:34:17-51
+108-->D:\Thuctap\PARKINGMANAGEMENTSYSTEM\VisionPark\android\app\src\main\AndroidManifest.xml:34:17-51
 109        </provider>
 110        <provider
-110-->[androidx.emoji2:emoji2:1.3.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
+110-->[androidx.emoji2:emoji2:1.3.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
 111            android:name="androidx.startup.InitializationProvider"
-111-->[androidx.emoji2:emoji2:1.3.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0\AndroidManifest.xml:25:13-67
+111-->[androidx.emoji2:emoji2:1.3.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0\AndroidManifest.xml:25:13-67
 112            android:authorities="io.ionic.starter.androidx-startup"
-112-->[androidx.emoji2:emoji2:1.3.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0\AndroidManifest.xml:26:13-68
+112-->[androidx.emoji2:emoji2:1.3.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0\AndroidManifest.xml:26:13-68
 113            android:exported="false" >
-113-->[androidx.emoji2:emoji2:1.3.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0\AndroidManifest.xml:27:13-37
+113-->[androidx.emoji2:emoji2:1.3.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0\AndroidManifest.xml:27:13-37
 114            <meta-data
-114-->[androidx.emoji2:emoji2:1.3.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
+114-->[androidx.emoji2:emoji2:1.3.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
 115                android:name="androidx.emoji2.text.EmojiCompatInitializer"
-115-->[androidx.emoji2:emoji2:1.3.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0\AndroidManifest.xml:30:17-75
+115-->[androidx.emoji2:emoji2:1.3.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0\AndroidManifest.xml:30:17-75
 116                android:value="androidx.startup" />
-116-->[androidx.emoji2:emoji2:1.3.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0\AndroidManifest.xml:31:17-49
+116-->[androidx.emoji2:emoji2:1.3.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0\AndroidManifest.xml:31:17-49
 117            <meta-data
-117-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\ACER\.gradle\caches\8.14.3\transforms\14a3b51da1167f75215e7e32d2231e74\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:29:13-31:52
+117-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\14a3b51da1167f75215e7e32d2231e74\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:29:13-31:52
 118                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
-118-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\ACER\.gradle\caches\8.14.3\transforms\14a3b51da1167f75215e7e32d2231e74\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:30:17-78
+118-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\14a3b51da1167f75215e7e32d2231e74\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:30:17-78
 119                android:value="androidx.startup" />
-119-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\ACER\.gradle\caches\8.14.3\transforms\14a3b51da1167f75215e7e32d2231e74\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:31:17-49
+119-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\14a3b51da1167f75215e7e32d2231e74\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:31:17-49
 120            <meta-data
-120-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:29:13-31:52
+120-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:29:13-31:52
 121                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
-121-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:30:17-85
+121-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:30:17-85
 122                android:value="androidx.startup" />
-122-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:31:17-49
+122-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:31:17-49
 123        </provider>
 124        <!--
 125        Service for holding metadata. Cannot be instantiated.
 126        Metadata will be merged from other manifests.
 127        -->
 128        <service
-128-->[androidx.camera:camera-core:1.4.2] C:\Users\ACER\.gradle\caches\8.14.3\transforms\1bed5d73aa0783bafdf646ee8d6db11d\transformed\camera-core-1.4.2\AndroidManifest.xml:29:9-33:78
+128-->[androidx.camera:camera-core:1.4.2] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\1bed5d73aa0783bafdf646ee8d6db11d\transformed\camera-core-1.4.2\AndroidManifest.xml:29:9-33:78
 129            android:name="androidx.camera.core.impl.MetadataHolderService"
-129-->[androidx.camera:camera-core:1.4.2] C:\Users\ACER\.gradle\caches\8.14.3\transforms\1bed5d73aa0783bafdf646ee8d6db11d\transformed\camera-core-1.4.2\AndroidManifest.xml:30:13-75
+129-->[androidx.camera:camera-core:1.4.2] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\1bed5d73aa0783bafdf646ee8d6db11d\transformed\camera-core-1.4.2\AndroidManifest.xml:30:13-75
 130            android:enabled="false"
-130-->[androidx.camera:camera-core:1.4.2] C:\Users\ACER\.gradle\caches\8.14.3\transforms\1bed5d73aa0783bafdf646ee8d6db11d\transformed\camera-core-1.4.2\AndroidManifest.xml:31:13-36
+130-->[androidx.camera:camera-core:1.4.2] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\1bed5d73aa0783bafdf646ee8d6db11d\transformed\camera-core-1.4.2\AndroidManifest.xml:31:13-36
 131            android:exported="false" />
-131-->[androidx.camera:camera-core:1.4.2] C:\Users\ACER\.gradle\caches\8.14.3\transforms\1bed5d73aa0783bafdf646ee8d6db11d\transformed\camera-core-1.4.2\AndroidManifest.xml:32:13-37
+131-->[androidx.camera:camera-core:1.4.2] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\1bed5d73aa0783bafdf646ee8d6db11d\transformed\camera-core-1.4.2\AndroidManifest.xml:32:13-37
 132
 133        <receiver
-133-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:34:9-52:20
+133-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:34:9-52:20
 134            android:name="androidx.profileinstaller.ProfileInstallReceiver"
-134-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:35:13-76
+134-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:35:13-76
 135            android:directBootAware="false"
-135-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:36:13-44
+135-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:36:13-44
 136            android:enabled="true"
-136-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:37:13-35
+136-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:37:13-35
 137            android:exported="true"
-137-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:38:13-36
+137-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:38:13-36
 138            android:permission="android.permission.DUMP" >
-138-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:39:13-57
+138-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:39:13-57
 139            <intent-filter>
-139-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:40:13-42:29
+139-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:40:13-42:29
 140                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
-140-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:41:17-91
-140-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:41:25-88
+140-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:41:17-91
+140-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:41:25-88
 141            </intent-filter>
 142            <intent-filter>
-142-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:43:13-45:29
+142-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:43:13-45:29
 143                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
-143-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:44:17-85
-143-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:44:25-82
+143-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:44:17-85
+143-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:44:25-82
 144            </intent-filter>
 145            <intent-filter>
-145-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:46:13-48:29
+145-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:46:13-48:29
 146                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
-146-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:47:17-88
-146-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:47:25-85
+146-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:47:17-88
+146-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:47:25-85
 147            </intent-filter>
 148            <intent-filter>
-148-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:49:13-51:29
+148-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:49:13-51:29
 149                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
-149-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:50:17-95
-149-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:50:25-92
+149-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:50:17-95
+149-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\nhuan\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:50:25-92
 150            </intent-filter>
 151        </receiver>
 152    </application>
