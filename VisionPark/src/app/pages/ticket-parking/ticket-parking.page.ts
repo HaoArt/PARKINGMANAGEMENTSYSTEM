@@ -2,7 +2,6 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core'; //
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
-
   IonContent,
   IonIcon,
   IonGrid,
@@ -17,7 +16,6 @@ import { Api } from '../../services/api';
 import { NFC, Ndef } from '@awesome-cordova-plugins/nfc/ngx';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Capacitor } from '@capacitor/core';
-
 
 interface MonthlyTicketRecord {
   ticketId: number;
@@ -49,14 +47,12 @@ interface MonthlyTicketRecord {
     CommonModule,
     FormsModule,
     NavbarComponent,
-
   ],
   providers: [NFC, Ndef],
 })
 export class TicketParkingPage implements OnInit {
   private api = inject(Api);
   private platform = inject(Platform);
-
 
   allMonthlyTickets: MonthlyTicketRecord[] = [];
   monthlyTickets: MonthlyTicketRecord[] = [];
@@ -108,7 +104,6 @@ export class TicketParkingPage implements OnInit {
           this.allMonthlyTickets = res.data;
 
           this.applyFilters();
-
         }
         this.isLoading = false;
       },
@@ -118,7 +113,6 @@ export class TicketParkingPage implements OnInit {
       },
     });
   }
-
 
   applyFilters() {
     if (this.filterStatus === 'active') {
@@ -166,7 +160,6 @@ export class TicketParkingPage implements OnInit {
       }
     } catch (error) {
       console.log('User cancelled or error:', error);
-
     }
   }
 
@@ -184,7 +177,6 @@ export class TicketParkingPage implements OnInit {
   }
 
   onSubmit() {
-
     if (!this.regData.cardUID)
       return alert('Vui lòng quét hoặc nhập mã thẻ NFC!');
     if (!this.selectedImageFile)
@@ -199,9 +191,7 @@ export class TicketParkingPage implements OnInit {
     formData.append('CustomerName', this.regData.customerName);
     formData.append('PhoneNumber', this.regData.phoneNumber);
     if (this.regData.registerPlate) {
-
       formData.append('RegisterPlate', this.regData.registerPlate);
-
     }
     formData.append('VehicleTypeID', this.regData.vehicleTypeID.toString());
     formData.append('DurationMonths', this.regData.durationMonths.toString());
@@ -225,50 +215,63 @@ export class TicketParkingPage implements OnInit {
 
   resetForm() {
     this.regData = {
-
       cardUID: '',
       customerName: '',
       phoneNumber: '',
       registerPlate: '',
       vehicleTypeID: 1,
       durationMonths: 1,
-
     };
     this.selectedImageFile = null;
     this.imagePreview = null;
   }
 
-
   startNFC() {
     if (this.platform.is('capacitor') || this.platform.is('cordova')) {
+      // 1. Lắng nghe thẻ NFC cơ bản (Thẻ trắng)
       this.nfc.addTagDiscoveredListener().subscribe({
-        next: (event: any) => {
-          const cardUID = this.nfc.bytesToHexString(event.tag.id).toUpperCase();
-          this.regData.cardUID = cardUID;
+        next: (event: any) => this.handleTagEvent(event),
+        error: (err) => console.error('Lỗi NFC Tag:', err),
+      });
 
-          // Chìa khóa: Ép màn hình điền mã thẻ ngay lập tức khi quẹt
-          this.cdr.detectChanges();
-
-          // Bạn có thể giữ alert hoặc bỏ đi vì giờ thẻ quẹt sẽ nhảy thẳng vào ô input rất mượt
-          alert('Đã nhận thẻ: ' + cardUID);
-        },
-        error: (err) => console.error('Lỗi NFC:', err)
+      // 2. BẮT BUỘC: Lắng nghe thẻ có chứa dữ liệu NDEF để chặn Android tự mở link/app khác
+      this.nfc.addNdefListener().subscribe({
+        next: (event: any) => this.handleTagEvent(event),
+        error: (err) => console.error('Lỗi NFC NDEF:', err),
       });
     } else {
-      console.warn('NFC plugin chỉ hoạt động trên thiết bị thực (Android/iOS). Môi trường hiện tại là trình duyệt.');
+      console.warn(
+        'NFC plugin chỉ hoạt động trên thiết bị thực (Android/iOS). Môi trường hiện tại là trình duyệt.',
+      );
+    }
+  }
+
+  // Tách logic ra một hàm dùng chung cho cả 2 loại thẻ
+  handleTagEvent(event: any) {
+    if (event && event.tag && event.tag.id) {
+      const cardUID = this.nfc.bytesToHexString(event.tag.id).toUpperCase();
+
+      // Gán mã thẻ vào biến của trang Phát hành thẻ (regData)
+      this.regData.cardUID = cardUID;
+
+      // Ép màn hình điền mã thẻ ngay lập tức khi quẹt
+      this.cdr.detectChanges();
+
+      // Hiện thông báo (Bạn có thể dùng Toast thay cho alert cho đẹp hơn)
+      alert('Đã nhận thẻ: ' + cardUID);
     }
   }
 
   // --- LOGIC PHÂN TRANG ---
   calculatePagination() {
     this.totalPages = Math.ceil(this.monthlyTickets.length / this.itemsPerPage);
-    
+
     if (this.currentPage > this.totalPages && this.totalPages > 0) {
       this.currentPage = this.totalPages;
     } else if (this.totalPages === 0) {
       this.currentPage = 1;
     }
-    
+
     this.updatePaginatedTickets();
     this.generatePages();
   }

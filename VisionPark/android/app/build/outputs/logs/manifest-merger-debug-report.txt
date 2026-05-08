@@ -1,20 +1,20 @@
 -- Merging decision tree log ---
 provider#androidx.core.content.FileProvider
-INJECTED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:29:9-37:20
+INJECTED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:50:5-58:16
 	android:grantUriPermissions
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:33:13-47
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:54:7-41
 	android:authorities
 		INJECTED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:31:13-64
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:52:7-58
 	android:exported
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:32:13-37
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:53:7-31
 	android:name
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:30:13-62
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:51:7-56
 manifest
-ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:2:1-43:12
-INJECTED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:2:1-43:12
-INJECTED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:2:1-43:12
-INJECTED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:2:1-43:12
+ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:2:1-61:12
+INJECTED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:2:1-61:12
+INJECTED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:2:1-61:12
+INJECTED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:2:1-61:12
 MERGED from [:capacitor-app] D:\ParkingManagementSystem\VisionPark\node_modules\@capacitor\app\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:2:1-7:12
 MERGED from [:capacitor-camera] D:\ParkingManagementSystem\VisionPark\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:2:1-19:12
 MERGED from [:capacitor-haptics] D:\ParkingManagementSystem\VisionPark\node_modules\@capacitor\haptics\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:2:1-9:12
@@ -79,9 +79,29 @@ MERGED from [androidx.core:core-viewtree:1.0.0] C:\Users\ACER\.gradle\caches\8.1
 		INJECTED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml
 	xmlns:android
 		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:2:11-69
+uses-feature#android.hardware.camera
+ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:4:3-6:32
+	android:required
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:6:5-29
+	android:name
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:5:5-43
+uses-permission#android.permission.INTERNET
+ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:8:3-65
+	android:name
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:8:20-62
+uses-permission#android.permission.NFC
+ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:9:3-60
+MERGED from [:capacitor-cordova-android-plugins] D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:5-62
+MERGED from [:capacitor-cordova-android-plugins] D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:5-62
+	android:name
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:9:20-57
+uses-permission#android.permission.CAMERA
+ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:10:3-63
+	android:name
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:10:20-60
 application
-ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:4:5-38:19
-INJECTED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:4:5-38:19
+ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:12:3-59:17
+INJECTED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:12:3-59:17
 MERGED from [:capacitor-cordova-android-plugins] D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:14:5-15:19
 MERGED from [:capacitor-cordova-android-plugins] D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:14:5-15:19
 MERGED from [io.ionic.libs:ioncamera-android:1.0.1] C:\Users\ACER\.gradle\caches\8.14.3\transforms\a295b38db932f479cec579b2dc812c1a\transformed\ioncamera-android-1.0.1\AndroidManifest.xml:8:5-45:19
@@ -111,55 +131,75 @@ MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\AC
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.17.0] C:\Users\ACER\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:28:18-86
 	android:supportsRtl
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:9:9-35
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:17:5-31
 	android:label
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:7:9-41
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:15:5-37
 	android:roundIcon
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:8:9-54
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:16:5-50
 	android:icon
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:6:9-43
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:14:5-39
 	android:allowBackup
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:5:9-35
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:13:5-31
 	android:theme
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:10:9-40
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:18:5-36
 	android:usesCleartextTraffic
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:11:7-42
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:19:5-40
 activity#io.ionic.starter.MainActivity
-ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:13:9-27:20
+ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:21:5-48:16
 	android:label
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:16:13-56
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:24:7-50
 	android:launchMode
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:18:13-43
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:26:7-37
 	android:exported
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:19:13-36
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:27:7-30
 	android:configChanges
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:14:13-148
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:22:7-142
 	android:theme
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:17:13-62
-	android:usesCleartextTraffic
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:20:13-48
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:25:7-56
 	android:name
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:15:13-41
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:23:7-35
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:22:13-25:29
+ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:29:7-32:23
 action#android.intent.action.MAIN
-ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:23:17-69
+ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:30:9-61
 	android:name
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:23:25-66
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:30:17-58
 category#android.intent.category.LAUNCHER
-ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:24:17-77
+ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:31:9-69
 	android:name
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:24:27-74
-uses-permission#android.permission.INTERNET
-ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:42:5-67
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:31:19-66
+intent-filter#action:name:android.nfc.action.NDEF_DISCOVERED+category:name:android.intent.category.DEFAULT+data:mimeType:*/*
+ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:34:7-38:23
+action#android.nfc.action.NDEF_DISCOVERED
+ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:35:9-68
 	android:name
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:42:22-64
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:35:17-66
+category#android.intent.category.DEFAULT
+ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:36:9-67
+	android:name
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:36:19-65
+data
+ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:37:9-39
+	android:mimeType
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:37:15-37
+intent-filter#action:name:android.nfc.action.TAG_DISCOVERED+category:name:android.intent.category.DEFAULT
+ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:39:7-42:23
+action#android.nfc.action.TAG_DISCOVERED
+ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:40:9-67
+	android:name
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:40:17-65
+intent-filter#action:name:android.nfc.action.TECH_DISCOVERED+category:name:android.intent.category.DEFAULT
+ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:43:7-46:23
+action#android.nfc.action.TECH_DISCOVERED
+ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:44:9-68
+	android:name
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:44:17-66
 meta-data#android.support.FILE_PROVIDER_PATHS
-ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:34:13-36:64
+ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:55:7-57:56
 	android:resource
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:36:17-51
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:57:9-43
 	android:name
-		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:35:17-67
+		ADDED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml:56:9-59
 uses-sdk
 INJECTED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from D:\ParkingManagementSystem\VisionPark\android\app\src\main\AndroidManifest.xml
@@ -304,10 +344,6 @@ uses-permission#android.permission.VIBRATE
 ADDED from [:capacitor-haptics] D:\ParkingManagementSystem\VisionPark\node_modules\@capacitor\haptics\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:7:5-66
 	android:name
 		ADDED from [:capacitor-haptics] D:\ParkingManagementSystem\VisionPark\node_modules\@capacitor\haptics\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:7:22-63
-uses-permission#android.permission.NFC
-ADDED from [:capacitor-cordova-android-plugins] D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:5-62
-	android:name
-		ADDED from [:capacitor-cordova-android-plugins] D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:22-59
 uses-feature#android.hardware.nfc
 ADDED from [:capacitor-cordova-android-plugins] D:\ParkingManagementSystem\VisionPark\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:10:5-12:36
 	android:required

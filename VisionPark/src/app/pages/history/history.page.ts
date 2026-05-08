@@ -83,6 +83,7 @@ export class HistoryPage implements OnInit {
   private api = inject(Api);
   private toastCtrl = inject(ToastController);
   private platform = inject(Platform);
+  private lastScanTime: number = 0;
 
   parkingHistory: ParkingRecord[] = [];
   paginatedHistory: ParkingRecord[] = [];
@@ -116,21 +117,40 @@ export class HistoryPage implements OnInit {
   // 👉 HÀM LẮNG NGHE THẺ NFC CHẠM VÀO ĐIỆN THOẠI
   startNFC() {
     if (this.platform.is('capacitor') || this.platform.is('cordova')) {
+      // 1. Lắng nghe thẻ NFC cơ bản (Thẻ trắng)
       this.nfc.addTagDiscoveredListener().subscribe({
-        next: (event: any) => {
-          const cardUID = this.nfc.bytesToHexString(event.tag.id).toUpperCase();
-          this.inputNfcId = cardUID; // Gán mã thẻ vào ô input
+        next: (event: any) => this.handleTagEvent(event),
+        error: (err) => console.error('Lỗi NFC Tag:', err),
+      });
 
-          this.cdr.detectChanges(); // Ép giao diện hiển thị ngay mã thẻ
-          this.showToast('Đã nhận thẻ: ' + cardUID, 'success');
-
-          // Tự động gọi hàm quét thẻ (như kiểu bấm nút "Enter")
-          this.onProcessCard(cardUID);
-        },
-        error: (err) => console.error('Lỗi NFC:', err)
+      // 2. BẮT BUỘC: Lắng nghe thẻ có chứa dữ liệu NDEF để chặn Android chuyển hướng
+      this.nfc.addNdefListener().subscribe({
+        next: (event: any) => this.handleTagEvent(event),
+        error: (err) => console.error('Lỗi NFC NDEF:', err),
       });
     } else {
-      console.warn('NFC plugin chỉ hoạt động trên thiết bị thực (Android/iOS). Môi trường hiện tại là trình duyệt.');
+      console.warn('NFC plugin chỉ hoạt động trên thiết bị thực.');
+    }
+  }
+  handleTagEvent(event: any) {
+    // 👉 1. LOGIC CHỐNG ĐÚP (COOLDOWN)
+    const currentTime = new Date().getTime();
+    if (currentTime - this.lastScanTime < 2000) {
+      // Nếu thời gian quẹt cách lần trước chưa tới 2000ms (2 giây) -> Bỏ qua ngay lập tức
+      return;
+    }
+    this.lastScanTime = currentTime; // Cập nhật lại mốc thời gian vừa quẹt xong
+
+    // 👉 2. LOGIC XỬ LÝ THẺ BÌNH THƯỜNG
+    if (event && event.tag && event.tag.id) {
+      const scannedUID = this.nfc.bytesToHexString(event.tag.id).toUpperCase();
+
+      this.inputNfcId = scannedUID;
+      this.cdr.detectChanges();
+      this.showToast('Đã nhận mã thẻ: ' + scannedUID, 'success');
+
+      // Tự động gọi API
+      this.onProcessCard(scannedUID);
     }
   }
 
@@ -153,10 +173,10 @@ export class HistoryPage implements OnInit {
         } else {
           this.parkingHistory = [];
         }
-        
+
         this.currentPage = 1;
         this.calculatePagination();
-        
+
         this.isLoading = false;
         this.cdr.detectChanges(); // Update UI
       },
@@ -252,21 +272,21 @@ export class HistoryPage implements OnInit {
       color,
       position: 'top',
       icon: iconName,
-      cssClass: 'toast-top-right'
+      cssClass: 'toast-top-right',
     });
     toast.present();
   }
 
   // --- LOGIC PHÂN TRANG ---
   calculatePagination() {
-    this.totalPages = Math.ceil(this.parkingHistory.length / this.itemsPerPage); 
-    
+    this.totalPages = Math.ceil(this.parkingHistory.length / this.itemsPerPage);
+
     if (this.currentPage > this.totalPages && this.totalPages > 0) {
       this.currentPage = this.totalPages;
     } else if (this.totalPages === 0) {
       this.currentPage = 1;
     }
-    
+
     this.updatePaginatedHistory();
     this.generatePages();
   }
@@ -287,14 +307,21 @@ export class HistoryPage implements OnInit {
 
     range.push(1);
     for (let i = current - delta; i <= current + delta; i++) {
-      if (i < total && i > 1) { range.push(i); }
+      if (i < total && i > 1) {
+        range.push(i);
+      }
     }
-    if (total > 1) { range.push(total); }
+    if (total > 1) {
+      range.push(total);
+    }
 
     for (let i of range) {
       if (l) {
-        if (i - l === 2) { rangeWithDots.push(l + 1); } 
-        else if (i - l !== 1) { rangeWithDots.push('...'); }
+        if (i - l === 2) {
+          rangeWithDots.push(l + 1);
+        } else if (i - l !== 1) {
+          rangeWithDots.push('...');
+        }
       }
       rangeWithDots.push(i);
       l = i;
@@ -311,11 +338,26 @@ export class HistoryPage implements OnInit {
     }
   }
 
-  nextPage() { if (this.currentPage < this.totalPages) { this.currentPage++; this.updatePaginatedHistory(); this.generatePages(); } }
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePaginatedHistory();
+      this.generatePages();
+    }
+  }
 
-  prevPage() { if (this.currentPage > 1) { this.currentPage--; this.updatePaginatedHistory(); this.generatePages(); } }
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePaginatedHistory();
+      this.generatePages();
+    }
+  }
 
   exportReport() {
-    this.showToast('Tính năng Xuất báo cáo Excel đang được phát triển!', 'warning');
+    this.showToast(
+      'Tính năng Xuất báo cáo Excel đang được phát triển!',
+      'warning',
+    );
   }
 }

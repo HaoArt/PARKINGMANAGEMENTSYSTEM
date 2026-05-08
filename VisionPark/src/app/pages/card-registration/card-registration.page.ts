@@ -53,7 +53,7 @@ export class CardRegistrationPage implements OnInit {
   cardForm = {
     cardUID: '',
     cardType: 'Monthly',
-    status: 'Active' 
+    status: 'Active',
   };
 
   constructor(
@@ -65,22 +65,38 @@ export class CardRegistrationPage implements OnInit {
 
   ngOnInit() {
     this.loadSystemCards();
-    this.startNFC(); 
+    this.startNFC();
   }
 
   startNFC() {
     if (this.platform.is('capacitor') || this.platform.is('cordova')) {
+      // 1. Lắng nghe thẻ NFC cơ bản (Thẻ trắng)
       this.nfc.addTagDiscoveredListener().subscribe({
-        next: (event: any) => {
-          const scannedUID = this.nfc.bytesToHexString(event.tag.id).toUpperCase();
-          this.cardForm.cardUID = scannedUID;
-          this.cdr.detectChanges(); 
-          this.showToast('Đã nhận mã thẻ: ' + scannedUID, 'success');
-        },
-        error: (err) => console.error('Lỗi NFC:', err)
+        next: (event: any) => this.handleTagEvent(event),
+        error: (err) => console.error('Lỗi NFC Tag:', err),
+      });
+
+      // 2. BẮT BUỘC: Lắng nghe thẻ có chứa dữ liệu NDEF để chặn Android chuyển hướng
+      this.nfc.addNdefListener().subscribe({
+        next: (event: any) => this.handleTagEvent(event),
+        error: (err) => console.error('Lỗi NFC NDEF:', err),
       });
     } else {
-      console.warn('NFC plugin chỉ hoạt động trên thiết bị thực (Android/iOS). Môi trường hiện tại là trình duyệt.');
+      console.warn('NFC plugin chỉ hoạt động trên thiết bị thực.');
+    }
+  }
+
+  // Tách logic xử lý ra một hàm riêng để dùng chung cho gọn
+  handleTagEvent(event: any) {
+    if (event && event.tag && event.tag.id) {
+      const scannedUID = this.nfc.bytesToHexString(event.tag.id).toUpperCase();
+      this.cardForm.cardUID = scannedUID; // Đổi thành this.inputNfcId nếu là trang History
+
+      this.cdr.detectChanges();
+      this.showToast('Đã nhận mã thẻ: ' + scannedUID, 'success');
+
+      // Nếu ở trang History thì nhớ gọi thêm hàm này:
+      // this.onProcessCard(scannedUID);
     }
   }
 
@@ -91,9 +107,9 @@ export class CardRegistrationPage implements OnInit {
         // CẬP NHẬT: Xử lý dữ liệu trả về trực tiếp dưới dạng mảng
         let rawData = [];
         if (res && res.data) {
-          rawData = res.data; 
+          rawData = res.data;
         } else if (Array.isArray(res)) {
-          rawData = res;      
+          rawData = res;
         }
 
         this.systemCards = rawData.map((item: any) => {
@@ -101,7 +117,7 @@ export class CardRegistrationPage implements OnInit {
             cardID: item.cardID || item.CardID,
             cardUID: item.cardUID || item.CardUID,
             cardType: item.cardType || item.CardType,
-            status: item.status || item.Status
+            status: item.status || item.Status,
           };
         });
 
@@ -117,18 +133,18 @@ export class CardRegistrationPage implements OnInit {
         this.cdr.detectChanges();
       },
     });
-  } 
+  }
 
   // Chuyển sang chế độ Sửa khi bấm vào icon Edit trên bảng
   editCard(item: CardRecord) {
     this.isEditing = true;
     this.editingCardId = item.cardID;
-    
+
     // Đổ dữ liệu từ bảng lên Form
     this.cardForm = {
       cardUID: item.cardUID,
       cardType: item.cardType,
-      status: item.status
+      status: item.status,
     };
   }
 
@@ -159,10 +175,13 @@ export class CardRegistrationPage implements OnInit {
           this.cdr.detectChanges();
         },
         error: (err) => {
-          this.showToast(err.error?.message || 'Lỗi khi cập nhật thẻ!', 'danger');
+          this.showToast(
+            err.error?.message || 'Lỗi khi cập nhật thẻ!',
+            'danger',
+          );
           this.isSubmitting = false;
           this.cdr.detectChanges();
-        }
+        },
       });
     } else {
       // GỌI API THÊM MỚI
@@ -178,7 +197,7 @@ export class CardRegistrationPage implements OnInit {
           this.showToast(err.error?.message || 'Lỗi khi lưu thẻ!', 'danger');
           this.isSubmitting = false;
           this.cdr.detectChanges();
-        }
+        },
       });
     }
   }
@@ -202,11 +221,11 @@ export class CardRegistrationPage implements OnInit {
               },
               error: (err) => {
                 this.showToast('Lỗi khi xóa thẻ!', 'danger');
-              }
+              },
             });
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
     await alert.present();
   }
@@ -215,11 +234,14 @@ export class CardRegistrationPage implements OnInit {
     this.cardForm = {
       cardUID: '',
       cardType: 'Monthly',
-      status: 'Active'
+      status: 'Active',
     };
   }
 
-  async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'danger') {
+  async showToast(
+    message: string,
+    color: 'success' | 'danger' | 'warning' = 'danger',
+  ) {
     let iconName = 'alert-circle-outline';
     if (color === 'success') iconName = 'checkmark-circle-outline';
     else if (color === 'warning') iconName = 'warning-outline';
@@ -230,7 +252,7 @@ export class CardRegistrationPage implements OnInit {
       color,
       position: 'top',
       icon: iconName,
-      cssClass: 'toast-top-right'
+      cssClass: 'toast-top-right',
     });
     toast.present();
   }
@@ -238,13 +260,13 @@ export class CardRegistrationPage implements OnInit {
   // --- LOGIC PHÂN TRANG ---
   calculatePagination() {
     this.totalPages = Math.ceil(this.systemCards.length / this.itemsPerPage);
-    
+
     if (this.currentPage > this.totalPages && this.totalPages > 0) {
       this.currentPage = this.totalPages;
     } else if (this.totalPages === 0) {
       this.currentPage = 1;
     }
-    
+
     this.updatePaginatedCards();
     this.generatePages();
   }
