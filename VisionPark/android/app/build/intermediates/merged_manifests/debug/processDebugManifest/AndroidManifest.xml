@@ -56,7 +56,8 @@
             android:exported="true"
             android:label="@string/title_activity_main"
             android:launchMode="singleTop"
-            android:theme="@style/AppTheme.NoActionBarLaunch" >
+            android:theme="@style/AppTheme.NoActionBarLaunch"
+            android:usesCleartextTraffic="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

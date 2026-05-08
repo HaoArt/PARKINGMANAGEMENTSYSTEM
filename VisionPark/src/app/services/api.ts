@@ -1,10 +1,7 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:5295/api'
-};
+import { environment } from '@environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -13,9 +10,25 @@ export class Api {
   private http = inject(HttpClient);
   private baseUrl = environment.apiUrl;
 
+  // Hàm tiện ích để đính kèm Token JWT vào Header
+  private getAuthOptions() {
+    let headers = new HttpHeaders();
+    const token = localStorage.getItem('token');
+
+    // Bật log để kiểm tra token có tồn tại không
+    console.log(
+      'Token lấy từ Local Storage:',
+      token ? token.substring(0, 20) + '...' : 'NULL',
+    );
+
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return { headers };
+  }
+
   getAllCards(): Observable<any> {
     return this.http.get(`${this.baseUrl}/Cards`);
-
   }
 
   createCard(cardData: any): Observable<any> {
@@ -88,10 +101,14 @@ export class Api {
   }
 
   getSettings(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/Settings`);
+    return this.http.get(`${this.baseUrl}/Settings`, this.getAuthOptions());
   }
 
   saveSettings(payload: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/Settings/update`, payload);
+    return this.http.post(
+      `${this.baseUrl}/Settings/update`,
+      payload,
+      this.getAuthOptions(),
+    );
   }
 }

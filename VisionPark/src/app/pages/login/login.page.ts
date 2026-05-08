@@ -17,7 +17,9 @@ import {
   IonTitle,
   IonCardHeader,
   IonCardSubtitle,
-  IonCardTitle, IonImg } from '@ionic/angular/standalone';
+  IonCardTitle,
+  IonImg,
+} from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { personOutline, lockClosedOutline } from 'ionicons/icons';
 import { Api } from '../../services/api';
@@ -27,7 +29,8 @@ import { Api } from '../../services/api';
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   standalone: true,
-  imports: [IonImg, 
+  imports: [
+    IonImg,
     IonCardTitle,
     CommonModule,
     FormsModule,
@@ -79,18 +82,26 @@ export class LoginPage implements OnInit {
 
         const name = res.fullName || res.FullName || res.username || 'User';
         const role = res.role || res.Role || 'Security';
+        // Lấy token từ response (Tuỳ thuộc vào backend trả về object như thế nào)
+        const token =
+          res.token || res.Token || res.data?.token || res.data?.Token;
 
         this.showToast(`Xin chào ${name}!`, 'success');
 
         // Lưu thông tin vào bộ nhớ trình duyệt
         localStorage.setItem('userRole', role);
         localStorage.setItem('fullName', name);
+        if (token) {
+          localStorage.setItem('token', token);
+        } else {
+          console.warn('Không tìm thấy token trong API response:', res);
+        }
 
         this.navCtrl.navigateRoot('/dashboard');
       },
       error: async (err) => {
         await loading.dismiss();
-        console.error('Lỗi đăng nhập:', err);
+        console.error('Lỗi đăng nhập chi tiết: ' + JSON.stringify(err));
 
         // Kiểm tra lỗi trả về từ Backend (như "Sai mật khẩu", "Tài khoản bị khóa")
         let errorMsg = 'Mất kết nối đến Server!';

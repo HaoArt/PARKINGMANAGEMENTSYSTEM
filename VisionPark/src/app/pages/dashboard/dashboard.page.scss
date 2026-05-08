@@ -350,45 +350,44 @@ table {
   }
 }
 
+/* --- Phân trang --- */
 .pagination {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 20px;
+  padding-top: 20px;
+  margin-top: 10px;
+  border-top: 1px solid #e2e8f0;
+
   .page-info {
-    font-size: 12px;
-    color: #9ca3af;
-    font-weight: 500;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
   }
+
   .page-controls {
     display: flex;
     gap: 8px;
-  }
-  button {
-    border: none;
-    background: transparent;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #6b7280;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  button.active {
-    background: #111827;
-    color: #ffffff;
-  }
-  display: flex;
-  justify-content: space-between;
 
-  &.card-dark {
-    background: #003399;
-    box-shadow: 0 8px 20px rgba(0, 51, 153, 0.2);
-    .label { color: #93c5fd; }
-    .value, .unit { color: #ffffff; }
+    button {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 13px;
+      transition: 0.2s;
+
+      &:hover:not(:disabled) { background: #f8fafc; color: #0f172a; }
+      &.active { background: #003399; color: #ffffff; border-color: #003399; }
+      &:disabled { opacity: 0.5; cursor: not-allowed; }
+    }
   }
 }
 

@@ -17,7 +17,10 @@
   </ion-content>
 
   <div class="sidebar-footer" style="background: #ffffff; padding: 24px;">
-    <button class="btn-export w-full bg-[#003399] text-white border-none p-4 rounded-xl text-[13px] font-bold cursor-pointer mb-4 shadow-[0_4px_12px_rgba(0,51,153,0.2)] hover:bg-[#002277] transition-all">Xuất báo cáo</button>
+    <button (click)="logout()" class="w-full bg-[#fef2f2] text-[#ef4444] border-none p-4 rounded-xl text-[14px] font-bold cursor-pointer mb-4 transition-all hover:bg-[#fee2e2] flex justify-center items-center gap-2">
+      <ion-icon name="log-out-outline" class="text-[20px]"></ion-icon> Đăng xuất
+    </button>
+
     <div class="footer-links flex flex-col gap-4">
       <a href="#" class="flex items-center gap-3 no-underline text-[12px] font-bold text-gray-500 uppercase transition-all hover:text-[#111827]">
         <ion-icon name="help-circle-outline" class="text-[20px]"></ion-icon> Trung tâm hỗ trợ

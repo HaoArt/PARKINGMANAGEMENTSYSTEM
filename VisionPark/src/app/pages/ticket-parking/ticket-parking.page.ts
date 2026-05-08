@@ -8,6 +8,7 @@ import {
   IonGrid,
   IonRow,
   IonCardContent,
+  Platform,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import * as icons from 'ionicons/icons';
@@ -54,10 +55,18 @@ interface MonthlyTicketRecord {
 })
 export class TicketParkingPage implements OnInit {
   private api = inject(Api);
+  private platform = inject(Platform);
 
 
   allMonthlyTickets: MonthlyTicketRecord[] = [];
   monthlyTickets: MonthlyTicketRecord[] = [];
+  paginatedTickets: MonthlyTicketRecord[] = [];
+
+  // Phân trang
+  currentPage: number = 1;
+  itemsPerPage: number = 5;
+  totalPages: number = 1;
+  visiblePages: (number | string)[] = [];
 
   filterStatus: string = 'all';
 
@@ -123,6 +132,8 @@ export class TicketParkingPage implements OnInit {
     } else {
       this.monthlyTickets = [...this.allMonthlyTickets];
     }
+    this.currentPage = 1; // Reset về trang 1 khi lọc
+    this.calculatePagination();
   }
 
   handleImageClick(fileInputElement: HTMLInputElement) {
@@ -229,16 +240,100 @@ export class TicketParkingPage implements OnInit {
 
 
   startNFC() {
-    this.nfc.addTagDiscoveredListener().subscribe((event: any) => {
-      const cardUID = this.nfc.bytesToHexString(event.tag.id).toUpperCase();
-      this.regData.cardUID = cardUID;
+    if (this.platform.is('capacitor') || this.platform.is('cordova')) {
+      this.nfc.addTagDiscoveredListener().subscribe({
+        next: (event: any) => {
+          const cardUID = this.nfc.bytesToHexString(event.tag.id).toUpperCase();
+          this.regData.cardUID = cardUID;
 
-      // Chìa khóa: Ép màn hình điền mã thẻ ngay lập tức khi quẹt
-      this.cdr.detectChanges();
+          // Chìa khóa: Ép màn hình điền mã thẻ ngay lập tức khi quẹt
+          this.cdr.detectChanges();
 
-      // Bạn có thể giữ alert hoặc bỏ đi vì giờ thẻ quẹt sẽ nhảy thẳng vào ô input rất mượt
-      alert('Đã nhận thẻ: ' + cardUID);
-    });
+          // Bạn có thể giữ alert hoặc bỏ đi vì giờ thẻ quẹt sẽ nhảy thẳng vào ô input rất mượt
+          alert('Đã nhận thẻ: ' + cardUID);
+        },
+        error: (err) => console.error('Lỗi NFC:', err)
+      });
+    } else {
+      console.warn('NFC plugin chỉ hoạt động trên thiết bị thực (Android/iOS). Môi trường hiện tại là trình duyệt.');
+    }
+  }
+
+  // --- LOGIC PHÂN TRANG ---
+  calculatePagination() {
+    this.totalPages = Math.ceil(this.monthlyTickets.length / this.itemsPerPage);
+    
+    if (this.currentPage > this.totalPages && this.totalPages > 0) {
+      this.currentPage = this.totalPages;
+    } else if (this.totalPages === 0) {
+      this.currentPage = 1;
+    }
+    
+    this.updatePaginatedTickets();
+    this.generatePages();
+  }
+
+  updatePaginatedTickets() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedTickets = this.monthlyTickets.slice(startIndex, endIndex);
+  }
+
+  // Hàm tạo mảng số trang hiển thị (vd: [1, 2, '...', 5])
+  generatePages() {
+    const current = this.currentPage;
+    const total = this.totalPages;
+    const delta = 1; // Số lượng trang hiển thị kề bên trang hiện tại
+    const range = [];
+    const rangeWithDots: (number | string)[] = [];
+    let l: number | undefined;
+
+    range.push(1);
+    for (let i = current - delta; i <= current + delta; i++) {
+      if (i < total && i > 1) {
+        range.push(i);
+      }
+    }
+    if (total > 1) {
+      range.push(total);
+    }
+
+    for (let i of range) {
+      if (l) {
+        if (i - l === 2) {
+          rangeWithDots.push(l + 1);
+        } else if (i - l !== 1) {
+          rangeWithDots.push('...');
+        }
+      }
+      rangeWithDots.push(i);
+      l = i;
+    }
+
+    this.visiblePages = rangeWithDots;
+  }
+
+  goToPage(page: number | string) {
+    if (typeof page === 'number' && page !== this.currentPage) {
+      this.currentPage = page;
+      this.updatePaginatedTickets();
+      this.generatePages();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePaginatedTickets();
+      this.generatePages();
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePaginatedTickets();
+      this.generatePages();
+    }
   }
 }
-

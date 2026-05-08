@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -33,6 +33,7 @@ import {
   businessOutline,
   timeOutline,
   callOutline,
+  refreshOutline,
 } from 'ionicons/icons';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 
@@ -79,9 +80,12 @@ export class SettingsPage implements OnInit {
   CurrentTab: string = 'general';
   SystemConfig: any = {};
   PricingRules: any[] = [];
+  isLoading: boolean = false;
+  isSaving: boolean = false;
 
   private api = inject(Api);
   private toastCtrl = inject(ToastController);
+  private cdr = inject(ChangeDetectorRef);
 
   constructor() {
     addIcons({
@@ -93,6 +97,7 @@ export class SettingsPage implements OnInit {
       businessOutline,
       timeOutline,
       callOutline,
+      refreshOutline,
     });
   }
 
@@ -101,34 +106,43 @@ export class SettingsPage implements OnInit {
   }
 
   loadSettings() {
+    this.isLoading = true;
     this.api.getSettings().subscribe({
       next: (res: any) => {
+        const data = res?.data || res;
+
         // Hứng dữ liệu Cài đặt chung
-        if (res?.systemConfig) {
+        if (data?.systemConfig || data?.SystemConfig) {
+          const sys = data.systemConfig || data.SystemConfig;
           this.SystemConfig = {
-            ParkingName:
-              res.systemConfig.parkingName || res.systemConfig.ParkingName,
-            MaxCapacity:
-              res.systemConfig.maxCapacity || res.systemConfig.MaxCapacity,
-            OpenTime: res.systemConfig.openTime || res.systemConfig.OpenTime,
-            CloseTime: res.systemConfig.closeTime || res.systemConfig.CloseTime,
-            Hotline: res.systemConfig.hotline || res.systemConfig.Hotline,
+            ParkingName: sys.parkingName ?? sys.ParkingName ?? '',
+            MaxCapacity: sys.maxCapacity ?? sys.MaxCapacity ?? 0,
+            OpenTime: sys.openTime ?? sys.OpenTime ?? '',
+            CloseTime: sys.closeTime ?? sys.CloseTime ?? '',
+            Hotline: sys.hotline ?? sys.Hotline ?? '',
           };
         }
 
         // Hứng dữ liệu Bảng giá
-        if (res?.pricingRules) {
-          this.PricingRules = res.pricingRules.map((r: any) => ({
-            RuleId: r.ruleId || r.RuleId,
-            VehicleType: r.vehicleType || r.VehicleType,
-            PricePerEntry: r.pricePerEntry || r.PricePerEntry,
-            PricePerMonth: r.pricePerMonth || r.PricePerMonth,
-            PricePerQuarter: r.pricePerQuarter || r.PricePerQuarter,
-            PricePerYear: r.pricePerYear || r.PricePerYear,
+        if (data?.pricingRules || data?.PricingRules) {
+          const rules = data.pricingRules || data.PricingRules;
+          this.PricingRules = rules.map((r: any) => ({
+            RuleId: r.ruleId ?? r.RuleId ?? 0,
+            VehicleType: r.vehicleType ?? r.VehicleType ?? '---',
+            PricePerEntry: r.pricePerEntry ?? r.PricePerEntry ?? 0,
+            PricePerMonth: r.pricePerMonth ?? r.PricePerMonth ?? 0,
+            PricePerQuarter: r.pricePerQuarter ?? r.PricePerQuarter ?? 0,
+            PricePerYear: r.pricePerYear ?? r.PricePerYear ?? 0,
           }));
         }
+        this.isLoading = false;
+        this.cdr.detectChanges();
       },
-      error: (err) => console.error('Lỗi lấy settings:', err),
+      error: (err) => {
+        console.error('Lỗi lấy settings:', err);
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
     });
   }
 
@@ -137,29 +151,44 @@ export class SettingsPage implements OnInit {
   }
 
   async saveSettings() {
+    this.isSaving = true;
+
     const payload = {
-      SystemConfig: this.SystemConfig,
-      PricingRules: this.PricingRules,
+      systemConfig: {
+        parkingName: this.SystemConfig.ParkingName,
+        maxCapacity: Number(this.SystemConfig.MaxCapacity) || 0,
+        openTime: this.SystemConfig.OpenTime,
+        closeTime: this.SystemConfig.CloseTime,
+        hotline: this.SystemConfig.Hotline
+      },
+      pricingRules: this.PricingRules.map(r => ({
+        ruleId: Number(r.RuleId),
+        pricePerEntry: Number(r.PricePerEntry) || 0,
+        pricePerMonth: Number(r.PricePerMonth) || 0,
+        pricePerQuarter: Number(r.PricePerQuarter) || 0,
+        pricePerYear: Number(r.PricePerYear) || 0
+      }))
     };
 
     this.api.saveSettings(payload).subscribe({
       next: async (res: any) => {
+        this.isSaving = false;
         const toast = await this.toastCtrl.create({
           message: res.message || 'Lưu cấu hình thành công!',
           duration: 2500,
-          color: 'success',
+          color: 'dark',
           position: 'top',
-          cssClass: 'toast-top-right toast-success',
         });
         toast.present();
+        this.loadSettings(); // Tải lại để đồng bộ chắc chắn với DB
       },
       error: async (err) => {
+        this.isSaving = false;
         const toast = await this.toastCtrl.create({
-          message: 'Lỗi khi lưu cài đặt!',
+          message: err.error?.message || err.error?.Message || err.error?.title || 'Lỗi khi lưu cài đặt!',
           duration: 2500,
-          color: 'danger',
+          color: 'dark',
           position: 'top',
-          cssClass: 'toast-top-right toast-danger',
         });
         toast.present();
       },

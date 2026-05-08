@@ -181,3 +181,43 @@
     }
   }
 }
+/* --- Phân trang --- */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 20px;
+  margin-top: 10px;
+  border-top: 1px solid #e2e8f0;
+
+  .page-info {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+  }
+
+  .page-controls {
+    display: flex;
+    gap: 8px;
+
+    button {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 13px;
+      transition: 0.2s;
+
+      &:hover:not(:disabled) { background: #f8fafc; color: #0f172a; }
+      &.active { background: #003399; color: #ffffff; border-color: #003399; }
+      &:disabled { opacity: 0.5; cursor: not-allowed; }
+    }
+  }
+}

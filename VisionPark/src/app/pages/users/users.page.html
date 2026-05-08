@@ -49,7 +49,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let user of users" class="data-row">
+            <tr *ngFor="let user of paginatedUsers" class="data-row">
               <td>
                 <div class="user-info">
                   <div class="avatar-wrapper">
@@ -86,7 +86,7 @@
                 </button>
               </td>
             </tr>
-            <tr *ngIf="users.length === 0 && !isLoading">
+            <tr *ngIf="paginatedUsers.length === 0 && !isLoading">
               <td colspan="6" class="empty-state">
                 <ion-icon name="folder-open-outline"></ion-icon>
                 <p>Không tìm thấy nhân viên nào phù hợp.</p>
@@ -94,6 +94,23 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- PHÂN TRANG -->
+      <div class="pagination" *ngIf="totalPages > 0">
+        <span class="page-info">Trang {{ currentPage }} / {{ totalPages }}</span>
+        <div class="page-controls">
+          <button (click)="prevPage()" [disabled]="currentPage === 1"><ion-icon name="chevron-back-outline"></ion-icon></button>
+          
+          <ng-container *ngFor="let page of visiblePages">
+            <button 
+              [class.active]="page === currentPage" 
+              [disabled]="page === '...'"
+              (click)="goToPage(page)">{{ page }}</button>
+          </ng-container>
+          
+          <button (click)="nextPage()" [disabled]="currentPage === totalPages"><ion-icon name="chevron-forward-outline"></ion-icon></button>
+        </div>
       </div>
     </div>
 

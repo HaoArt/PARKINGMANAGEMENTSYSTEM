@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using VisionPark.API.Data;
@@ -7,9 +7,6 @@ using VisionPark.API.Models;
 
 namespace VisionPark.API.Controllers
 {
-
-    [Authorize(Roles = "Admin")]
-
     [Route("api/[controller]")]
     [ApiController]
     public class SettingsController : ControllerBase
@@ -22,16 +19,19 @@ namespace VisionPark.API.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous] // Cho phép Dashboard và các role khác lấy thông tin cấu hình (Sức chứa, Giờ mở cửa...)
         public async Task<IActionResult> GetSettings()
         {
             
             var configs = await _context.SystemConfigs.ToListAsync();
             string GetValue(string key, string def) => configs.FirstOrDefault(c => c.ConfigKey == key)?.ConfigValue ?? def;
 
+            int.TryParse(GetValue("MaxCapacity", "1500"), out int maxCapacity);
+
             var sysConfig = new SystemConfigDto
             {
                 ParkingName = GetValue("ParkingName", "VisionPark Central"),
-                MaxCapacity = int.TryParse(GetValue("MaxCapacity", "1500"), out int max) ? max : 1500,
+                MaxCapacity = maxCapacity > 0 ? maxCapacity : 1500,
                 OpenTime = GetValue("OpenTime", "06:00"),
                 CloseTime = GetValue("CloseTime", "23:30"),
                 Hotline = GetValue("Hotline", "1900 8888")
@@ -53,15 +53,28 @@ namespace VisionPark.API.Controllers
             return Ok(new { SystemConfig = sysConfig, PricingRules = pricing });
         }
 
+        [Authorize(Roles = "Admin")] // Chỉ tài khoản Admin mới được phép lưu/sửa cấu hình
         [HttpPost("update")]
+        [HttpPost("save")]
         public async Task<IActionResult> UpdateSettings([FromBody] UpdateSettingsRequest request)
         {
+            if (request == null || request.SystemConfig == null || request.PricingRules == null)
+            {
+                return BadRequest(new { Message = "Dữ liệu gửi lên không hợp lệ hoặc bị thiếu!" });
+            }
             
             async Task UpdateConfig(string key, string value)
             {
+                var safeValue = value ?? "";
                 var conf = await _context.SystemConfigs.FirstOrDefaultAsync(c => c.ConfigKey == key);
-                if (conf != null) conf.ConfigValue = value;
-                else _context.SystemConfigs.Add(new SystemConfig { ConfigKey = key, ConfigValue = value, DataType = "string", ConfigGrpup = "General" });
+                if (conf != null) conf.ConfigValue = safeValue;
+                else _context.SystemConfigs.Add(new SystemConfig 
+                { 
+                    ConfigKey = key, 
+                    ConfigValue = safeValue, 
+                    DataType = key == "MaxCapacity" ? "number" : "string", 
+                    ConfigGrpup = "General" 
+                });
             }
 
             await UpdateConfig("ParkingName", request.SystemConfig.ParkingName);
