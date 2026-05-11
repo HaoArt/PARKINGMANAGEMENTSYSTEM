@@ -16,6 +16,7 @@ interface UserRecord {
   role: string;
   isActive: boolean;
   createAt: string;
+  faceImageUrl?: string;
 }
 
 @Component({

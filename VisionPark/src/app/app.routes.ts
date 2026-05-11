@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { TestScanFaceComponent } from './pages/test-scan-face/test-scan-face.component';
 
 export const routes: Routes = [
   {
@@ -48,6 +49,6 @@ export const routes: Routes = [
     path: 'card-registration',
     loadComponent: () => import('./pages/card-registration/card-registration.page').then( m => m.CardRegistrationPage)
   },
-
+  { path: 'test-face', component: TestScanFaceComponent },
 
 ];
