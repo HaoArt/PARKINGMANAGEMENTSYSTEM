@@ -17,7 +17,6 @@ namespace VisionPark.API.Data
         public DbSet<MonthlyTicket> MonthlyTickets { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<FaceRecord> FaceRecords { get; set; }
-
-       
+        public DbSet<Attendance> Attendances { get; set; }   
     }
 }
