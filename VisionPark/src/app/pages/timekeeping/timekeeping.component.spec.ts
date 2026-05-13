@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { TestScanFaceComponent } from './test-scan-face.component';
+import { TestScanFaceComponent } from './timekeeping.component';
 
 describe('TestScanFaceComponent', () => {
   let component: TestScanFaceComponent;

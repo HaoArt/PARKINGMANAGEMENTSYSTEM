@@ -1,26 +1,34 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Api } from '../../services/api'; 
-import { CommonModule } from '@angular/common';
+import { CommonModule, registerLocaleData } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import localeVi from '@angular/common/locales/vi';
+import { IonContent } from '@ionic/angular/standalone';
+import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
+
+// Đăng ký dữ liệu ngôn ngữ tiếng Việt
+registerLocaleData(localeVi, 'vi');
 
 @Component({
-  selector: 'app-test-scan-face',
+  selector: 'app-timekeeping',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './test-scan-face.component.html',
-  styleUrls: ['./test-scan-face.component.scss']
+  imports: [CommonModule, FormsModule, IonContent, NavbarComponent],
+  templateUrl: './timekeeping.component.html',
+  styleUrls: ['./timekeeping.component.scss']
 })
 export class TestScanFaceComponent implements OnInit, OnDestroy {
   @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
   @ViewChild('canvasElement') canvasElement!: ElementRef<HTMLCanvasElement>;
   @ViewChild('overlayCanvas') overlayCanvas!: ElementRef<HTMLCanvasElement>;
-
+  notification: { type: 'success' | 'error', message: string } | null = null;
+  notificationTimeout: any;
   imageBase64: string | null = null;
   scanResult: any = null;
-  historyList: any[] = [];
+  attendanceSummary: any[] = [];
   isCameraOn = false;
   stream: MediaStream | null = null;
   trackingInterval: any;
+  isProcessing = false;
 
   // Thuộc tính mới cho chấm công
   mode: 'register' | 'recognize' = 'recognize';
@@ -28,18 +36,34 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
   selectedUserId: number | null = null;
   recognitionResult: any = null;
 
+  // Đồng hồ
+  currentTime: Date = new Date();
+  clockInterval: any;
+
   constructor(private api: Api) {}
 
   ngOnInit() {
-    this.loadHistory();
+    this.loadAttendanceSummary();
     this.loadUsers();
+    this.clockInterval = setInterval(() => {
+      this.currentTime = new Date();
+    }, 1000);
   }
 
   // Tự động tìm và trả về thông tin nhân viên đang được chọn
   get selectedUser() {
     return this.users.find(u => u.userID === this.selectedUserId);
   }
-
+  showNotification(type: 'success' | 'error', message: string) {
+    this.notification = { type, message };
+    if (this.notificationTimeout) {
+      clearTimeout(this.notificationTimeout);
+    }
+    // Tự động ẩn thông báo sau 3.5 giây
+    this.notificationTimeout = setTimeout(() => {
+      this.notification = null;
+    }, 3500);
+  }
   loadUsers() {
     this.api.getAllUsers().subscribe({
       next: (res: any) => {
@@ -50,15 +74,18 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
           }));
         }
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error("Lỗi tải danh sách người dùng:", err);
-        alert("Không thể tải danh sách người dùng.");
+        this.showNotification('error', 'Không thể tải danh sách người dùng.');
       }
     });
   }
 
   ngOnDestroy() {
     this.stopCamera();
+    if (this.clockInterval) {
+      clearInterval(this.clockInterval);
+    }
   }
 
   async startCamera() {
@@ -78,9 +105,9 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
         this.videoElement.nativeElement.srcObject = this.stream;
         this.startFaceTracking();
       }, 100);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Lỗi truy cập webcam: ", err);
-      alert("Không thể truy cập webcam. Vui lòng cấp quyền và thử lại.");
+      this.showNotification('error', 'Không thể truy cập webcam. Vui lòng cấp quyền và thử lại.');
     }
   }
 
@@ -130,7 +157,7 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
         next: (res) => {
           this.drawBoundingBoxes(res.faces, video.videoWidth, video.videoHeight);
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error("Lỗi tracking API:", err);
         }
       });
@@ -235,48 +262,57 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
 
   handleRegistration(imageBase64: string) {
     if (!this.selectedUserId) {
-      alert("Vui lòng chọn một nhân viên để đăng ký.");
+      this.showNotification('error', 'Vui lòng chọn một nhân viên để đăng ký.');
       return;
     }
+    this.isProcessing = true; // Bật Loading
     this.api.registerFace(this.selectedUserId, imageBase64).subscribe({
       next: (res) => {
-        alert(res.message);
+        this.isProcessing = false; // Tắt Loading
+        this.showNotification('success', res.message);
         this.recognitionResult = null; // Clear previous results
-        this.loadHistory(); // Tải lại lịch sử để xem ảnh mới
+        this.loadAttendanceSummary(); // Tải lại lịch sử để xem ảnh mới
         this.loadUsers(); // Tải lại danh sách nhân viên để cập nhật ảnh khuôn mặt trong khung Preview
       },
-      error: (err) => {
-        alert(err.error?.message || "Lỗi khi đăng ký khuôn mặt.");
+      error: (err: any) => {
+        this.isProcessing = false;
+        this.showNotification('error', err.error?.message || "Lỗi khi đăng ký khuôn mặt.");
       }
     });
   }
 
   handleRecognition(imageBase64: string) {
     this.recognitionResult = null; // Reset
+    this.isProcessing = true; // Bật Loading
     this.api.recognizeFace(imageBase64).subscribe({
       next: (res) => {
+        this.isProcessing = false; // Tắt Loading
         if (res.success) {
           this.recognitionResult = res.user;
-          alert(`Nhận diện thành công: ${res.user.fullName}`);
+          this.loadAttendanceSummary(); // Tải lại lịch sử chấm công
+          this.showNotification('success', `Nhận diện thành công: ${res.user.fullName}`);
         } else {
-          alert(res.message);
+          this.showNotification('error', res.message);
         }
       },
-      error: (err) => {
-        alert(err.error?.message || "Lỗi khi nhận diện khuôn mặt.");
+      error: (err: any) => {
+        this.isProcessing = false;
+        this.showNotification('error', err.error?.message || "Lỗi khi nhận diện khuôn mặt.");
       }
     });
   }
 
-  // Gọi API lấy lịch sử
-  loadHistory() {
-    this.api.getFaceHistory().subscribe({
-      next: (res) => {
-        this.historyList = res;
+  // Gọi API lấy lịch sử chấm công đã được xử lý
+  loadAttendanceSummary() {
+    this.api.getAttendanceSummary().subscribe({
+      next: (res: any) => {
+        this.attendanceSummary = res.data || res;
       },
-      error: (err) => {
-        console.error('Lỗi khi lấy lịch sử', err);
-        alert('Không tải được lịch sử. Hãy kiểm tra lại Backend hoặc bảng FaceRecords!');
+      error: (err: any) => {
+        this.showNotification('error', err.error?.message || "Lỗi khi tải lịch sử chấm công.");
+        // err.error chứa đoạn JSON { Message: "...", Error: "..." } từ Backend
+        console.error('Lỗi Backend trả về:', err.error?.error || err.message);
+        this.attendanceSummary = []; // Xóa trắng danh sách nếu API lỗi
       }
     });
   }

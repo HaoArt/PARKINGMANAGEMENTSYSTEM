@@ -35,7 +35,7 @@ export class SidebarComponent implements OnInit {
     { title: 'Lịch sử', url: '/history', icon: 'time-outline' },
     { title: 'Nhân viên', url: '/users', icon: 'people-outline' },
     { title: 'Cài đặt', url: '/settings', icon: 'settings-outline' },
-    { title: 'Chấm công', url: '/test-face', icon: 'settings-outline' }
+    { title: 'Chấm công', url: '/timekeeping', icon: 'settings-outline' }
   ];
 
   currentUrl: string = '';

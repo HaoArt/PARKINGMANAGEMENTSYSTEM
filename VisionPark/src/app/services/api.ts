@@ -136,4 +136,13 @@ export class Api {
   getFaceHistory(): Observable<any> {
     return this.http.get(`${this.baseUrl}/FaceScan/history`);
   }
+
+  // New method for attendance summary
+  getAttendanceSummary(): Observable<any> {
+    // Placeholder for the actual API call
+    // You'll need to implement the backend endpoint for this.
+    // For now, it returns an empty array or a mock observable.
+    // return this.http.get(`${this.baseUrl}/Attendance/summary`);
+    return this.http.get(`${this.baseUrl}/Attendance/summary`); // Assuming a new endpoint
+  }
 }
