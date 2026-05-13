@@ -38,10 +38,29 @@ namespace VisionPark.API.Controllers
             {
                 return Unauthorized(new { Message = "Tài khoản không tồn tại trên hệ thống!" });
             }
-            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
+
+            bool isPasswordValid = false;
+            try
+            {
+                isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
+            }
+            catch (Exception)
+            {
+                // Fallback: Bắt mọi lỗi (FormatException, SaltParseException) nếu chuỗi trong DB không phải là mã Hash hợp lệ
+                if (user.PasswordHash != null && user.PasswordHash.Trim() == request.Password.Trim())
+                {
+                    isPasswordValid = true;
+                    
+                    // Mã hóa lại và lưu xuống DB để các lần sau chuẩn định dạng
+                    user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+                    await _context.SaveChangesAsync();
+                }
+            }
+
             if (!isPasswordValid)
             {
-                return Unauthorized(new { Message = "Mật khẩu không chính xác!" });
+                // Tạm thời hiển thị chi tiết để Debug (Sẽ thấy rõ nếu có dấu cách thừa hoặc sai mật khẩu)
+                return Unauthorized(new { Message = $"Sai mật khẩu! Bạn vừa nhập: '{request.Password}' - Chuỗi trong DB đang lưu: '{user.PasswordHash}'" });
             }
 
             if (!user.IsActive)
