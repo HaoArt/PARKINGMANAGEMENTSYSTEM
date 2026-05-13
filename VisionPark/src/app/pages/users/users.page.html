@@ -52,9 +52,16 @@
             <tr *ngFor="let user of paginatedUsers" class="data-row">
               <td>
                 <div class="user-info">
-                  <div class="avatar-wrapper">
-                    <img [src]="'https://ui-avatars.com/api/?name=' + user.fullName + '&background=f1f5f9&color=003399&bold=true'" alt="Avatar">
+                  <div class="user-avatar-wrapper">
+                    <!-- Nếu có ảnh khuôn mặt đã đăng ký -->
+                    <img *ngIf="user.faceImageUrl" [src]="user.faceImageUrl" alt="Avatar" class="avatar-img" />
+                    
+                    <!-- Nếu chưa đăng ký khuôn mặt, hiện icon mặc định -->
+                    <div *ngIf="!user.faceImageUrl" class="avatar-placeholder">
+                      <ion-icon name="person"></ion-icon>
+                    </div>
                   </div>
+                  
                   <div class="name-block">
                     <span class="full-name">{{ user.fullName }}</span>
                     <span class="sub-text">{{ user.userName }}@visionpark.vn</span>

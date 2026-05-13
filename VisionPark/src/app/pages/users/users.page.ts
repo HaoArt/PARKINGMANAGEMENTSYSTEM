@@ -78,7 +78,9 @@ export class UsersPage implements OnInit {
       next: (res: any) => {
         if (res?.data) {
           this.allUsers = res.data.map((item: any) => ({
-            ...item, userID: item.userId || item.UserID || item.userID
+            ...item, 
+            userID: item.userId || item.UserID || item.userID,
+            faceImageUrl: item.faceImageUrl || item.FaceImageUrl
           }));
           this.applyFilters();
         }

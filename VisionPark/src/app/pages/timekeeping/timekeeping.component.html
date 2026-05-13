@@ -6,12 +6,6 @@
     <p>Nhận diện khuôn mặt AI để điểm danh nhân viên</p>
   </div>
 
-  <div *ngIf="notification" class="alert-banner" [ngClass]="notification.type">
-    <span *ngIf="notification.type === 'success'">✅</span>
-    <span *ngIf="notification.type === 'error'">⚠️</span>
-    {{ notification.message }}
-  </div>
-
   <!-- Mode Switcher -->
   <div class="mode-switcher card">
     <label class="radio-label">

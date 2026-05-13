@@ -1,12 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc;
 using OpenCvSharp;
-using System;
-using System.Linq;
+
 using VisionPark.API.Data;
 using VisionPark.API.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 
 namespace VisionPark.API.Controllers
 {
@@ -264,21 +261,40 @@ namespace VisionPark.API.Controllers
                         {
                         // --- GHI NHẬN CHẤM CÔNG THẬT (REAL DATA INSERT) ---
                         var today = DateTime.Now.Date;
-                        var existingAttendance = await _context.Attendances
-                            .FirstOrDefaultAsync(a => a.UserId == recognizedUser.UserID && a.CheckInTime.Date == today);
+                        
+                        // Lấy danh sách các lần chấm công trong ngày, sắp xếp mới nhất lên đầu
+                        var attendancesToday = await _context.Attendances
+                            .Where(a => a.UserId == recognizedUser.UserID && a.CheckInTime.Date == today)
+                            .OrderByDescending(a => a.CheckInTime)
+                            .ToListAsync();
 
-                        if (existingAttendance == null)
+                        var latestAttendance = attendancesToday.FirstOrDefault();
+
+                        if (latestAttendance == null)
                         {
-                            // Check-in (Vào làm)
+                            // Chưa có lần nào -> Check-in ca mới
                             _context.Attendances.Add(new Attendance {
                                 UserId = recognizedUser.UserID,
                                 CheckInTime = DateTime.Now
                             });
                         }
-                        else if (existingAttendance.CheckOutTime == null)
+                        else if (latestAttendance.CheckOutTime == null)
                         {
-                            // Check-out (Tan làm)
-                            existingAttendance.CheckOutTime = DateTime.Now;
+                            // Đã có Check-in nhưng chưa có Check-out -> Cập nhật Check-out
+                            latestAttendance.CheckOutTime = DateTime.Now;
+                        }
+                        else if (attendancesToday.Count < 3)
+                        {
+                            // Đã check-out ca trước đó. Nếu số ca trong ngày < 3, cho phép mở ca mới (Dòng hiển thị mới)
+                            _context.Attendances.Add(new Attendance {
+                                UserId = recognizedUser.UserID,
+                                CheckInTime = DateTime.Now
+                            });
+                        }
+                        else
+                        {
+                            // Nếu đã đủ 3 dòng trong ngày, thì chỉ cập nhật giờ Check-out của ca cuối cùng (ca thứ 3)
+                            latestAttendance.CheckOutTime = DateTime.Now;
                         }
                         
                         await _context.SaveChangesAsync();
