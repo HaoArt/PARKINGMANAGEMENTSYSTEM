@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import localeVi from '@angular/common/locales/vi';
 import { IonContent } from '@ionic/angular/standalone';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
+import { ToastController } from '@ionic/angular/standalone';
 
 // Đăng ký dữ liệu ngôn ngữ tiếng Việt
 registerLocaleData(localeVi, 'vi');
@@ -20,8 +21,6 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
   @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
   @ViewChild('canvasElement') canvasElement!: ElementRef<HTMLCanvasElement>;
   @ViewChild('overlayCanvas') overlayCanvas!: ElementRef<HTMLCanvasElement>;
-  notification: { type: 'success' | 'error', message: string } | null = null;
-  notificationTimeout: any;
   imageBase64: string | null = null;
   scanResult: any = null;
   attendanceSummary: any[] = [];
@@ -40,7 +39,7 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
   currentTime: Date = new Date();
   clockInterval: any;
 
-  constructor(private api: Api) {}
+  constructor(private api: Api, private toastController: ToastController) {}
 
   ngOnInit() {
     this.loadAttendanceSummary();
@@ -54,16 +53,18 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
   get selectedUser() {
     return this.users.find(u => u.userID === this.selectedUserId);
   }
-  showNotification(type: 'success' | 'error', message: string) {
-    this.notification = { type, message };
-    if (this.notificationTimeout) {
-      clearTimeout(this.notificationTimeout);
-    }
-    // Tự động ẩn thông báo sau 3.5 giây
-    this.notificationTimeout = setTimeout(() => {
-      this.notification = null;
-    }, 3500);
+
+  async showNotification(type: 'success' | 'error', message: string) {
+    const toast = await this.toastController.create({
+      message: (type === 'success' ? '✅ ' : '⚠️ ') + message,
+      duration: 3500,
+      position: 'top',
+      color: type === 'success' ? 'success' : 'danger',
+      cssClass: 'toast-top-right'
+    });
+    await toast.present();
   }
+
   loadUsers() {
     this.api.getAllUsers().subscribe({
       next: (res: any) => {
