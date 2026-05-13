@@ -16,6 +16,7 @@ namespace VisionPark.API.Data
         public DbSet<NfcCard> NfcCards { get; set; }
         public DbSet<MonthlyTicket> MonthlyTickets { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<FaceRecord> FaceRecords { get; set; }
 
        
     }

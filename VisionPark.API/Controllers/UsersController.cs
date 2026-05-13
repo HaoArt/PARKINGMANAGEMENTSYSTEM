@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -35,6 +35,7 @@ namespace VisionPark.API.Controllers
                     u.FullName,
                     u.Role,
                     u.IsActive,
+                    u.FaceImageUrl,
                     CreateAt = u.CreatedAt.ToString("dd/MM/yyyy HH:mm")
                 })
                 .ToListAsync();

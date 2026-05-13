@@ -111,4 +111,38 @@ export class Api {
       this.getAuthOptions(),
     );
   }
+
+  // Quét và nhận diện khuôn mặt từ ảnh Base64
+  detectFace(base64Image: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/FaceScan/detect`, { base64Image });
+  }
+
+  // Đăng ký khuôn mặt cho User
+  registerFace(userId: number, base64Image: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/FaceScan/register`, { userId, base64Image });
+  }
+
+  // Nhận diện khuôn mặt để chấm công
+  recognizeFace(base64Image: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/FaceScan/recognize`, { base64Image });
+  }
+
+  // Quét khuôn mặt realtime (không lưu vào CSDL)
+  detectFaceLive(base64Image: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/FaceScan/detect-live`, { base64Image });
+  }
+
+  // Lấy lịch sử quét khuôn mặt (bao gồm ảnh đã được vẽ khung)
+  getFaceHistory(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/FaceScan/history`);
+  }
+
+  // New method for attendance summary
+  getAttendanceSummary(): Observable<any> {
+    // Placeholder for the actual API call
+    // You'll need to implement the backend endpoint for this.
+    // For now, it returns an empty array or a mock observable.
+    // return this.http.get(`${this.baseUrl}/Attendance/summary`);
+    return this.http.get(`${this.baseUrl}/Attendance/summary`); // Assuming a new endpoint
+  }
 }
