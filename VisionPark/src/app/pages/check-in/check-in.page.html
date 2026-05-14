@@ -1,102 +1,122 @@
-<ion-content class="ion-padding" style="--background: #f4f6f8;">
-  <div class="mb-5 flex justify-between items-center">
-    <h2 class="text-2xl font-bold text-gray-800 m-0">Quản lý Xe Vào</h2>
-  </div>
-
-  <ion-grid class="p-0">
-    <ion-row>
-      <ion-col size="12" size-md="5" size-lg="4">
-        <ion-card class="rounded-xl shadow-sm m-0 border border-gray-100">
-          <ion-card-header class="bg-white border-b border-gray-100 pb-3">
-            <ion-card-title class="text-lg font-bold text-[#0040a1] flex items-center">
-              <ion-icon name="add-outline" class="mr-2 text-xl"></ion-icon>
-              Ghi nhận thẻ mới
+<ion-content class="ion-padding custom-bg">
+  <ion-grid class="max-w-6xl mx-auto h-full">
+    <ion-row class="h-full items-center justify-center">
+      
+      <!-- Cột trái: Form nhập liệu -->
+      <ion-col size="12" size-md="6" size-lg="5" class="ion-padding-vertical">
+        <ion-card class="modern-card glass-effect">
+          <ion-card-header class="ion-text-center pb-0">
+            <div class="icon-wrapper mx-auto mb-3">
+              <ion-icon name="log-in-outline" class="text-4xl text-emerald-500"></ion-icon>
+            </div>
+            <ion-card-title class="text-2xl font-bold text-gray-800 tracking-wide">
+              Check-in Phương Tiện
             </ion-card-title>
+            <p class="text-gray-500 text-sm mt-1">Ghi nhận xe vào bãi nhanh chóng</p>
           </ion-card-header>
 
-          <ion-card-content class="pt-5 bg-white">
-            
-            <ion-item lines="none" class="mb-4 bg-gray-50 rounded-lg border border-gray-200">
-              <ion-icon name="id-card-outline" slot="start" class="text-gray-400"></ion-icon>
-              <ion-input
-                label="Mã thẻ NFC"
-                label-placement="floating"
-                placeholder="Chạm thẻ vào đầu đọc..."
-                [(ngModel)]="CheckInData.CardUid"
-              ></ion-input>
-            </ion-item>
-
-            <ion-item lines="none" class="mb-4 bg-gray-50 rounded-lg border border-gray-200">
-              <ion-icon name="car-outline" slot="start" class="text-gray-400"></ion-icon>
-              <ion-input
-                label="Biển số nhận diện"
-                label-placement="floating"
-                placeholder="VD: 75A-123.45"
-                [(ngModel)]="CheckInData.PlateNumber"
-              ></ion-input>
-            </ion-item>
-
-            <ion-item lines="none" class="mb-6 bg-gray-50 rounded-lg border border-gray-200">
-              <ion-select
-                label="Loại phương tiện"
-                label-placement="floating"
-                [(ngModel)]="CheckInData.VehicleType"
-                interface="popover"
-              >
-                <ion-select-option value="Xe máy">Xe máy</ion-select-option>
-                <ion-select-option value="Ô tô">Ô tô</ion-select-option>
-              </ion-select>
-            </ion-item>
-
-            <ion-button expand="block" class="font-bold h-12 rounded-lg" style="--border-radius: 8px; --background: #0040a1;" (click)="onSubmit()">
-              <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
-              Xác nhận vào bãi
-            </ion-button>
-
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-
-      <ion-col size="12" size-md="7" size-lg="8" class="mt-4 md:mt-0">
-        <ion-card class="rounded-xl shadow-sm m-0 h-full border border-gray-100">
-          <ion-card-header class="bg-white border-b border-gray-100 pb-3">
-            <ion-card-title class="text-lg font-bold text-gray-700 flex items-center">
-              <ion-icon name="time-outline" class="mr-2 text-xl"></ion-icon>
-              Lịch sử tạo thẻ
-            </ion-card-title>
-          </ion-card-header>
-
-          <ion-card-content class="p-0 bg-white">
-            <ion-list lines="full" class="bg-transparent m-0">
-              
-              <div *ngIf="RecentCheckIns.length === 0" class="text-center p-10 text-gray-400 flex flex-col items-center">
-                <ion-icon name="id-card-outline" class="text-5xl mb-2 text-gray-200"></ion-icon>
-                <p>Chưa có dữ liệu quẹt thẻ gần đây.</p>
-              </div>
-
-              <ion-item *ngFor="let item of RecentCheckIns" class="hover:bg-gray-50 transition-colors cursor-pointer">
-                <div slot="start" class="flex flex-col items-center justify-center w-12 h-12 bg-blue-50 rounded-full mr-3">
-                  <ion-icon 
-                    [name]="item.VehicleType === 'Ô tô' ? 'car-outline' : 'bicycle-outline'" 
-                    class="text-[#0040a1] text-2xl">
-                  </ion-icon>
-                </div>
-                
-                <ion-label>
-                  <h2 class="font-bold text-[17px] text-gray-800 tracking-wider font-mono">{{ item.PlateNumber }}</h2>
-                  <p class="text-gray-500 text-sm mt-1">Mã thẻ: <span class="font-medium text-gray-700">{{ item.CardUid }}</span></p>
-                </ion-label>
-                
-                <div slot="end" class="flex flex-col items-end">
-                  <ion-badge color="success" class="mb-2 px-2 py-1 rounded">Trong bãi</ion-badge>
-                  <p class="text-[13px] text-gray-400 m-0 font-medium">{{ item.TimeIn | date:'HH:mm - dd/MM' }}</p>
-                </div>
+          <ion-card-content class="mt-4">
+            <form (ngSubmit)="onSubmit()">
+              <!-- Mã thẻ -->
+              <ion-item lines="none" class="input-item mb-4">
+                <ion-icon name="scan-outline" slot="start" class="text-indigo-500"></ion-icon>
+                <ion-input 
+                  [(ngModel)]="CheckInData.CardUid" 
+                  name="cardUid"
+                  label="Mã thẻ NFC" 
+                  labelPlacement="floating" 
+                  placeholder="Quét hoặc nhập mã thẻ..."
+                  class="font-medium"
+                  required>
+                </ion-input>
               </ion-item>
 
-            </ion-list>
+              <!-- Biển số xe -->
+              <ion-item lines="none" class="input-item mb-4">
+                <ion-icon name="id-card-outline" slot="start" class="text-blue-500"></ion-icon>
+                <ion-input 
+                  [(ngModel)]="CheckInData.PlateNumber" 
+                  name="plateNumber"
+                  label="Biển số xe" 
+                  labelPlacement="floating" 
+                  placeholder="Ví dụ: 75A-123.45"
+                  class="font-medium uppercase-input"
+                  required>
+                </ion-input>
+              </ion-item>
+
+              <!-- Loại phương tiện -->
+              <ion-item lines="none" class="input-item mb-6">
+                <ion-icon [name]="CheckInData.VehicleType === 'Xe máy' ? 'bicycle-outline' : 'car-outline'" slot="start" class="text-amber-500"></ion-icon>
+                <ion-select 
+                  [(ngModel)]="CheckInData.VehicleType" 
+                  name="vehicleType"
+                  label="Loại xe" 
+                  labelPlacement="floating"
+                  interface="popover">
+                  <ion-select-option value="Xe máy">Xe máy</ion-select-option>
+                  <ion-select-option value="Ô tô">Ô tô</ion-select-option>
+                  <ion-select-option value="Xe đạp">Xe đạp</ion-select-option>
+                </ion-select>
+              </ion-item>
+
+              <!-- Nút xác nhận -->
+              <ion-button expand="block" type="submit" class="submit-btn" shape="round">
+                <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+                Xác nhận vào bãi
+              </ion-button>
+            </form>
           </ion-card-content>
         </ion-card>
       </ion-col>
+
+      <!-- Cột phải: Lịch sử gần đây -->
+      <ion-col size="12" size-md="6" size-lg="6" class="ion-padding-vertical">
+        <ion-card class="modern-card history-card">
+          <ion-card-header>
+            <ion-card-title class="text-lg font-bold text-gray-700 flex items-center gap-2">
+              <ion-icon name="time-outline" class="text-indigo-500"></ion-icon>
+              Lịch sử Check-in gần đây
+            </ion-card-title>
+          </ion-card-header>
+          
+          <ion-card-content class="p-0">
+            <ion-list class="bg-transparent px-2" *ngIf="RecentCheckIns.length > 0; else noData">
+              <ion-item *ngFor="let item of RecentCheckIns" class="history-item mb-2 rounded-xl" lines="none">
+                <ion-avatar slot="start" class="bg-indigo-100 flex items-center justify-center p-2 rounded-lg">
+                  <ion-icon 
+                    [name]="item.VehicleType === 'Ô tô' ? 'car-outline' : (item.VehicleType === 'Xe máy' ? 'bicycle-outline' : 'help-outline')"
+                    class="text-2xl text-indigo-600">
+                  </ion-icon>
+                </ion-avatar>
+                <ion-label>
+                  <h2 class="font-bold text-gray-800 text-lg uppercase">{{ item.PlateNumber }}</h2>
+                  <p class="text-gray-500 text-sm flex items-center gap-1 mt-1">
+                    <ion-icon name="id-card-outline"></ion-icon>
+                    {{ item.CardUid }}
+                  </p>
+                </ion-label>
+                <div slot="end" class="flex flex-col items-end">
+                  <ion-badge color="success" class="mb-1 rounded-md px-2 py-1 shadow-sm">
+                    {{ item.VehicleType }}
+                  </ion-badge>
+                  <ion-note class="text-xs font-medium text-gray-400">
+                    {{ item.TimeIn | date:'HH:mm:ss' }}
+                  </ion-note>
+                </div>
+              </ion-item>
+            </ion-list>
+            
+            <ng-template #noData>
+              <div class="flex flex-col items-center justify-center py-10 opacity-60">
+                <ion-icon name="alert-circle-outline" class="text-5xl text-gray-400 mb-2"></ion-icon>
+                <p class="text-gray-500 font-medium">Chưa có lượt xe vào nào</p>
+              </div>
+            </ng-template>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
     </ion-row>
   </ion-grid>
 </ion-content>

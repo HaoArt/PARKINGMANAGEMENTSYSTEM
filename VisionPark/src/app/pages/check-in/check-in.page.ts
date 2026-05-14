@@ -1,16 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { 
   IonContent, IonGrid, IonRow, IonCol, IonCard, 
   IonCardHeader, IonCardTitle, IonCardContent, 
   IonItem, IonLabel, IonInput, IonSelect, IonSelectOption, 
-  IonButton, IonIcon, IonList, IonBadge 
+  IonButton, IonIcon, IonList, IonBadge, ToastController,
+  IonAvatar, IonText, IonNote
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { 
   idCardOutline, carOutline, bicycleOutline, 
-  timeOutline, checkmarkCircleOutline, addOutline 
+  timeOutline, checkmarkCircleOutline, addOutline,
+  logInOutline, scanOutline, alertCircleOutline, helpOutline
 } from 'ionicons/icons';
 
 // Giao diện dữ liệu chuẩn hóa theo thiết kế Database của bạn
@@ -31,6 +33,7 @@ interface CheckInRecord {
     IonCardHeader, IonCardTitle, IonCardContent, 
     IonItem, IonLabel, IonInput, IonSelect, IonSelectOption, 
     IonButton, IonIcon, IonList, IonBadge, 
+    IonAvatar, IonText, IonNote,
     CommonModule, FormsModule
   ]
 })
@@ -43,6 +46,8 @@ export class CheckInPage implements OnInit {
     VehicleType: 'Xe máy'
   };
 
+  private toastCtrl = inject(ToastController);
+
   // Danh sách lịch sử Check-in tạm thời
   RecentCheckIns: CheckInRecord[] = [];
 
@@ -50,7 +55,8 @@ export class CheckInPage implements OnInit {
     // Đăng ký các icon sẽ dùng trên giao diện
     addIcons({ 
       idCardOutline, carOutline, bicycleOutline, 
-      timeOutline, checkmarkCircleOutline, addOutline 
+      timeOutline, checkmarkCircleOutline, addOutline,
+      logInOutline, scanOutline, alertCircleOutline, helpOutline
     });
   }
 
@@ -62,10 +68,26 @@ export class CheckInPage implements OnInit {
     ];
   }
 
+  async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'danger') {
+    let iconName = 'alert-circle-outline';
+    if (color === 'success') iconName = 'checkmark-circle-outline';
+    else if (color === 'warning') iconName = 'warning-outline';
+
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      color,
+      position: 'top',
+      icon: iconName,
+      cssClass: 'toast-top-right',
+    });
+    toast.present();
+  }
+
   // Hàm xử lý khi bấm nút "Xác nhận vào bãi"
   onSubmit() {
     if (!this.CheckInData.CardUid || !this.CheckInData.PlateNumber) {
-      alert('Vui lòng nhập đầy đủ Mã thẻ và Biển số!');
+      this.showToast('Vui lòng nhập đầy đủ Mã thẻ và Biển số!', 'warning');
       return;
     }
 
@@ -79,6 +101,8 @@ export class CheckInPage implements OnInit {
 
     // Đẩy record mới lên đầu danh sách
     this.RecentCheckIns.unshift(newRecord);
+
+    this.showToast('Ghi nhận vào bãi thành công!', 'success');
 
     // Xóa trắng form để chuẩn bị cho xe tiếp theo
     this.CheckInData = {

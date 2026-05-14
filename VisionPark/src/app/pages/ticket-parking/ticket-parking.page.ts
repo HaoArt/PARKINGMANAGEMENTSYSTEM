@@ -8,6 +8,7 @@ import {
   IonRow,
   IonCardContent,
   Platform,
+  ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import * as icons from 'ionicons/icons';
@@ -53,6 +54,7 @@ interface MonthlyTicketRecord {
 export class TicketParkingPage implements OnInit {
   private api = inject(Api);
   private platform = inject(Platform);
+  private toastCtrl = inject(ToastController);
 
   allMonthlyTickets: MonthlyTicketRecord[] = [];
   monthlyTickets: MonthlyTicketRecord[] = [];
@@ -177,12 +179,18 @@ export class TicketParkingPage implements OnInit {
   }
 
   onSubmit() {
-    if (!this.regData.cardUID)
-      return alert('Vui lòng quét hoặc nhập mã thẻ NFC!');
-    if (!this.selectedImageFile)
-      return alert('Vui lòng tải lên ảnh chụp xe để AI đọc biển số!');
-    if (!this.regData.customerName)
-      return alert('Vui lòng nhập tên khách hàng!');
+    if (!this.regData.cardUID) {
+      this.showToast('Vui lòng quét hoặc nhập mã thẻ NFC!', 'warning');
+      return;
+    }
+    if (!this.selectedImageFile) {
+      this.showToast('Vui lòng tải lên ảnh chụp xe để AI đọc biển số!', 'warning');
+      return;
+    }
+    if (!this.regData.customerName) {
+      this.showToast('Vui lòng nhập tên khách hàng!', 'warning');
+      return;
+    }
 
     this.isSubmitting = true;
 
@@ -199,14 +207,14 @@ export class TicketParkingPage implements OnInit {
 
     this.api.registerMonthly(formData).subscribe({
       next: (res: any) => {
-        alert(`${res.message}\nBiển số AI đọc được: ${res.detectedPlate}`);
+        this.showToast(`${res.message}\nBiển số AI đọc được: ${res.detectedPlate}`, 'success');
         this.resetForm();
         this.loadTickets();
         this.isSubmitting = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
-        alert(err.error?.message || err.error || 'Lỗi đăng ký vé tháng!');
+        this.showToast(err.error?.message || err.error || 'Lỗi đăng ký vé tháng!', 'danger');
         this.isSubmitting = false;
         this.cdr.detectChanges();
       },
@@ -258,8 +266,24 @@ export class TicketParkingPage implements OnInit {
       this.cdr.detectChanges();
 
       // Hiện thông báo (Bạn có thể dùng Toast thay cho alert cho đẹp hơn)
-      alert('Đã nhận thẻ: ' + cardUID);
+      this.showToast('Đã nhận thẻ: ' + cardUID, 'success');
     }
+  }
+
+  async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'danger') {
+    let iconName = 'alert-circle-outline';
+    if (color === 'success') iconName = 'checkmark-circle-outline';
+    else if (color === 'warning') iconName = 'warning-outline';
+
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      color,
+      position: 'top',
+      icon: iconName,
+      cssClass: 'toast-top-right',
+    });
+    toast.present();
   }
 
   // --- LOGIC PHÂN TRANG ---
