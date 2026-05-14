@@ -1,0 +1,118 @@
+<ion-content class="app-bg">
+  <app-navbar></app-navbar>
+
+  <div class="page-container">
+    <div class="page-header">
+      <h2>Hệ thống Chấm công AI</h2>
+      <p>
+        Bảo vệ vui lòng chụp ảnh khuôn mặt để hệ thống nhận diện và điểm danh
+        vào ca trực.
+      </p>
+    </div>
+
+    <div class="split-layout">
+      <div class="gray-panel">
+        <h3 class="panel-title">Chụp ảnh điểm danh</h3>
+
+        <div class="camera-box">
+          <div
+            class="placeholder-box"
+            *ngIf="!photoPreview"
+            (click)="takePicture()"
+          >
+            <ion-icon name="camera-outline" class="large-icon"></ion-icon>
+            <p>Nhấn để chụp ảnh Selfie</p>
+          </div>
+
+          <div class="preview-box" *ngIf="photoPreview">
+            <img [src]="photoPreview" alt="Selfie" />
+            <button class="re-capture-btn" (click)="takePicture()">
+              <ion-icon name="refresh-outline"></ion-icon> Chụp lại
+            </button>
+          </div>
+        </div>
+
+        <input
+          type="file"
+          #fileInput
+          class="hidden"
+          accept="image/*"
+          (change)="onFileSelected($event)"
+        />
+        <div class="text-center mt-2" *ngIf="!isNativePlatform">
+          <a href="javascript:void(0)" (click)="fileInput.click()"
+            >Hoặc chọn file từ máy tính</a
+          >
+        </div>
+
+        <button
+          class="submit-btn mt-4"
+          (click)="submitCheckIn()"
+          [disabled]="!photoFile || isLoading"
+        >
+          <ion-icon name="finger-print-outline"></ion-icon>
+          {{ isLoading ? 'Đang nhận diện AI...' : 'Xác nhận chấm công' }}
+        </button>
+      </div>
+
+      <div class="gray-panel">
+        <h3 class="panel-title">Kết quả nhận diện</h3>
+
+        <div class="empty-state" *ngIf="!resultData && !isLoading">
+          <ion-icon
+            name="id-card-outline"
+            style="font-size: 48px; color: #ccc"
+          ></ion-icon>
+          <p>Dữ liệu chấm công sẽ hiển thị ở đây sau khi quét khuôn mặt.</p>
+        </div>
+
+        <div class="empty-state" *ngIf="isLoading">
+          <ion-spinner name="crescent"></ion-spinner>
+          <p>Đang xử lý hình ảnh và đối chiếu dữ liệu...</p>
+        </div>
+
+        <div class="result-card success" *ngIf="resultData">
+          <div class="status-badge success-badge">
+            <ion-icon name="checkmark-circle"></ion-icon> Nhận diện thành công
+          </div>
+
+          <div
+            class="employee-image-preview mt-3 mb-3 text-center"
+            *ngIf="employeeImageUrl"
+          >
+            <img
+              [src]="employeeImageUrl"
+              alt="Ảnh nhân viên gốc"
+              class="employee-photo"
+            />
+            <p class="text-small text-muted">Ảnh gốc hệ thống</p>
+          </div>
+
+          <div class="info-row">
+            <span class="label">Nhân viên:</span>
+            <span class="value font-bold">{{ resultData.fullName }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="label">Chức vụ:</span>
+            <span class="value">{{ resultData.role }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="label">Giờ Check-in:</span>
+            <span class="value text-blue">{{ resultData.checkInTime }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="label">Độ chính xác AI:</span>
+            <span class="value">{{ resultData.similarity }}</span>
+          </div>
+
+          <button class="outline-btn mt-4" (click)="reset()">
+            Điểm danh người tiếp theo
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>

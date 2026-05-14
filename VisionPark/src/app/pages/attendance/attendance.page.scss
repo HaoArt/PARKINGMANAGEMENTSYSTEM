@@ -1,0 +1,273 @@
+/* Biến màu sắc chủ đạo */
+$primary-blue: #3880ff;
+$success-green: #2dd36f;
+$dark-gray: #222428;
+$light-gray: #f4f5f8;
+$panel-bg: #ffffff;
+$border-color: #e0e0e0;
+
+.app-bg {
+  --background: #f8f9fb; // Màu nền nhẹ nhàng cho toàn trang
+}
+
+.page-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 30px;
+  h2 {
+    font-weight: 700;
+    color: $dark-gray;
+    margin-bottom: 5px;
+  }
+  p {
+    color: #666;
+    margin: 0;
+  }
+}
+
+/* Bố cục Split Layout sử dụng Flexbox */
+.split-layout {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-items: flex-start;
+
+  @media (max-width: 992px) {
+    flex-direction: column; // Chuyển sang cột trên màn hình nhỏ
+  }
+}
+
+.gray-panel {
+  flex: 1;
+  background: $panel-bg;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid $border-color;
+  width: 100%;
+
+  .panel-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: $dark-gray;
+    border-left: 4px solid $primary-blue;
+    padding-left: 12px;
+  }
+}
+
+/* Khu vực Camera & Preview */
+.camera-box {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #f0f2f5;
+  border: 2px dashed #ccc;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .placeholder-box {
+    text-align: center;
+    cursor: pointer;
+    transition: color 0.3s;
+
+    &:hover {
+      color: $primary-blue;
+    }
+
+    .large-icon {
+      font-size: 64px;
+      margin-bottom: 10px;
+      color: #999;
+    }
+    p {
+      color: #666;
+      font-weight: 500;
+    }
+  }
+
+  .preview-box {
+    width: 100%;
+    height: 100%;
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .re-capture-btn {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.9rem;
+      backdrop-filter: blur(4px);
+    }
+  }
+}
+
+/* Buttons */
+.submit-btn {
+  width: 100%;
+  background: $primary-blue;
+  color: white;
+  border: none;
+  padding: 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+  transition:
+    opacity 0.2s,
+    transform 0.1s;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    background: #ccc;
+  }
+}
+
+.outline-btn {
+  width: 100%;
+  background: transparent;
+  color: $primary-blue;
+  border: 1.5px solid $primary-blue;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  margin-top: 15px;
+}
+
+/* Kết quả nhận diện */
+.result-card {
+  animation: fadeIn 0.4s ease-out;
+
+  &.success {
+    .status-badge {
+      background: rgba(45, 211, 111, 0.1);
+      color: $success-green;
+      padding: 10px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+  }
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+
+  .label {
+    color: #777;
+    font-size: 0.95rem;
+  }
+
+  .value {
+    color: $dark-gray;
+    font-weight: 500;
+
+    &.font-bold {
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+  }
+}
+
+/* Trạng thái trống/đang tải */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  text-align: center;
+  color: #999;
+
+  p {
+    margin-top: 15px;
+    max-width: 200px;
+  }
+}
+
+/* Utility */
+.text-blue {
+  color: $primary-blue;
+}
+.hidden {
+  display: none;
+}
+.mt-2 {
+  margin-top: 8px;
+}
+.mt-4 {
+  margin-top: 24px;
+}
+.text-center {
+  text-align: center;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Inside attendance.page.scss */
+
+.employee-image-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  .employee-photo {
+    width: 150px; // Kích thước ảnh gốc tròn
+    height: 150px;
+    object-fit: cover; // Cắt ảnh vuông/chữ nhật thành tròn đẹp
+    border-radius: 50%; // Làm tròn 100%
+    border: 4px solid $success-green; // Viền xanh lá thành công
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); // Đổ bóng nhẹ
+    margin-bottom: 8px;
+  }
+
+  .text-small {
+    font-size: 0.8rem;
+    margin: 0;
+  }
+
+  .text-muted {
+    color: #888;
+  }
+}

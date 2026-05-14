@@ -155,6 +155,45 @@
               <ion-icon name="chevron-down-outline" class="select-icon"></ion-icon>
             </div>
           </div>
+
+          <!-- PHẦN ĐĂNG KÝ KHUÔN MẶT (Chỉ hiển thị khi chỉnh sửa) -->
+          <div class="form-group camera-section" *ngIf="modalMode === 'edit'" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+            <label>Đăng ký khuôn mặt (Face ID)</label>
+            
+            <div class="camera-controls" style="margin-bottom: 10px; display: flex; gap: 10px;">
+              <button style="background: #2563eb; color: white; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer;" (click)="startCamera()" *ngIf="!isCameraOn" [disabled]="isProcessingCamera">
+                Mở Webcam
+              </button>
+              <button style="background: #10b981; color: white; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer;" (click)="captureImage()" *ngIf="isCameraOn" [disabled]="isProcessingCamera">
+                📸 Chụp ảnh
+              </button>
+              <button style="background: #ef4444; color: white; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer;" (click)="stopCamera()" *ngIf="isCameraOn" [disabled]="isProcessingCamera">
+                Tắt Webcam
+              </button>
+            </div>
+
+            <div class="video-container" style="position: relative; width: 100%; max-width: 400px; border-radius: 8px; overflow: hidden; margin-bottom: 15px; background: #f8fafc; border: 1px dashed #cbd5e1; text-align: center;">
+              <video #videoElement autoplay playsinline *ngIf="isCameraOn" style="width: 100%; display: block;"></video>
+              
+              <div class="camera-placeholder" *ngIf="!isCameraOn" style="padding: 20px;">
+                 <p style="color: #64748b; margin-bottom: 10px;">Camera đang tắt</p>
+                 <p style="font-size: 13px; color: #94a3b8; margin-bottom: 5px;">Hoặc tải ảnh có sẵn:</p>
+                 <input type="file" accept="image/*" (change)="onFileSelected($event)" [disabled]="isProcessingCamera" style="font-size: 13px; max-width: 100%;" />
+              </div>
+            </div>
+
+            <div *ngIf="!isCameraOn && imageBase64" class="image-preview" style="text-align: center; margin-bottom: 15px;">
+              <p style="font-size: 13px; color: #64748b; margin-bottom: 5px;">Ảnh đã chọn:</p>
+              <img [src]="imageBase64" alt="Preview" style="max-height: 200px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);" />
+            </div>
+
+            <button style="width: 100%; background: #003399; color: white; padding: 10px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;" (click)="registerFace()" *ngIf="imageBase64" [disabled]="isProcessingCamera">
+              <span *ngIf="isProcessingCamera">Đang xử lý...</span>
+              <span *ngIf="!isProcessingCamera">Xác nhận Đăng ký Khuôn mặt</span>
+            </button>
+
+            <canvas #canvasElement style="display: none;"></canvas>
+          </div>
         </div>
 
         <div class="modal-footer">

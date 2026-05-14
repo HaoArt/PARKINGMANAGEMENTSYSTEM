@@ -8048,3 +8048,4 @@ int xml m3_button_group_child_size_change 0x7f120003
 int xml m3_split_button_inner_corner_size_state_list 0x7f120004
 int xml m3expressive_button_shape_state_list 0x7f120005
 int xml m3expressive_connected_buttons_inner_corner_size_state_list 0x7f120006
+int xml nfc_tech_filter 0x7f120007

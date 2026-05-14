@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { TestScanFaceComponent } from './pages/timekeeping/timekeeping.component';
+import { roleGuard } from './role.guard';
 
 export const routes: Routes = [
   {
@@ -17,20 +18,22 @@ export const routes: Routes = [
     path: 'dashboard',
     loadComponent: () =>
       import('./pages/dashboard/dashboard.page').then((m) => m.DashboardPage),
+    canActivate: [roleGuard],
+    data: { roles: ['Admin', 'Security'] },
   },
   {
     path: 'history',
     loadComponent: () =>
       import('./pages/history/history.page').then((m) => m.HistoryPage),
+    canActivate: [roleGuard],
+    data: { roles: ['Admin', 'Security'] },
   },
-  // {
-  //   path: 'check-in', // Kiểm tra xem tên có khớp với '/dashboard' không
-  //   loadComponent: () => import('./pages/check-in/check-in.page').then((m) => m.CheckInPage),
-  // },
   {
-    path: 'settings', // Kiểm tra xem tên có khớp với '/dashboard' không
+    path: 'settings',
     loadComponent: () =>
       import('./pages/settings/settings.page').then((m) => m.SettingsPage),
+    canActivate: [roleGuard],
+    data: { roles: ['Admin'] },
   },
   {
     path: 'ticket-parking',
@@ -38,17 +41,31 @@ export const routes: Routes = [
       import('./pages/ticket-parking/ticket-parking.page').then(
         (m) => m.TicketParkingPage,
       ),
+    canActivate: [roleGuard],
+    data: { roles: ['Admin', 'Security'] },
   },
 
   {
     path: 'users',
-    loadComponent: () => import('./pages/users/users.page').then( m => m.UsersPage)
+    loadComponent: () =>
+      import('./pages/users/users.page').then((m) => m.UsersPage),
+    canActivate: [roleGuard],
+    data: { roles: ['Admin'] },
   },
 
   {
     path: 'card-registration',
-    loadComponent: () => import('./pages/card-registration/card-registration.page').then( m => m.CardRegistrationPage)
+    loadComponent: () =>
+      import('./pages/card-registration/card-registration.page').then(
+        (m) => m.CardRegistrationPage,
+      ),
+    canActivate: [roleGuard],
+    data: { roles: ['Admin'] },
   },
-  { path: 'timekeeping', component: TestScanFaceComponent },
-
+  {
+    path: 'timekeeping',
+    component: TestScanFaceComponent,
+    canActivate: [roleGuard],
+    data: { roles: ['Admin', 'Security'] },
+  },
 ];

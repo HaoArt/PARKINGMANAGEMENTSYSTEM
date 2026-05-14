@@ -1,163 +1,163 @@
 <ion-content>
-<app-navbar></app-navbar>
-<div class="timekeeping-container">
-  <div class="page-header">
-    <h2 class="page-title">Chấm công & Quản lý Khuôn mặt</h2>
-    <p>Nhận diện khuôn mặt AI để điểm danh nhân viên</p>
-  </div>
-
-  <!-- Mode Switcher -->
-  <div class="mode-switcher card">
-    <label class="radio-label">
-      <input type="radio" name="mode" value="recognize" [(ngModel)]="mode">
-      <strong>Chấm công (Nhận diện)</strong>
-    </label>
-    <label class="radio-label">
-      <input type="radio" name="mode" value="register" [(ngModel)]="mode">
-      <strong>Đăng ký khuôn mặt mới</strong>
-    </label>
-  </div>
-
-  <!-- Registration specific UI -->
-  <div *ngIf="mode === 'register'" class="registration-section card">
-    <label for="user-select" class="section-title">Bước 1: Chọn nhân viên để đăng ký</label>
-    <div class="input-box">
-      <select id="user-select" class="custom-select" [(ngModel)]="selectedUserId">
-        <option [ngValue]="null" disabled>-- Vui lòng chọn nhân viên --</option>
-        <option *ngFor="let user of users" [value]="user.userID">{{ user.fullName }} (Tài khoản: {{ user.userName }})</option>
-      </select>
+  <app-navbar></app-navbar>
+  <div class="timekeeping-container">
+    <div class="page-header">
+      <h2 class="page-title">Chấm công & Quản lý Khuôn mặt</h2>
+      <p>Nhận diện khuôn mặt AI để điểm danh nhân viên</p>
     </div>
 
-    <!-- User Info Card -->
-    <div *ngIf="selectedUser" class="user-info-card mt-3">
-      <div class="avatar-container">
-        <img *ngIf="selectedUser.faceImageUrl" [src]="selectedUser.faceImageUrl" alt="Khuôn mặt">
-        <div *ngIf="!selectedUser.faceImageUrl" class="avatar-placeholder">
-          <span>Chưa có ảnh</span>
+    <!-- Main Grid -->
+    <div class="split-layout mt-4">
+      <!-- Left Column: Camera Area -->
+      <div class="gray-panel">
+        <!-- Lớp phủ Loading -->
+        <div *ngIf="isProcessing" class="panel-loading-overlay">
+          <div class="spinner"></div>
+          <p>Hệ thống AI đang phân tích...</p>
         </div>
-      </div>
-      <div class="info-details">
-        <p><strong>Họ tên:</strong> {{ selectedUser.fullName }}</p>
-        <p><strong>Tài khoản:</strong> {{ selectedUser.userName }}</p>
-        <p><strong>Trạng thái:</strong> 
-          <span class="badge" [ngClass]="selectedUser.faceImageUrl ? 'active' : 'inactive'">
-            {{ selectedUser.faceImageUrl ? 'Đã đăng ký' : 'Chưa đăng ký' }}
-          </span>
-        </p>
-      </div>
-    </div>
-  </div>
 
-  <!-- Main Grid -->
-  <div class="split-layout mt-4">
-    <!-- Left Column: Camera Area -->
-    <div class="gray-panel">
-      <!-- Lớp phủ Loading -->
-      <div *ngIf="isProcessing" class="panel-loading-overlay">
-        <div class="spinner"></div>
-        <p>Hệ thống AI đang phân tích...</p>
-      </div>
-
-      <div class="panel-header" *ngIf="mode === 'register'">
-        <h3 class="panel-title">Bước 2: Chụp ảnh</h3>
-      </div>
-      
-      <!-- Time Display for Timekeeping -->
-      <div *ngIf="mode === 'recognize'" class="panel-header timekeeping-header">
-        <h3 class="panel-title">Máy Chấm Công Face ID</h3>
-        <div class="digital-clock">
-          <span class="time">{{ currentTime | date:'HH:mm:ss' }}</span>
-          <span class="date">{{ currentTime | date:'dd/MM/yyyy' }}</span>
+        <!-- Time Display for Timekeeping -->
+        <div class="panel-header timekeeping-header">
+          <h3 class="panel-title">Máy Chấm Công Face ID</h3>
+          <div class="digital-clock">
+            <span class="time">{{ currentTime | date: "HH:mm:ss" }}</span>
+            <span class="date">{{ currentTime | date: "dd/MM/yyyy" }}</span>
+          </div>
         </div>
-      </div>
-      
-      <div class="camera-controls">
-        <button class="submit-btn" (click)="startCamera()" *ngIf="!isCameraOn" [disabled]="isProcessing">
-          Mở Webcam
-        </button>
-        <button class="submit-btn bg-green" (click)="captureImage()" *ngIf="isCameraOn" [disabled]="isProcessing">
-          {{ mode === 'register' ? 'Chụp & Đăng ký' : '📸 Chụp & Chấm công' }}
-        </button>
-        <button class="submit-btn bg-red" (click)="stopCamera()" *ngIf="isCameraOn" [disabled]="isProcessing">
-          Tắt Webcam
-        </button>
-      </div>
 
-      <div class="video-container" [class.camera-off]="!isCameraOn">
-        <video #videoElement autoplay playsinline *ngIf="isCameraOn"></video>
-        <canvas #overlayCanvas class="overlay-canvas" *ngIf="isCameraOn"></canvas>
-        
-        <div class="camera-placeholder" *ngIf="!isCameraOn">
-           <p>Camera đang tắt</p>
-           <p class="upload-hint">Hoặc tải ảnh lên từ máy tính:</p>
-           <input type="file" accept="image/*" class="custom-file-input" (change)="onFileSelected($event)" [disabled]="isProcessing" />
+        <div class="camera-controls">
+          <button
+            class="submit-btn"
+            (click)="startCamera()"
+            *ngIf="!isCameraOn"
+            [disabled]="isProcessing"
+          >
+            Mở Webcam
+          </button>
+          <button
+            class="submit-btn bg-green"
+            (click)="captureImage()"
+            *ngIf="isCameraOn"
+            [disabled]="isProcessing"
+          >
+            📸 Chụp & Chấm công
+          </button>
+          <button
+            class="submit-btn bg-red"
+            (click)="stopCamera()"
+            *ngIf="isCameraOn"
+            [disabled]="isProcessing"
+          >
+            Tắt Webcam
+          </button>
         </div>
-      </div>
 
-      <!-- Preview Selected File -->
-      <div *ngIf="!isCameraOn && imageBase64" class="image-preview">
-        <h4>Ảnh tải lên:</h4>
-        <img [src]="imageBase64" alt="Preview" />
-      </div>
+        <div class="video-container" [class.camera-off]="!isCameraOn">
+          <video #videoElement autoplay playsinline *ngIf="isCameraOn"></video>
+          <canvas
+            #overlayCanvas
+            class="overlay-canvas"
+            *ngIf="isCameraOn"
+          ></canvas>
 
-      <!-- Recognition Result -->
-      <div *ngIf="recognitionResult" class="result-card mt-3">
-        <div class="result-header">
-          <span class="success-icon">✅</span>
-          <h4>Chấm công thành công!</h4>
+          <div class="camera-placeholder" *ngIf="!isCameraOn">
+            <p>Camera đang tắt</p>
+            <p class="upload-hint">Hoặc tải ảnh lên từ máy tính:</p>
+            <input
+              type="file"
+              accept="image/*"
+              class="custom-file-input"
+              (change)="onFileSelected($event)"
+              [disabled]="isProcessing"
+            />
+          </div>
         </div>
-        <div class="result-details">
-          <img [src]="recognitionResult.faceImageUrl" alt="Result">
-          <div>
-            <p><strong>Họ tên:</strong> {{ recognitionResult.fullName }}</p>
-            <p><strong>Thời gian:</strong> <span class="highlight-time">{{ currentTime | date:'HH:mm:ss dd/MM/yyyy' }}</span></p>
+
+        <!-- Preview Selected File -->
+        <div *ngIf="!isCameraOn && imageBase64" class="image-preview">
+          <h4>Ảnh tải lên:</h4>
+          <img [src]="imageBase64" alt="Preview" />
+        </div>
+
+        <!-- Recognition Result -->
+        <div *ngIf="recognitionResult" class="result-card mt-3">
+          <div class="result-header">
+            <span class="success-icon">✅</span>
+            <h4>Chấm công thành công!</h4>
+          </div>
+          <div class="result-details">
+            <img [src]="recognitionResult.faceImageUrl" alt="Result" />
+            <div>
+              <p><strong>Họ tên:</strong> {{ recognitionResult.fullName }}</p>
+              <p>
+                <strong>Thời gian:</strong>
+                <span class="highlight-time">{{
+                  currentTime | date: "HH:mm:ss dd/MM/yyyy"
+                }}</span>
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Right Column: History -->
-    <div class="gray-panel">
-      <div class="panel-header">
-        <h3 class="panel-title">Lịch sử Chấm công</h3>
-        <button class="btn-outline" (click)="loadAttendanceSummary()">Tải lại</button>
-      </div>
-      <div class="attendance-list">
-        <!-- Lặp qua từng nhóm ngày -->
-        <div *ngFor="let dayGroup of attendanceSummary" class="day-group">
-          <h4 class="day-header">{{ dayGroup.date | date:'fullDate':'':'vi' }}</h4>
-          <!-- Lặp qua các bản ghi trong ngày -->
-          <div *ngFor="let record of dayGroup.records" class="attendance-record row-card">
-            <img [src]="record.faceImageUrl" alt="Avatar" class="avatar">
-            <div class="record-info">
-              <p class="name">{{ record.fullName }}</p>
-              <div class="time-details">
-                <div class="check-in">
-                  <span class="label">Vào:</span>
-                  <span class="time">{{ record.checkInTime | date:'HH:mm' }}</span>
-                </div>
-                <div class="check-out">
-                  <span class="label">Ra:</span>
-                  <span class="time" [class.pending]="!record.checkOutTime">
-                    {{ record.checkOutTime ? (record.checkOutTime | date:'HH:mm') : 'Chưa có' }}
-                  </span>
+      <!-- Right Column: History -->
+      <div class="gray-panel">
+        <div class="panel-header">
+          <h3 class="panel-title">Lịch sử Chấm công</h3>
+          <button class="btn-outline" (click)="loadAttendanceSummary()">
+            Tải lại
+          </button>
+        </div>
+        <div class="attendance-list">
+          <!-- Lặp qua từng nhóm ngày -->
+          <div *ngFor="let dayGroup of attendanceSummary" class="day-group">
+            <h4 class="day-header">
+              {{ dayGroup.date | date: "fullDate" : "" : "vi" }}
+            </h4>
+            <!-- Lặp qua các bản ghi trong ngày -->
+            <div
+              *ngFor="let record of dayGroup.records"
+              class="attendance-record row-card"
+            >
+              <img [src]="record.faceImageUrl" alt="Avatar" class="avatar" />
+              <div class="record-info">
+                <p class="name">{{ record.fullName }}</p>
+                <div class="time-details">
+                  <div class="check-in">
+                    <span class="label">Vào:</span>
+                    <span class="time">{{
+                      record.checkInTime | date: "HH:mm"
+                    }}</span>
+                  </div>
+                  <div class="check-out">
+                    <span class="label">Ra:</span>
+                    <span class="time" [class.pending]="!record.checkOutTime">
+                      {{
+                        record.checkOutTime
+                          ? (record.checkOutTime | date: "HH:mm")
+                          : "Chưa có"
+                      }}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="work-duration" *ngIf="record.workDuration">
-              {{ record.workDuration }}
+              <div class="work-duration" *ngIf="record.workDuration">
+                {{ record.workDuration }}
+              </div>
             </div>
           </div>
-        </div>
-        <!-- Trạng thái rỗng -->
-        <div *ngIf="!attendanceSummary || attendanceSummary.length === 0" class="empty-state">
-          <p>Chưa có dữ liệu chấm công.</p>
+          <!-- Trạng thái rỗng -->
+          <div
+            *ngIf="!attendanceSummary || attendanceSummary.length === 0"
+            class="empty-state"
+          >
+            <p>Chưa có dữ liệu chấm công.</p>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Hidden Canvas for capturing frame -->
-  <canvas #canvasElement style="display: none;"></canvas>
-</div>
+    <!-- Hidden Canvas for capturing frame -->
+    <canvas #canvasElement style="display: none"></canvas>
+  </div>
 </ion-content>

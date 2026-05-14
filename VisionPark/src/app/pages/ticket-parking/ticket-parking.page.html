@@ -2,21 +2,18 @@
   <app-navbar></app-navbar>
 
   <div class="page-container">
-
     <div class="page-header">
       <h2>Phát hành Thẻ VisionPark</h2>
       <p>Nhập thông tin chi tiết để cấp phát thẻ NFC mới cho phương tiện.</p>
     </div>
 
     <div class="split-layout">
-
       <div class="gray-panel">
         <h3 class="panel-title">Phát hành thẻ mới</h3>
 
         <div class="form-group">
           <label>MÃ THẺ NFC</label>
           <div class="input-box">
-
             <input
               type="text"
               placeholder="Quẹt thẻ hoặc nhập mã..."
@@ -27,7 +24,6 @@
               title="Quét thẻ"
               (click)="startNFC()"
             >
-
               <ion-icon name="scan-outline"></ion-icon>
             </div>
           </div>
@@ -46,34 +42,43 @@
               name="chevron-down-outline"
               class="dropdown-icon"
             ></ion-icon>
-
           </div>
         </div>
 
         <div class="form-group">
+          <label>LOẠI XE</label>
+          <div class="input-box">
+            <select [(ngModel)]="regData.vehicleTypeID">
+              <option [value]="1">Ô tô</option>
+              <option [value]="2">Xe máy</option>
+            </select>
+
+            <ion-icon
+              name="chevron-down-outline"
+              class="dropdown-icon"
+            ></ion-icon>
+          </div>
+        </div>
+        <div class="form-group">
           <label>HỌ VÀ TÊN CHỦ XE</label>
           <div class="input-box">
-
             <input
               type="text"
               placeholder="Nhập họ và tên..."
               [(ngModel)]="regData.customerName"
             />
-
           </div>
         </div>
 
         <div class="form-group">
           <label>BIỂN SỐ XE</label>
           <div class="input-box">
-
             <input
               type="text"
               placeholder="VD: 51H-123.45"
               [(ngModel)]="regData.registerPlate"
             />
 
-            <!-- INPUT ẨN DÀNH CHO MÁY TÍNH -->
             <input
               type="file"
               #fileInput
@@ -82,7 +87,6 @@
               (change)="onFileSelected($event)"
             />
 
-            <!-- NÚT GỌI CHỌN FILE THÔNG MINH -->
             <div
               class="icon-btn gray-icon"
               (click)="handleImageClick(fileInput)"
@@ -92,7 +96,6 @@
             </div>
           </div>
 
-          <!-- KHUNG XEM TRƯỚC ẢNH -->
           <div class="image-preview-mini" *ngIf="imagePreview">
             <img [src]="imagePreview" alt="Preview" />
             <span (click)="imagePreview = null; selectedImageFile = null"
@@ -111,7 +114,6 @@
         </button>
       </div>
 
-      <!-- BẢNG DANH SÁCH THẺ -->
       <div class="gray-panel">
         <div class="panel-header">
           <div class="filter-box">
@@ -163,20 +165,31 @@
           </table>
         </div>
 
-        <!-- PHÂN TRANG -->
         <div class="pagination" *ngIf="totalPages > 0">
-          <span class="page-info">Trang {{ currentPage }} / {{ totalPages }}</span>
+          <span class="page-info"
+            >Trang {{ currentPage }} / {{ totalPages }}</span
+          >
           <div class="page-controls">
-            <button (click)="prevPage()" [disabled]="currentPage === 1"><ion-icon name="chevron-back-outline"></ion-icon></button>
-            
+            <button (click)="prevPage()" [disabled]="currentPage === 1">
+              <ion-icon name="chevron-back-outline"></ion-icon>
+            </button>
+
             <ng-container *ngFor="let page of visiblePages">
-              <button 
-                [class.active]="page === currentPage" 
+              <button
+                [class.active]="page === currentPage"
                 [disabled]="page === '...'"
-                (click)="goToPage(page)">{{ page }}</button>
+                (click)="goToPage(page)"
+              >
+                {{ page }}
+              </button>
             </ng-container>
-            
-            <button (click)="nextPage()" [disabled]="currentPage === totalPages"><ion-icon name="chevron-forward-outline"></ion-icon></button>
+
+            <button
+              (click)="nextPage()"
+              [disabled]="currentPage === totalPages"
+            >
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </button>
           </div>
         </div>
       </div>

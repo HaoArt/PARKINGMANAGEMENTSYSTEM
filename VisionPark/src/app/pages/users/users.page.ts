@@ -1,8 +1,25 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core'; 
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  inject,
+  ChangeDetectorRef,
+  ViewChild,
+  ElementRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { IonContent, IonIcon, AlertController, ToastController, NavController } from '@ionic/angular/standalone';
+import {
+  IonContent,
+  IonIcon,
+  AlertController,
+  ToastController,
+  NavController,
+  IonButton,
+  IonHeader,
+  IonCard,
+} from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import * as icons from 'ionicons/icons';
 
@@ -24,13 +41,22 @@ interface UserRecord {
   templateUrl: './users.page.html',
   styleUrls: ['./users.page.scss'],
   standalone: true,
-  imports: [IonContent, IonIcon, CommonModule, FormsModule, NavbarComponent],
+  imports: [
+    IonCard,
+    IonHeader,
+    IonButton,
+    IonContent,
+    IonIcon,
+    CommonModule,
+    FormsModule,
+    NavbarComponent,
+  ],
 })
-export class UsersPage implements OnInit {
+export class UsersPage implements OnInit, OnDestroy {
   private api = inject(Api);
   private alertCtrl = inject(AlertController);
   private toastCtrl = inject(ToastController);
-  private cdr = inject(ChangeDetectorRef); 
+  private cdr = inject(ChangeDetectorRef);
   private navCtrl = inject(NavController);
 
   allUsers: UserRecord[] = [];
@@ -42,7 +68,7 @@ export class UsersPage implements OnInit {
   itemsPerPage: number = 5;
   totalPages: number = 1;
   visiblePages: (number | string)[] = [];
-  
+
   searchTerm: string = '';
   filterRole: string = 'all';
   filterStatus: string = 'all';
@@ -51,12 +77,26 @@ export class UsersPage implements OnInit {
   // --- BIẾN QUẢN LÝ MODAL ---
   showModal: boolean = false;
   modalMode: 'add' | 'edit' = 'add';
-  editingUser: any = { userID: null, fullName: '', userName: '', password: '', role: 'Security', isActive: true };
+  editingUser: any = {
+    userID: null,
+    fullName: '',
+    userName: '',
+    password: '',
+    role: 'Security',
+    isActive: true,
+  };
+
+  // --- QUẢN LÝ ĐĂNG KÝ KHUÔN MẶT ---
+  @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
+  @ViewChild('canvasElement') canvasElement!: ElementRef<HTMLCanvasElement>;
+
+  isCameraOn = false;
+  stream: MediaStream | null = null;
+  isProcessingCamera = false;
+  imageBase64: string | null = null;
 
   constructor() {
-
     addIcons({ ...icons, closeOutline: icons.closeOutline });
-
   }
 
   ngOnInit() {
@@ -69,12 +109,22 @@ export class UsersPage implements OnInit {
     this.loadUsers();
   }
 
+  ngOnDestroy() {
+    this.stopCamera();
+  }
+
   async showToast(message: string, color: 'success' | 'danger' = 'success') {
     const toast = await this.toastCtrl.create({
-      message: message, duration: 2500, color: color, position: 'top',
+      message: message,
+      duration: 2500,
+      color: color,
+      position: 'top',
 
       cssClass: `toast-top-right toast-${color}`,
-      icon: color === 'success' ? 'checkmark-circle-outline' : 'alert-circle-outline'
+      icon:
+        color === 'success'
+          ? 'checkmark-circle-outline'
+          : 'alert-circle-outline',
     });
     toast.present();
   }
@@ -85,20 +135,20 @@ export class UsersPage implements OnInit {
       next: (res: any) => {
         if (res?.data) {
           this.allUsers = res.data.map((item: any) => ({
-            ...item, 
+            ...item,
             userID: item.userId || item.UserID || item.userID,
-            faceImageUrl: item.faceImageUrl || item.FaceImageUrl
+            faceImageUrl: item.faceImageUrl || item.FaceImageUrl,
           }));
           this.applyFilters();
         }
         this.isLoading = false;
-        this.cdr.detectChanges(); 
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
         console.error('Lỗi API lấy nhân viên:', err);
         this.isLoading = false;
         this.cdr.detectChanges();
-      }
+      },
     });
   }
 
@@ -106,12 +156,20 @@ export class UsersPage implements OnInit {
     let temp = this.allUsers;
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
-      temp = temp.filter(u => u.fullName.toLowerCase().includes(term) || u.userName.toLowerCase().includes(term));
+      temp = temp.filter(
+        (u) =>
+          u.fullName.toLowerCase().includes(term) ||
+          u.userName.toLowerCase().includes(term),
+      );
     }
-    if (this.filterRole !== 'all') temp = temp.filter(u => u.role === this.filterRole);
-    if (this.filterStatus !== 'all') temp = temp.filter(u => u.isActive === (this.filterStatus === 'active'));
+    if (this.filterRole !== 'all')
+      temp = temp.filter((u) => u.role === this.filterRole);
+    if (this.filterStatus !== 'all')
+      temp = temp.filter(
+        (u) => u.isActive === (this.filterStatus === 'active'),
+      );
     this.users = temp;
-    
+
     this.currentPage = 1;
     this.calculatePagination();
   }
@@ -119,23 +177,35 @@ export class UsersPage implements OnInit {
   // --- LOGIC MỞ/ĐÓNG MODAL ---
   openAddModal() {
     this.modalMode = 'add';
-    this.editingUser = { userID: null, fullName: '', userName: '', password: '', role: 'Security', isActive: true };
+    this.editingUser = {
+      userID: null,
+      fullName: '',
+      userName: '',
+      password: '',
+      role: 'Security',
+      isActive: true,
+    };
     this.showModal = true;
   }
 
   openEditModal(user: UserRecord) {
     this.modalMode = 'edit';
-    this.editingUser = { 
-      userID: user.userID, fullName: user.fullName, userName: user.userName, 
-      password: '', role: user.role, isActive: user.isActive 
+    this.editingUser = {
+      userID: user.userID,
+      fullName: user.fullName,
+      userName: user.userName,
+      password: '',
+      role: user.role,
+      isActive: user.isActive,
     };
     this.showModal = true;
   }
 
   closeModal() {
     this.showModal = false;
+    this.stopCamera();
+    this.imageBase64 = null;
   }
-
 
   saveUser() {
     if (!this.editingUser.fullName || !this.editingUser.userName) {
@@ -148,58 +218,60 @@ export class UsersPage implements OnInit {
         this.showToast('Vui lòng nhập mật khẩu!', 'danger');
         return;
       }
-      
+
       // SỬA Ở ĐÂY: Chỉ gửi đúng 4 trường cần thiết, tuyệt đối không gửi userID = null
       const payload = {
         fullName: this.editingUser.fullName,
         userName: this.editingUser.userName,
         password: this.editingUser.password,
-        role: 'Security'
+        role: 'Security',
       };
 
       this.api.createUser(payload).subscribe({
-        next: (res: any) => { 
-          this.showToast('Thêm nhân viên thành công!', 'success'); 
-          this.closeModal(); 
-          this.loadUsers(); 
+        next: (res: any) => {
+          this.showToast('Thêm nhân viên thành công!', 'success');
+          this.closeModal();
+          this.loadUsers();
         },
         error: (err: any) => {
           // Bắt thêm lỗi validation mặc định của .NET (err.error.title) để dễ debug hơn
-          const errorMsg = err.error?.Message || err.error?.title || 'Lỗi thêm nhân viên!';
+          const errorMsg =
+            err.error?.Message || err.error?.title || 'Lỗi thêm nhân viên!';
           this.showToast(errorMsg, 'danger');
           console.error('Chi tiết lỗi API 400:', err.error);
-        }
+        },
       });
-
     } else {
-      
       // SỬA Ở ĐÂY: Dành riêng cho Update
       const payload = {
-        fullName: this.editingUser.fullName, 
+        fullName: this.editingUser.fullName,
         userName: this.editingUser.userName,
-        password: this.editingUser.password, 
-        role: this.editingUser.role, 
-        isActive: this.editingUser.isActive
+        password: this.editingUser.password,
+        role: this.editingUser.role,
+        isActive: this.editingUser.isActive,
       };
 
       this.api.updateUser(this.editingUser.userID, payload).subscribe({
-        next: (res: any) => { 
-          this.showToast('Cập nhật thành công!', 'success'); 
-          this.closeModal(); 
-          this.loadUsers(); 
+        next: (res: any) => {
+          this.showToast('Cập nhật thành công!', 'success');
+          this.closeModal();
+          this.loadUsers();
         },
         error: (err: any) => {
-          const errorMsg = err.error?.Message || err.error?.title || 'Lỗi cập nhật!';
+          const errorMsg =
+            err.error?.Message || err.error?.title || 'Lỗi cập nhật!';
           this.showToast(errorMsg, 'danger');
           console.error('Chi tiết lỗi API 400:', err.error);
-        }
+        },
       });
     }
   }
   // --- XÓA NHÂN VIÊN ---
   async deleteUser(user: UserRecord) {
-    if (user.role === 'Admin') return this.showToast('Không được phép xóa tài khoản Admin!', 'danger');
-    if (!user.userID) return this.showToast('Không tìm thấy ID nhân viên!', 'danger');
+    if (user.role === 'Admin')
+      return this.showToast('Không được phép xóa tài khoản Admin!', 'danger');
+    if (!user.userID)
+      return this.showToast('Không tìm thấy ID nhân viên!', 'danger');
 
     const alert = await this.alertCtrl.create({
       header: 'Xác nhận xóa',
@@ -207,29 +279,127 @@ export class UsersPage implements OnInit {
       buttons: [
         { text: 'Hủy', role: 'cancel' },
         {
-          text: 'Xóa nhân viên', role: 'destructive',
+          text: 'Xóa nhân viên',
+          role: 'destructive',
           handler: () => {
             this.api.deleteUser(user.userID).subscribe({
-              next: (res: any) => { this.showToast('Đã xóa thành công!', 'success'); this.loadUsers(); },
-              error: (err: any) => this.showToast(err.error?.Message || 'Lỗi xóa!', 'danger')
+              next: (res: any) => {
+                this.showToast('Đã xóa thành công!', 'success');
+                this.loadUsers();
+              },
+              error: (err: any) =>
+                this.showToast(err.error?.Message || 'Lỗi xóa!', 'danger'),
             });
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
     await alert.present();
   }
 
+  // --- LOGIC ĐĂNG KÝ KHUÔN MẶT TỪ WEBCAM ---
+  async startCamera() {
+    if (this.isCameraOn) return;
+    try {
+      this.stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 640, height: 480 },
+      });
+      this.isCameraOn = true;
+      this.imageBase64 = null;
+
+      setTimeout(() => {
+        if (this.videoElement) {
+          this.videoElement.nativeElement.srcObject = this.stream;
+        }
+      }, 100);
+    } catch (err: any) {
+      console.error('Lỗi truy cập webcam: ', err);
+      this.showToast(
+        'Không thể truy cập webcam. Vui lòng cấp quyền và thử lại.',
+        'danger',
+      );
+    }
+  }
+
+  stopCamera() {
+    if (this.stream) {
+      this.stream.getTracks().forEach((track) => track.stop());
+      this.isCameraOn = false;
+      this.stream = null;
+    }
+  }
+
+  captureImage() {
+    if (!this.isCameraOn || !this.videoElement || !this.canvasElement) return;
+
+    const video = this.videoElement.nativeElement;
+    const canvas = this.canvasElement.nativeElement;
+    const context = canvas.getContext('2d');
+
+    if (context) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      this.imageBase64 = canvas.toDataURL('image/jpeg');
+      this.stopCamera();
+    }
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.imageBase64 = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  registerFace() {
+    if (!this.editingUser.userID) {
+      this.showToast(
+        'Vui lòng lưu thông tin nhân viên trước khi đăng ký khuôn mặt.',
+        'danger',
+      );
+      return;
+    }
+    if (!this.imageBase64) {
+      this.showToast('Vui lòng chụp hoặc tải lên ảnh khuôn mặt.', 'danger');
+      return;
+    }
+
+    this.isProcessingCamera = true;
+    this.api.registerFace(this.editingUser.userID, this.imageBase64).subscribe({
+      next: (res: any) => {
+        this.isProcessingCamera = false;
+        this.showToast(
+          res.message || 'Đăng ký khuôn mặt thành công!',
+          'success',
+        );
+        this.loadUsers();
+      },
+      error: (err: any) => {
+        this.isProcessingCamera = false;
+        this.showToast(
+          err.error?.message || 'Lỗi khi đăng ký khuôn mặt.',
+          'danger',
+        );
+      },
+    });
+  }
+
   // --- LOGIC PHÂN TRANG ---
   calculatePagination() {
-    this.totalPages = Math.ceil(this.users.length / this.itemsPerPage); 
-    
+    this.totalPages = Math.ceil(this.users.length / this.itemsPerPage);
+
     if (this.currentPage > this.totalPages && this.totalPages > 0) {
       this.currentPage = this.totalPages;
     } else if (this.totalPages === 0) {
       this.currentPage = 1;
     }
-    
+
     this.updatePaginatedUsers();
     this.generatePages();
     this.cdr.detectChanges();
