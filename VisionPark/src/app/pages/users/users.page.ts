@@ -2,7 +2,7 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { IonContent, IonIcon, AlertController, ToastController } from '@ionic/angular/standalone';
+import { IonContent, IonIcon, AlertController, ToastController, NavController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import * as icons from 'ionicons/icons';
 
@@ -31,6 +31,7 @@ export class UsersPage implements OnInit {
   private alertCtrl = inject(AlertController);
   private toastCtrl = inject(ToastController);
   private cdr = inject(ChangeDetectorRef); 
+  private navCtrl = inject(NavController);
 
   allUsers: UserRecord[] = [];
   users: UserRecord[] = [];
@@ -59,6 +60,12 @@ export class UsersPage implements OnInit {
   }
 
   ngOnInit() {
+    const role = localStorage.getItem('userRole');
+    if (role !== 'Admin') {
+      this.showToast('Bạn không có quyền truy cập trang này!', 'danger');
+      this.navCtrl.navigateRoot('/dashboard');
+      return;
+    }
     this.loadUsers();
   }
 

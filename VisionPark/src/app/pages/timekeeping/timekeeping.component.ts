@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import localeVi from '@angular/common/locales/vi';
 import { IonContent } from '@ionic/angular/standalone';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
-import { ToastController } from '@ionic/angular/standalone';
+import { NotificationService } from '../../services/notification.service';
 
 // Đăng ký dữ liệu ngôn ngữ tiếng Việt
 registerLocaleData(localeVi, 'vi');
@@ -34,14 +34,16 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
   users: any[] = [];
   selectedUserId: number | null = null;
   recognitionResult: any = null;
+  isAdmin: boolean = false;
 
   // Đồng hồ
   currentTime: Date = new Date();
   clockInterval: any;
 
-  constructor(private api: Api, private toastController: ToastController) {}
+  constructor(private api: Api, private notification: NotificationService) {}
 
   ngOnInit() {
+    this.isAdmin = localStorage.getItem('userRole') === 'Admin';
     this.loadAttendanceSummary();
     this.loadUsers();
     this.clockInterval = setInterval(() => {
@@ -54,16 +56,6 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
     return this.users.find(u => u.userID === this.selectedUserId);
   }
 
-  async showNotification(type: 'success' | 'error', message: string) {
-    const toast = await this.toastController.create({
-      message: (type === 'success' ? '✅ ' : '⚠️ ') + message,
-      duration: 3500,
-      position: 'top',
-      color: type === 'success' ? 'success' : 'danger',
-      cssClass: 'toast-top-right'
-    });
-    await toast.present();
-  }
 
   loadUsers() {
     this.api.getAllUsers().subscribe({
@@ -77,7 +69,7 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
       },
       error: (err: any) => {
         console.error("Lỗi tải danh sách người dùng:", err);
-        this.showNotification('error', 'Không thể tải danh sách người dùng.');
+        this.notification.showToast('Không thể tải danh sách người dùng.', 'danger');
       }
     });
   }
@@ -108,7 +100,7 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
       }, 100);
     } catch (err: any) {
       console.error("Lỗi truy cập webcam: ", err);
-      this.showNotification('error', 'Không thể truy cập webcam. Vui lòng cấp quyền và thử lại.');
+      this.notification.showToast('Không thể truy cập webcam. Vui lòng cấp quyền và thử lại.', 'danger');
     }
   }
 
@@ -262,22 +254,27 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
   }
 
   handleRegistration(imageBase64: string) {
+    if (!this.isAdmin) {
+      this.notification.showToast('Bạn không có quyền đăng ký khuôn mặt.', 'danger');
+      return;
+    }
+
     if (!this.selectedUserId) {
-      this.showNotification('error', 'Vui lòng chọn một nhân viên để đăng ký.');
+      this.notification.showToast('Vui lòng chọn một nhân viên để đăng ký.', 'danger');
       return;
     }
     this.isProcessing = true; // Bật Loading
     this.api.registerFace(this.selectedUserId, imageBase64).subscribe({
       next: (res) => {
         this.isProcessing = false; // Tắt Loading
-        this.showNotification('success', res.message);
+        this.notification.showToast(res.message, 'success');
         this.recognitionResult = null; // Clear previous results
         this.loadAttendanceSummary(); // Tải lại lịch sử để xem ảnh mới
         this.loadUsers(); // Tải lại danh sách nhân viên để cập nhật ảnh khuôn mặt trong khung Preview
       },
       error: (err: any) => {
         this.isProcessing = false;
-        this.showNotification('error', err.error?.message || "Lỗi khi đăng ký khuôn mặt.");
+        this.notification.showToast(err.error?.message || "Lỗi khi đăng ký khuôn mặt.", 'danger');
       }
     });
   }
@@ -291,14 +288,14 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
         if (res.success) {
           this.recognitionResult = res.user;
           this.loadAttendanceSummary(); // Tải lại lịch sử chấm công
-          this.showNotification('success', `Nhận diện thành công: ${res.user.fullName}`);
+          this.notification.showToast(`Nhận diện thành công: ${res.user.fullName}`, 'success');
         } else {
-          this.showNotification('error', res.message);
+          this.notification.showToast(res.message, 'danger');
         }
       },
       error: (err: any) => {
         this.isProcessing = false;
-        this.showNotification('error', err.error?.message || "Lỗi khi nhận diện khuôn mặt.");
+        this.notification.showToast(err.error?.message || "Lỗi khi nhận diện khuôn mặt.", 'danger');
       }
     });
   }
@@ -310,7 +307,7 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
         this.attendanceSummary = res.data || res;
       },
       error: (err: any) => {
-        this.showNotification('error', err.error?.message || "Lỗi khi tải lịch sử chấm công.");
+        this.notification.showToast(err.error?.message || "Lỗi khi tải lịch sử chấm công.", 'danger');
         // err.error chứa đoạn JSON { Message: "...", Error: "..." } từ Backend
         console.error('Lỗi Backend trả về:', err.error?.error || err.message);
         this.attendanceSummary = []; // Xóa trắng danh sách nếu API lỗi
