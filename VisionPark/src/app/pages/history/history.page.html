@@ -1,363 +1,303 @@
-<ion-content class="custom-bg">
+<ion-content [fullscreen]="true" class="premium-dashboard">
   <app-navbar (searchChange)="onNavbarSearch($event)"></app-navbar>
 
-  <div class="px-6 md:px-10 py-4 max-w-[1400px] mx-auto pb-12">
-    <div class="mb-8">
-      <h2 class="text-[26px] font-extrabold text-[#0a192f] mb-1 tracking-tight">
-        Vận hành Bãi xe
-      </h2>
-      <p class="text-gray-500 text-[13px] font-medium">
-        Terminal Active Control
-      </p>
-    </div>
+  <div class="main-wrapper">
+    <header class="page-header">
+      <div class="header-content">
+        <h1>Vận hành Bãi xe</h1>
+        <p>
+          Kiểm soát và phân luồng phương tiện ra/vào (Terminal Active Control)
+        </p>
+      </div>
+    </header>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-      <!-- CỘT 1: NHẬP/QUÉT THẺ -->
-      <div
-        class="bg-white rounded-[24px] p-7 shadow-[0_2px_15px_rgba(0,0,0,0.02)] flex flex-col justify-center"
-      >
-        <div class="flex items-center gap-3 mb-6">
-          <div
-            class="w-10 h-10 rounded-full bg-[#eff6ff] flex items-center justify-center text-[#3b82f6] cursor-pointer"
-            title="Bật kết nối NFC"
-            (click)="startNFC()"
-          >
-            <ion-icon name="scan-outline" class="text-xl"></ion-icon>
-          </div>
-          <h3 class="text-[18px] font-bold text-[#111827] m-0">
+    <div class="top-cards-grid">
+      <div class="glass-card flex flex-col">
+        <div class="card-header border-bottom">
+          <h3 class="flex items-center gap-2 m-0">
+            <button
+              class="btn-icon-circular"
+              title="Bật kết nối NFC"
+              (click)="startNFC()"
+            >
+              <ion-icon name="scan-outline"></ion-icon>
+            </button>
             Đầu Đọc Thẻ NFC
           </h3>
         </div>
 
-        <div class="space-y-5">
-          <p class="text-[13px] text-gray-500 mb-4">
+        <div class="card-body">
+          <p class="helper-text mb-4">
             Quẹt thẻ vào thiết bị hoặc nhập mã NFC để hệ thống tự động kiểm tra
             và phân luồng VÀO/RA.
           </p>
 
-          <div>
-            <label
-              class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2"
-              >Mã thẻ NFC</label
-            >
-            <div class="relative">
-
+          <div class="form-group">
+            <label>Mã Thẻ NFC</label>
+            <div class="premium-input">
               <ion-icon
                 name="id-card-outline"
-                class="absolute left-3 top-3.5 text-gray-400 text-[18px]"
+                class="input-icon"
+                slot="start"
               ></ion-icon>
-
-              <!-- ĐÃ XÓA PHẦN INPUT BỊ DƯ THỪA TRÙNG LẶP -->
               <input
                 type="text"
                 placeholder="Chờ quẹt thẻ..."
-                class="w-full bg-[#f4f6f8] text-[#111827] text-[15px] border-none rounded-[12px] pl-10 pr-4 py-3.5 outline-none font-bold tracking-widest transition focus:ring-2 focus:ring-blue-100"
+                class="tracking-widest uppercase"
                 [(ngModel)]="inputNfcId"
                 (keyup.enter)="onProcessCard(inputNfcId)"
                 [disabled]="isLoading"
               />
-
             </div>
           </div>
 
           <button
-            class="w-full mt-2 bg-[#003399] hover:bg-[#002277] disabled:bg-gray-300 text-white font-bold text-[14px] py-4 rounded-[12px] transition-colors flex items-center justify-center gap-2 shadow-md shadow-blue-900/20 cursor-pointer"
+            class="btn-primary full-width mt-4"
             (click)="onProcessCard(inputNfcId)"
             [disabled]="isLoading"
           >
-            <ion-icon name="radio-outline" class="text-lg"></ion-icon>
-            {{ isLoading ? 'Đang xử lý...' : 'Xác thực thẻ' }}
+            <ion-icon name="radio-outline"></ion-icon>
+            <span>{{ isLoading ? 'Đang xử lý...' : 'Xác thực thẻ' }}</span>
           </button>
         </div>
       </div>
 
-      <!-- CỘT 2: KẾT QUẢ QUÉT THẺ -->
-      <div
-        class="bg-white rounded-[24px] p-7 shadow-[0_2px_15px_rgba(0,0,0,0.02)] relative overflow-hidden"
-      >
+      <div class="glass-card flex flex-col relative overflow-hidden">
         <div
           *ngIf="scanResult"
-          class="absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-10"
-          [ngClass]="scanResult.isSuccess ? 'bg-green-500' : 'bg-red-500'"
+          class="result-decorator"
+          [ngClass]="scanResult.isSuccess ? 'bg-success' : 'bg-danger'"
         ></div>
 
-        <div class="flex items-center gap-3 mb-6 relative z-10">
-          <div
-            class="w-10 h-10 rounded-full flex items-center justify-center border"
-            [ngClass]="scanResult ? (scanResult.isSuccess ? 'bg-[#f0fdf4] text-[#22c55e] border-green-100' : 'bg-red-50 text-red-500 border-red-100') : 'bg-[#f8f9fa] text-gray-400 border-gray-100'"
-          >
-            <ion-icon
-              [name]="scanResult ? (scanResult.isSuccess ? 'checkmark-circle-outline' : 'close-circle-outline') : 'information-circle-outline'"
-              class="text-xl"
-            ></ion-icon>
-          </div>
-          <div>
-            <h3 class="text-[18px] font-bold text-[#111827] m-0">
-              Thông Tin Vé
-            </h3>
-            <p
-              *ngIf="scanResult"
-              class="text-[12px] font-bold mt-1"
-              [ngClass]="scanResult.isSuccess ? 'text-green-600' : 'text-red-500'"
-            >
-              {{ scanResult.message }}
-            </p>
-          </div>
-        </div>
-
-        <div
-          *ngIf="!scanResult"
-          class="flex flex-col items-center justify-center h-[200px] text-gray-400"
-        >
-          <ion-icon
-            name="card-outline"
-            class="text-4xl mb-3 opacity-50"
-          ></ion-icon>
-          <p class="text-[13px] font-medium">Chưa có dữ liệu thẻ</p>
-        </div>
-
-        <div *ngIf="scanResult" class="space-y-4 relative z-10 animate-fade-in">
-          <div class="bg-[#f8f9fa] rounded-[16px] p-5 border border-gray-100">
+        <div class="card-header border-bottom relative z-10">
+          <div class="flex items-center gap-3 m-0">
             <div
-              class="flex justify-between items-center mb-3 pb-3 border-b border-gray-200"
+              class="status-icon-box"
+              [ngClass]="scanResult ? (scanResult.isSuccess ? 'success' : 'danger') : 'default'"
             >
-              <span
-                class="text-[11px] font-bold text-gray-500 uppercase tracking-wider"
-                >Chủ thẻ</span
+              <ion-icon
+                [name]="scanResult ? (scanResult.isSuccess ? 'checkmark-circle-outline' : 'close-circle-outline') : 'information-circle-outline'"
+              ></ion-icon>
+            </div>
+            <div>
+              <h3 class="m-0 text-main font-bold text-lg">Thông Tin Vé</h3>
+              <p
+                *ngIf="scanResult"
+                class="text-sm font-bold mt-1 mb-0"
+                [ngClass]="scanResult.isSuccess ? 'text-success' : 'text-danger'"
               >
-              <span class="text-[14px] font-black text-[#003399]"
-                >{{ scanResult.customerName }}</span
-              >
+                {{ scanResult.message }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-body relative z-10 flex flex-col justify-center">
+          <div *ngIf="!scanResult" class="empty-state py-8">
+            <ion-icon name="card-outline"></ion-icon>
+            <p>Chưa có dữ liệu thẻ</p>
+          </div>
+
+          <div *ngIf="scanResult" class="result-details animate-fade-in">
+            <div class="customer-box">
+              <div class="flex-justify border-bottom pb-2 mb-3">
+                <span class="label">Chủ thẻ</span>
+                <span class="value highlight text-lg"
+                  >{{ scanResult.customerName }}</span
+                >
+              </div>
+              <div class="grid-2-col">
+                <div>
+                  <span class="label block mb-1">Biển số xe</span>
+                  <div class="plate-container text-sm">
+                    {{ scanResult.plateNumber }}
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="label block mb-1">Loại xe</span>
+                  <span
+                    class="value font-bold flex items-center justify-end gap-1"
+                  >
+                    <ion-icon
+                      [name]="scanResult.vehicleType === 'Ô tô' ? 'car-sport-outline' : 'bicycle-outline'"
+                      class="text-muted"
+                    ></ion-icon>
+                    {{ scanResult.vehicleType }}
+                  </span>
+                </div>
+              </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-              <div>
+            <div class="grid-2-col gap-4 mt-4">
+              <div class="info-card text-center">
+                <span class="label block mb-1">Hạn sử dụng</span>
                 <span
-                  class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1"
-                  >Biển số xe</span
+                  class="value font-bold"
+                  [ngClass]="scanResult.status === 'Đã hết hạn' ? 'text-danger' : 'text-main'"
                 >
-                <span
-                  class="inline-block bg-white border border-gray-200 px-3 py-1 rounded-md text-[13px] font-bold text-gray-800 tracking-widest uppercase shadow-sm"
-                >
-                  {{ scanResult.plateNumber }}
+                  {{ scanResult.expiryDate }}
                 </span>
               </div>
-              <div class="text-right">
+              <div class="info-card text-center">
+                <span class="label block mb-1">Trạng thái vé</span>
                 <span
-                  class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1"
-                  >Loại xe</span
+                  class="value font-bold"
+                  [ngClass]="scanResult.status === 'Hợp lệ' ? 'text-success' : 'text-danger'"
                 >
-                <span class="text-[13px] font-bold text-gray-700"
-                  >{{ scanResult.vehicleType }}</span
-                >
+                  {{ scanResult.status }}
+                </span>
               </div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4">
-            <div
-              class="bg-[#fcfcfd] border border-gray-100 rounded-[12px] p-4 text-center"
-            >
-              <span
-                class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1"
-                >Hạn sử dụng</span
-              >
-              <span
-                class="text-[13px] font-bold"
-                [ngClass]="scanResult.status === 'Đã hết hạn' ? 'text-red-500' : 'text-gray-700'"
-              >
-                {{ scanResult.expiryDate }}
-              </span>
-            </div>
-            <div
-              class="bg-[#fcfcfd] border border-gray-100 rounded-[12px] p-4 text-center"
-            >
-              <span
-                class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1"
-                >Trạng thái vé</span
-              >
-              <span
-                class="text-[13px] font-bold"
-                [ngClass]="scanResult.status === 'Hợp lệ' ? 'text-green-600' : 'text-red-500'"
-              >
-                {{ scanResult.status }}
-              </span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- BẢNG LỊCH SỬ GIAO DỊCH DƯỚI CÙNG -->
-    <div
-      class="bg-white p-7 rounded-[24px] shadow-[0_2px_15px_rgba(0,0,0,0.02)]"
-    >
-      <div
-        class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4"
-      >
-        <h3 class="text-[16px] font-bold text-[#111827] m-0">
-          Lịch sử Giao dịch
-        </h3>
-
-        <div class="flex gap-3 w-full md:w-auto">
-          <div class="relative">
-            <select
-              class="bg-[#f4f6f8] text-gray-600 text-[12px] border-none rounded-[10px] pl-4 pr-9 py-2.5 outline-none font-medium appearance-none cursor-pointer"
-              [(ngModel)]="filterConfig.status"
-              (change)="applyFilters()"
-            >
+    <div class="glass-card mt-6">
+      <div class="table-header">
+        <h3>Lịch sử Giao dịch</h3>
+        <div class="table-tools">
+          <div class="filter-dropdown">
+            <select [(ngModel)]="filterConfig.status" (change)="applyFilters()">
               <option value="all">Tất cả trạng thái</option>
               <option value="In">Trong bãi</option>
               <option value="Out">Đã ra</option>
             </select>
-            <ion-icon
-              name="chevron-down-outline"
-              class="absolute right-3 top-3 text-gray-400 text-[14px]"
-            ></ion-icon>
+            <ion-icon name="chevron-down-outline"></ion-icon>
           </div>
 
-          <div class="relative w-full md:w-[220px]">
+          <div class="search-input-group">
+            <ion-icon name="search-outline"></ion-icon>
             <input
               type="text"
               placeholder="Tìm biển số..."
-              class="w-full bg-[#f4f6f8] text-gray-700 text-[12px] border-none rounded-[10px] pl-9 pr-3 py-2.5 outline-none font-medium"
               [(ngModel)]="filterConfig.plateNumber"
               (input)="applyFilters()"
             />
-            <ion-icon
-              name="search-outline"
-              class="absolute left-3 top-2.5 text-gray-400 text-[16px]"
-            ></ion-icon>
           </div>
 
-          <button class="bg-[#003399] text-white border-none rounded-[10px] px-4 py-2.5 text-[12px] font-bold cursor-pointer hover:bg-[#002277] transition-colors flex items-center gap-2" (click)="exportReport()">
-            <ion-icon name="download-outline" class="text-[14px]"></ion-icon>
-            Xuất báo cáo
+          <button class="btn-primary" (click)="exportReport()">
+            <ion-icon name="download-outline"></ion-icon>
+            <span class="hidden-mobile">Xuất báo cáo</span>
           </button>
         </div>
       </div>
 
-      <div
-        *ngIf="paginatedHistory.length === 0"
-        class="py-16 flex flex-col items-center justify-center text-center"
-      >
-        <div
-          class="w-16 h-16 bg-[#f4f6f8] rounded-full flex items-center justify-center mb-4 text-gray-400"
-        >
-          <ion-icon name="document-text-outline" class="text-3xl"></ion-icon>
-        </div>
-        <h4 class="text-[15px] font-bold text-[#111827] m-0 mb-1.5">
-          Chưa có dữ liệu
-        </h4>
-        <p class="text-[13px] text-gray-500 m-0">
-          Không tìm thấy bản ghi giao dịch nào.
-        </p>
-      </div>
-
-      <div *ngIf="paginatedHistory.length > 0" class="overflow-x-auto">
-        <table class="w-full text-left border-collapse whitespace-nowrap">
+      <div class="responsive-table-wrapper">
+        <table class="premium-table condensed-table">
           <thead>
             <tr>
-              <th
-                class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-2"
-              >
-                Mã NFC
-              </th>
-              <th
-                class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center"
-              >
-                Loại xe
-              </th>
-              <th
-                class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center bg-blue-50/50 rounded-tl-lg"
-              >
-                Biển VÀO
-              </th>
-              <th
-                class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center bg-blue-50/50"
-              >
-                Giờ VÀO
-              </th>
-              <th
-                class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center bg-gray-50/50"
-              >
-                Biển RA
-              </th>
-              <th
-                class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center bg-gray-50/50 rounded-tr-lg"
-              >
-                Giờ RA
-              </th>
-              <th
-                class="py-4 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center pr-2"
-              >
-                Trạng thái
-              </th>
+              <th>Phương tiện & Thẻ</th>
+              <th>Lượt VÀO</th>
+              <th>Lượt RA</th>
+              <th class="text-right">Trạng thái</th>
             </tr>
           </thead>
           <tbody>
-            <tr
-              *ngFor="let item of paginatedHistory"
-              class="border-b border-gray-50 hover:bg-[#f4f6f8]/50 transition-colors"
-            >
-              <td class="py-4 text-[12px] font-bold text-[#374151] pl-2">
-                {{ item.nfcId }}
+            <tr class="table-row" *ngFor="let item of paginatedHistory">
+              <td data-label="Phương tiện & Thẻ">
+                <div class="flex-col-stack">
+                  <span class="font-bold text-main flex items-center gap-1.5">
+                    <ion-icon
+                      [name]="item.vehicleType === 'Ô tô' ? 'car-sport-outline' : 'bicycle-outline'"
+                      class="text-muted text-lg"
+                    ></ion-icon>
+                    {{ item.vehicleType }}
+                  </span>
+                  <span class="text-xs font-mono text-muted tracking-wide"
+                    >{{ item.nfcId }}</span
+                  >
+                </div>
               </td>
+
+              <td data-label="Lượt VÀO" class="bg-highlight-soft">
+                <div class="flex-col-stack items-start">
+                  <div class="plate-container text-xs mb-1">
+                    {{ item.plateNumberIn }}
+                  </div>
+                  <span class="text-xs font-bold text-primary"
+                    >{{ item.checkInTime }}</span
+                  >
+                </div>
+              </td>
+
               <td
-                class="py-4 text-[12px] font-medium text-gray-500 text-center"
+                data-label="Lượt RA"
+                [class.opacity-50]="item.plateNumberOut === 'N/A' || item.plateNumberOut === '---'"
               >
-                {{ item.vehicleType }}
+                <div class="flex-col-stack items-start">
+                  <div
+                    class="plate-container outline text-xs mb-1"
+                    *ngIf="item.plateNumberOut !== 'N/A' && item.plateNumberOut !== '---'"
+                  >
+                    {{ item.plateNumberOut }}
+                  </div>
+                  <span
+                    *ngIf="item.plateNumberOut === 'N/A' || item.plateNumberOut === '---'"
+                    class="font-bold text-muted mb-1"
+                    >---</span
+                  >
+                  <span
+                    class="text-xs text-muted"
+                    [class.italic]="item.checkOutTime === 'Chưa ra khỏi bãi'"
+                    >{{ item.checkOutTime }}</span
+                  >
+                </div>
               </td>
-              <td
-                class="py-4 text-[12px] font-bold text-[#003399] text-center bg-blue-50/20"
-              >
-                {{ item.plateNumberIn }}
-              </td>
-              <td
-                class="py-4 text-[12px] font-medium text-gray-600 text-center bg-blue-50/20"
-              >
-                {{ item.checkInTime }}
-              </td>
-              <td
-                class="py-4 text-[12px] font-bold text-gray-700 text-center bg-gray-50/30"
-                [ngClass]="item.plateNumberOut === 'N/A' || item.plateNumberOut === '---' ? 'opacity-40' : ''"
-              >
-                {{ item.plateNumberOut }}
-              </td>
-              <td
-                class="py-4 text-[12px] font-medium text-gray-500 text-center bg-gray-50/30"
-                [ngClass]="item.checkOutTime === 'Chưa ra khỏi bãi' ? 'italic text-[11px] opacity-60' : ''"
-              >
-                {{ item.checkOutTime }}
-              </td>
-              <td class="py-4 text-center pr-2">
+
+              <td data-label="Trạng thái" class="text-right align-middle">
                 <span
-                  [class]="item.status === 'In' ? 'bg-[#eff6ff] text-[#3b82f6] border border-blue-100 px-3 py-1.5 rounded-full text-[10px] font-bold inline-block min-w-[75px] text-center' : 'bg-[#f0fdf4] text-[#22c55e] border border-green-100 px-3 py-1.5 rounded-full text-[10px] font-bold inline-block min-w-[75px] text-center'"
+                  class="status-pill"
+                  [class.in]="item.status === 'In'"
+                  [class.out]="item.status === 'Out'"
                 >
                   {{ item.status === 'In' ? 'Trong bãi' : 'Đã ra' }}
                 </span>
+              </td>
+            </tr>
+
+            <tr *ngIf="paginatedHistory.length === 0">
+              <td colspan="4" class="empty-state py-12">
+                <ion-icon name="document-text-outline"></ion-icon>
+                <p>Không tìm thấy bản ghi giao dịch nào.</p>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- PHÂN TRANG -->
-      <div class="pagination" *ngIf="totalPages > 0">
-        <span class="page-info">Trang {{ currentPage }} / {{ totalPages }}</span>
-        <div class="page-controls">
-          <button (click)="prevPage()" [disabled]="currentPage === 1"><ion-icon name="chevron-back-outline"></ion-icon></button>
-          
-          <ng-container *ngFor="let page of visiblePages">
-            <button 
-              [class.active]="page === currentPage" 
-              [disabled]="page === '...'"
-              (click)="goToPage(page)">{{ page }}</button>
-          </ng-container>
-          
-          <button (click)="nextPage()" [disabled]="currentPage === totalPages"><ion-icon name="chevron-forward-outline"></ion-icon></button>
+      <footer class="pagination-footer" *ngIf="totalPages > 0">
+        <span class="page-count"
+          >Trang {{ currentPage }} / {{ totalPages }}</span
+        >
+        <div class="page-nav">
+          <button
+            class="nav-btn"
+            (click)="prevPage()"
+            [disabled]="currentPage === 1"
+          >
+            <ion-icon name="chevron-back-outline"></ion-icon>
+          </button>
+          <div class="page-numbers">
+            <ng-container *ngFor="let page of visiblePages">
+              <button
+                [class.active]="page === currentPage"
+                [disabled]="page === '...'"
+                (click)="goToPage(page)"
+              >
+                {{ page }}
+              </button>
+            </ng-container>
+          </div>
+          <button
+            class="nav-btn"
+            (click)="nextPage()"
+            [disabled]="currentPage === totalPages"
+          >
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </button>
         </div>
-      </div>
+      </footer>
     </div>
   </div>
 </ion-content>

@@ -1,108 +1,118 @@
-<ion-content class="app-bg">
+<ion-content [fullscreen]="true" class="premium-dashboard">
   <app-navbar></app-navbar>
 
-  <div class="page-container">
-    <div class="page-header">
-      <h2>Quản lý Kho Thẻ NFC</h2>
-      <p>Thêm mới, chỉnh sửa, khóa hoặc xóa thẻ từ khỏi hệ thống.</p>
-    </div>
+  <div class="main-wrapper">
+    <header class="page-header">
+      <div class="header-content">
+        <h1>Quản lý Kho Thẻ NFC</h1>
+        <p>Thêm mới, chỉnh sửa, khóa hoặc xóa thẻ từ khỏi hệ thống.</p>
+      </div>
+    </header>
 
     <div class="split-layout">
-      <!-- CỘT TRÁI: FORM THÔNG TIN THẺ -->
-      <div class="gray-panel">
-        <h3 class="panel-title">
-          {{ isEditing ? 'Cập nhật thẻ #' + editingCardId : 'Đăng ký thẻ mới' }}
-        </h3>
-
-        <div class="form-group mt-6">
-          <label>MÃ THẺ UID (NFC)</label>
-          <div class="input-box">
-            <input
-              type="text"
-              placeholder="Chạm thẻ vào mặt lưng..."
-              [(ngModel)]="cardForm.cardUID"
-              readonly
-            />
-            <div class="icon-btn blue-icon" title="Đang chờ quét thẻ...">
-              <ion-icon name="wifi-outline" class="animate-pulse"></ion-icon>
-            </div>
-          </div>
-          <p *ngIf="!isEditing" class="text-xs text-gray-500 mt-2 italic">
-            *Hệ thống đang tự động lắng nghe thẻ NFC.
+      <div class="glass-card form-card">
+        <div class="card-header">
+          <h2>
+            {{ isEditing ? 'Cập nhật thẻ #' + editingCardId : 'Đăng ký thẻ mới'
+            }}
+          </h2>
+          <p>
+            {{ isEditing ? 'Chỉnh sửa thông tin thẻ đã lưu.' : 'Quét thẻ để bắt
+            đầu tạo mới.' }}
           </p>
         </div>
 
-        <div class="form-group">
-          <label>PHÂN LOẠI THẺ</label>
-          <div class="input-box">
-            <select [(ngModel)]="cardForm.cardType">
-              <option value="Guest">Thẻ Lượt (Khách vãng lai)</option>
-              <option value="Monthly">Thẻ Tháng (Cố định)</option>
-              <option value="VIP">Thẻ VIP</option>
-            </select>
-            <ion-icon
-              name="chevron-down-outline"
-              class="dropdown-icon"
-            ></ion-icon>
+        <div class="card-body">
+          <div class="form-group mt-2">
+            <label>MÃ THẺ UID (NFC)</label>
+            <div class="premium-input readonly-input">
+              <input
+                type="text"
+                placeholder="Chạm thẻ vào mặt lưng..."
+                [(ngModel)]="cardForm.cardUID"
+                readonly
+              />
+              <div class="scan-indicator" title="Đang chờ quét thẻ...">
+                <ion-icon name="wifi-outline" class="pulse-anim"></ion-icon>
+              </div>
+            </div>
+            <p *ngIf="!isEditing" class="helper-text">
+              <ion-icon name="information-circle-outline"></ion-icon>
+              Hệ thống đang tự động lắng nghe thẻ NFC.
+            </p>
           </div>
-        </div>
 
-        <!-- Chỉ hiện chọn Trạng Thái khi Đang Edit để Admin có thể Khóa thẻ -->
-        <div class="form-group" *ngIf="isEditing">
-          <label>TRẠNG THÁI HOẠT ĐỘNG</label>
-          <div class="input-box">
-            <select [(ngModel)]="cardForm.status">
-              <option value="Active">Đang hoạt động (Active)</option>
-              <option value="Inactive">Khóa (Inactive/Locked)</option>
-            </select>
-            <ion-icon
-              name="chevron-down-outline"
-              class="dropdown-icon"
-            ></ion-icon>
+          <div class="form-group">
+            <label>PHÂN LOẠI THẺ</label>
+            <div class="premium-input select-wrapper">
+              <select [(ngModel)]="cardForm.cardType">
+                <option value="Guest">Thẻ Lượt (Khách vãng lai)</option>
+                <option value="Monthly">Thẻ Tháng (Cố định)</option>
+                <option value="VIP">Thẻ VIP</option>
+              </select>
+              <ion-icon
+                name="chevron-down-outline"
+                class="dropdown-icon"
+              ></ion-icon>
+            </div>
           </div>
-        </div>
 
-        <div class="flex gap-3 mt-4">
-          <button
-            *ngIf="isEditing"
-            class="submit-btn"
-            style="background: #94a3b8; flex: 1"
-            (click)="cancelEdit()"
-          >
-            <ion-icon name="close-outline"></ion-icon> Hủy
-          </button>
+          <div class="form-group" *ngIf="isEditing">
+            <label>TRẠNG THÁI HOẠT ĐỘNG</label>
+            <div class="premium-input select-wrapper">
+              <select [(ngModel)]="cardForm.status">
+                <option value="Active">Đang hoạt động (Active)</option>
+                <option value="Inactive">Khóa (Inactive/Locked)</option>
+              </select>
+              <ion-icon
+                name="chevron-down-outline"
+                class="dropdown-icon"
+              ></ion-icon>
+            </div>
+          </div>
 
-          <button
-            class="submit-btn"
-            style="flex: 2"
-            (click)="saveCard()"
-            [disabled]="isSubmitting || !cardForm.cardUID"
-          >
-            <ion-icon
-              [name]="isEditing ? 'save-outline' : 'add-circle-outline'"
-            ></ion-icon>
-            {{ isSubmitting ? 'Đang xử lý...' : (isEditing ? 'Cập nhật' : 'Lưu
-            thẻ') }}
-          </button>
+          <div class="form-actions">
+            <button
+              *ngIf="isEditing"
+              class="btn-secondary"
+              (click)="cancelEdit()"
+            >
+              <ion-icon name="close-outline"></ion-icon>
+              <span>Hủy</span>
+            </button>
+
+            <button
+              class="btn-primary"
+              [class.full-width]="!isEditing"
+              (click)="saveCard()"
+              [disabled]="isSubmitting || !cardForm.cardUID"
+            >
+              <ion-icon
+                [name]="isEditing ? 'save-outline' : 'add-circle-outline'"
+              ></ion-icon>
+              <span
+                >{{ isSubmitting ? 'Đang xử lý...' : (isEditing ? 'Cập nhật' :
+                'Lưu thẻ') }}</span
+              >
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- CỘT PHẢI: DANH SÁCH THẺ TRONG HỆ THỐNG -->
-      <div class="gray-panel">
-        <div class="panel-header">
-          <h3 class="panel-title">Kho thẻ hiện tại</h3>
-          <div class="filter-btn">
-            <ion-icon
-              name="refresh-outline"
-              class="cursor-pointer text-lg text-blue-600 hover:text-blue-800"
-              (click)="loadSystemCards()"
-              title="Làm mới"
-            ></ion-icon>
-          </div>
+      <div class="glass-card table-card">
+        <div class="table-header">
+          <h3>Kho thẻ hiện tại</h3>
+          <button
+            class="btn-icon-only"
+            (click)="loadSystemCards()"
+            title="Làm mới dữ liệu"
+          >
+            <ion-icon name="refresh-outline"></ion-icon>
+          </button>
         </div>
 
-        <div class="table-container">
-          <table>
+        <div class="responsive-table-wrapper">
+          <table class="premium-table condensed-table">
             <thead>
               <tr>
                 <th>ID</th>
@@ -114,44 +124,48 @@
             </thead>
             <tbody>
               <tr
-                class="row-card"
+                class="table-row"
                 *ngFor="let item of paginatedCards"
-                [class.bg-blue-50]="editingCardId === item.cardID"
+                [class.editing-row]="editingCardId === item.cardID"
               >
-                <td class="font-bold text-gray-500">#{{ item.cardID }}</td>
-                <td class="nfc-col font-mono">{{ item.cardUID }}</td>
-                <td class="font-bold text-gray-700">
+                <td data-label="ID" class="font-bold text-muted">
+                  #{{ item.cardID }}
+                </td>
+
+                <td data-label="Mã UID">
+                  <div class="plate-container">{{ item.cardUID }}</div>
+                </td>
+
+                <td data-label="Loại thẻ" class="font-bold text-main">
                   {{ item.cardType === 'Guest' ? 'Thẻ Lượt' : (item.cardType ===
                   'Monthly' ? 'Thẻ Tháng' : 'VIP') }}
                 </td>
-                <td class="status-col text-center">
+
+                <td data-label="Trạng thái" class="text-center">
                   <span
-                    class="badge"
-                    [class.active]="item.status === 'Active'"
-                    [class.inactive]="item.status !== 'Active'"
+                    class="status-pill"
+                    [class.in]="item.status === 'Active'"
+                    [class.out]="item.status !== 'Active'"
                   >
                     {{ item.status === 'Active' ? 'Sẵn sàng' : 'Đã Khóa' }}
                   </span>
                 </td>
-                <!-- NÚT SỬA VÀ XÓA -->
-                <td class="text-right">
-                  <div class="flex items-center justify-end gap-2">
+
+                <td data-label="Thao tác" class="text-right">
+                  <div class="action-buttons">
                     <button
-                      class="p-2 text-blue-600 hover:bg-blue-100 rounded-md transition"
+                      class="action-btn edit"
                       title="Sửa"
                       (click)="editCard(item)"
                     >
-                      <ion-icon
-                        name="create-outline"
-                        class="text-lg"
-                      ></ion-icon>
+                      <ion-icon name="create-outline"></ion-icon>
                     </button>
                     <button
-                      class="p-2 text-red-500 hover:bg-red-50 rounded-md transition"
+                      class="action-btn delete"
                       title="Xóa"
                       (click)="deleteCard(item.cardID)"
                     >
-                      <ion-icon name="trash-outline" class="text-lg"></ion-icon>
+                      <ion-icon name="trash-outline"></ion-icon>
                     </button>
                   </div>
                 </td>
@@ -159,31 +173,46 @@
 
               <tr *ngIf="paginatedCards.length === 0 && !isLoading">
                 <td colspan="5" class="empty-state">
-                  <ion-icon name="cube-outline" class="text-4xl mb-2"></ion-icon
-                  ><br />
-                  Chưa có thẻ nào trong kho.
+                  <ion-icon name="cube-outline"></ion-icon>
+                  <p>Chưa có thẻ nào trong kho.</p>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-        
-        <!-- PHÂN TRANG -->
-        <div class="pagination" *ngIf="totalPages > 0">
-          <span class="page-info">Trang {{ currentPage }} / {{ totalPages }}</span>
-          <div class="page-controls">
-            <button (click)="prevPage()" [disabled]="currentPage === 1"><ion-icon name="chevron-back-outline"></ion-icon></button>
-            
-            <ng-container *ngFor="let page of visiblePages">
-              <button 
-                [class.active]="page === currentPage" 
-                [disabled]="page === '...'"
-                (click)="goToPage(page)">{{ page }}</button>
-            </ng-container>
-            
-            <button (click)="nextPage()" [disabled]="currentPage === totalPages"><ion-icon name="chevron-forward-outline"></ion-icon></button>
+
+        <footer class="pagination-footer" *ngIf="totalPages > 0">
+          <span class="page-count"
+            >Trang {{ currentPage }} / {{ totalPages }}</span
+          >
+          <div class="page-nav">
+            <button
+              class="nav-btn"
+              (click)="prevPage()"
+              [disabled]="currentPage === 1"
+            >
+              <ion-icon name="chevron-back-outline"></ion-icon>
+            </button>
+            <div class="page-numbers">
+              <ng-container *ngFor="let page of visiblePages">
+                <button
+                  [class.active]="page === currentPage"
+                  [disabled]="page === '...'"
+                  (click)="goToPage(page)"
+                >
+                  {{ page }}
+                </button>
+              </ng-container>
+            </div>
+            <button
+              class="nav-btn"
+              (click)="nextPage()"
+              [disabled]="currentPage === totalPages"
+            >
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </button>
           </div>
-        </div>
+        </footer>
       </div>
     </div>
   </div>

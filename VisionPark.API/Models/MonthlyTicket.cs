@@ -11,7 +11,7 @@ namespace VisionPark.API.Models
 
         public int CardID { get; set; }
         [ForeignKey("CardID")]
-        public  NfcCard Card { get; set; }
+        public  NfcCard? Card { get; set; }
 
         public int VehicleTypeID { get; set; }
         [ForeignKey("VehicleTypeID")]

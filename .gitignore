@@ -1,16 +1,54 @@
-# --- Frontend (VisionPark) ---
+# =========================
+# FRONTEND - IONIC ANGULAR
+# =========================
 node_modules/
 dist/
 www/
 .angular/
+coverage/
 
-# --- Backend C# (VisionPark.API) ---
+# Capacitor / Android build
+android/.gradle/
+android/build/
+android/app/build/
+
+# Generated assets
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+
+# =========================
+# BACKEND - .NET
+# =========================
 [Bb]in/
 [Oo]bj/
 .vs/
+
 *.user
+*.suo
+*.cache
+*.tmp
+
 appsettings.Development.json
 
-# --- OS Files ---
+# =========================
+# PYTHON AI
+# =========================
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# =========================
+# LOGS
+# =========================
+*.log
+
+# =========================
+# OS FILES
+# =========================
 .DS_Store
 Thumbs.db

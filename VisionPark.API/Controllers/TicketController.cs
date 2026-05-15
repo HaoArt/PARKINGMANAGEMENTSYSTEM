@@ -12,7 +12,7 @@ namespace VisionPark.API.Controllers
     public class TicketController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly IHttpClientFactory _httpClientFactory; // Khai báo công cụ gọi API ngoài
+        private readonly IHttpClientFactory _httpClientFactory;
 
         public TicketController(ApplicationDbContext context, IHttpClientFactory httpClientFactory)
         {
@@ -23,7 +23,6 @@ namespace VisionPark.API.Controllers
         [HttpPost("register-monthly")]
         public async Task<IActionResult> RegisterMonthly([FromForm] MonthlyTicketRequest request)
         {
-            // 1. GỬI ẢNH SANG PYTHON ĐỂ NHẬN DIỆN BIỂN SỐ
             string detectedPlate = "";
             if (request.VehicleImage == null || request.VehicleImage.Length == 0)
                 return BadRequest("Vui lòng tải lên ảnh chụp xe để AI đọc biển số!");
@@ -34,7 +33,9 @@ namespace VisionPark.API.Controllers
                 using var stream = request.VehicleImage.OpenReadStream();
                 content.Add(new StreamContent(stream), "image", request.VehicleImage.FileName);
 
-                // Gọi sang trạm AI Python (cửa sổ đen CMD)
+                // Gửi loại xe sang Python để ép luật đọc biển số
+                content.Add(new StringContent(request.VehicleTypeID.ToString()), "vehicleType");
+
                 var aiResponse = await client.PostAsync("http://localhost:8000/api/recognize-plate", content);
                 if (aiResponse.IsSuccessStatusCode)
                 {
@@ -54,8 +55,6 @@ namespace VisionPark.API.Controllers
             if (string.IsNullOrEmpty(detectedPlate))
                 return BadRequest("AI không thể nhận diện được biển số từ bức ảnh này!");
 
-
-
             var card = await _context.NfcCards.FirstOrDefaultAsync(c => c.CardUID == request.CardUID);
             if (card == null) return BadRequest("Thẻ này chưa được khởi tạo trong hệ thống!");
 
@@ -71,7 +70,7 @@ namespace VisionPark.API.Controllers
                 VehicleTypeID = request.VehicleTypeID,
                 CustomerName = request.CustomerName,
                 PhoneNumber = request.PhoneNumber,
-                RegisterPlate = detectedPlate, // Dùng kết quả do AI đọc được!
+                RegisterPlate = detectedPlate,
                 StartDate = DateTime.Now,
                 EndDate = DateTime.Now.AddMonths(request.DurationMonths),
                 IsActive = true,
@@ -85,10 +84,11 @@ namespace VisionPark.API.Controllers
             return Ok(new
             {
                 Message = "Đăng ký vé tháng thành công!",
-                DetectedPlate = detectedPlate, 
+                DetectedPlate = detectedPlate,
                 Data = newTicket
             });
         }
+
         [HttpGet("monthly-tickets")]
         public async Task<IActionResult> GetAllMonthlyTicket()
         {
@@ -109,24 +109,12 @@ namespace VisionPark.API.Controllers
                     Status = DateTime.Now > t.EndDate ? "Đã hết hạn" : (t.IsActive ? "Đang hoạt động" : "Đã khóa")
                 })
                 .ToListAsync();
+
             if (tickets.Count == 0)
             {
-                return Ok(new
-                {
-                    Message = "Chưa có vé tháng nào được đăng ký.",
-                    TotalCount = 0,
-                    Data = tickets
-                });
+                return Ok(new { Message = "Chưa có vé tháng nào được đăng ký.", TotalCount = 0, Data = tickets });
             }
-            return Ok(new
-            {
-                Message = "Lấy danh sách vé tháng thành công!",
-                TotalCount = tickets.Count,
-                Data = tickets
-            });
+            return Ok(new { Message = "Lấy danh sách vé tháng thành công!", TotalCount = tickets.Count, Data = tickets });
         }
-
-
-
     }
 }

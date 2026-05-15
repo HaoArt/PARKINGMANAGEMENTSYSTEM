@@ -1,128 +1,152 @@
-<ion-content class="dashboard-bg">
-  <app-navbar></app-navbar> 
-  
-  <div class="dashboard-container pt-6"> 
+<ion-content [fullscreen]="true" class="premium-dashboard">
+  <app-navbar></app-navbar>
 
-    <div class="stats-cards">
-      
-      <div class="stat-card">
-        <div class="stat-info">
-          <span class="label">Tổng phương tiện</span>
-          <span class="value">{{ stats.totalVehicles | number }}</span>
-          <span class="trend up"><ion-icon name="arrow-up-outline"></ion-icon> Dữ liệu thực tế</span>
-        </div>
-        <div class="stat-icon icon-blue">
-          <ion-icon name="car"></ion-icon>
-        </div>
+  <div class="main-wrapper">
+    <header class="dashboard-header">
+      <div class="header-content">
+        <h1>Bảng điều khiển</h1>
+        <p>Hệ thống quản lý bãi xe thông minh v2.0</p>
       </div>
-
-      <div class="stat-card">
-        <div class="stat-info full-width">
-          <span class="label">Chỗ trống</span>
-          <div class="value-row">
-            <span class="value">{{ stats.availableSlots }}</span>
-            <div class="stat-icon icon-green">P</div>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" [style.width.%]="stats.fillRate"></div>
-          </div>
-          <span class="trend-text">Tỷ lệ lấp đầy {{ stats.fillRate }}%</span>
-        </div>
+      <div class="header-actions">
+        <button class="btn-primary" (click)="exportReport()">
+          <ion-icon name="download-outline"></ion-icon>
+          <span>Xuất báo cáo</span>
+        </button>
       </div>
+    </header>
 
-      <div class="stat-card card-dark">
-        <div class="stat-info">
-          <span class="label">Doanh thu hôm nay</span>
-          <span class="value">{{ stats.revenueToday }}</span>
-          <span class="unit">VND</span>
-        </div>
-        <div class="stat-icon icon-transparent">
-          <ion-icon name="cash-outline"></ion-icon>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="table-section">
-      
-      <div class="table-header-row">
-        <h3>Lịch sử ra vào gần đây</h3>
-        <div class="table-actions">
-          
-          <div class="search-box">
-            <ion-icon name="search-outline"></ion-icon>
-            <input type="text" placeholder="Tìm biển số, mã NFC..." [(ngModel)]="searchTerm" (input)="applyFilters()">
+    <div class="dashboard-grid">
+      <section class="stats-container">
+        <div class="glass-card stat-card primary">
+          <div class="card-body">
+            <div class="icon-wrapper">
+              <ion-icon name="car"></ion-icon>
+            </div>
+            <div class="stat-content">
+              <span class="label">Tổng phương tiện</span>
+              <h2 class="value">{{ stats.totalVehicles | number }}</h2>
+              <div class="trend up">
+                <ion-icon name="pulse-outline"></ion-icon>
+                <span>Dữ liệu thời gian thực</span>
+              </div>
+            </div>
           </div>
-
-          <div class="filter-box">
-            <ion-icon name="options-outline"></ion-icon>
-            <select [(ngModel)]="filterStatus" (change)="applyFilters()">
-              <option value="all">Tất cả trạng thái</option>
-              <option value="In">Trong bãi</option>
-              <option value="Out">Đã ra</option>
-            </select>
-          </div>
-
-          <button class="bg-[#003399] text-white border-none px-4 py-2 rounded-lg text-[13px] font-bold cursor-pointer hover:bg-[#002277] transition-colors flex items-center gap-2" (click)="exportReport()">
-            <ion-icon name="download-outline" class="text-[16px]"></ion-icon>
-            Xuất báo cáo
-          </button>
-
         </div>
-      </div>
 
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th>MÃ NFC</th>
-              <th>BIỂN SỐ</th>
-              <th>LOẠI XE</th>
-              <th>THỜI GIAN</th>
-              <th>TRẠNG THÁI</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of paginatedRecords">
-              <td class="nfc-col">{{ item.id }}</td>
-              <td><span class="plate-badge">{{ item.plateNumber }}</span></td>
-              <td class="type-col">
-                <ion-icon [name]="item.vehicleType === 'Ô tô' ? 'car-outline' : 'bicycle'"></ion-icon>
-                {{ item.vehicleType }}
-              </td>
-              <td class="time-col">{{ item.timeIn }}</td>
-              <td>
-                <span class="status-badge" [class.in]="item.status === 'In'" [class.out]="item.status === 'Out'">
-                  <span class="dot"></span>
-                  {{ item.status === 'In' ? 'Trong bãi' : 'Đã ra' }}
+        <div class="glass-card stat-card accent">
+          <div class="card-body">
+            <div class="stat-content full-width">
+              <div class="flex-justify">
+                <span class="label">Tình trạng chỗ trống</span>
+                <span class="badge" [class.warning]="stats.fillRate > 80">
+                  {{ stats.fillRate }}% Lấp đầy
                 </span>
-              </td>
-            </tr>
-            <tr *ngIf="paginatedRecords.length === 0">
-              <td colspan="5" style="text-align: center; padding: 30px; color: #9ca3af; font-weight: 600;">
-                Không có dữ liệu phù hợp
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="pagination" *ngIf="totalPages > 0">
-        <span class="page-info">Trang {{ currentPage }} / {{ totalPages }}</span>
-        <div class="page-controls">
-          <button (click)="prevPage()" [disabled]="currentPage === 1"><ion-icon name="chevron-back-outline"></ion-icon></button>
-          
-          <ng-container *ngFor="let page of visiblePages">
-            <button 
-              [class.active]="page === currentPage" 
-              [disabled]="page === '...'"
-              (click)="goToPage(page)">{{ page }}</button>
-          </ng-container>
-          
-          <button (click)="nextPage()" [disabled]="currentPage === totalPages"><ion-icon name="chevron-forward-outline"></ion-icon></button>
+              </div>
+              <h2 class="value">{{ stats.availableSlots }} <small>vị trí</small></h2>
+              <div class="progress-container">
+                <div class="progress-track">
+                  <div class="progress-bar" [style.width.%]="stats.fillRate"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
 
+        <div class="glass-card stat-card revenue">
+          <div class="card-body">
+            <div class="icon-wrapper">
+              <ion-icon name="cash-outline"></ion-icon>
+            </div>
+            <div class="stat-content">
+              <span class="label">Doanh thu hôm nay</span>
+              <h2 class="value">{{ stats.revenueToday }} <small>VND</small></h2>
+              <span class="sub-label">Cập nhật liên tục</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="table-container glass-card">
+        <div class="table-header">
+          <h3>Lịch sử ra vào</h3>
+          <div class="table-tools">
+            <div class="search-input-group">
+              <ion-icon name="search-outline"></ion-icon>
+              <input type="text" placeholder="Tìm biển số, mã thẻ..." [(ngModel)]="searchTerm" (input)="applyFilters()" />
+            </div>
+            <div class="filter-dropdown">
+              <ion-icon name="filter-outline"></ion-icon>
+              <select [(ngModel)]="filterStatus" (change)="applyFilters()">
+                <option value="all">Tất cả trạng thái</option>
+                <option value="In">Trong bãi</option>
+                <option value="Out">Đã ra</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="responsive-table-wrapper">
+          <table class="premium-table">
+            <thead>
+              <tr>
+                <th>Mã Thẻ</th>
+                <th>Biển Số</th>
+                <th>Loại Xe</th>
+                <th>Thời Gian Vào</th>
+                <th>Trạng Thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of paginatedRecords" class="table-row">
+                <td class="font-bold text-muted">{{ item.id }}</td>
+                <td>
+                  <div class="plate-container">{{ item.plateNumber }}</div>
+                </td>
+                <td>
+                  <div class="type-badge">
+                    <ion-icon [name]="item.vehicleType === 'Ô tô' ? 'car-sport-outline' : 'bicycle-outline'"></ion-icon>
+                    {{ item.vehicleType }}
+                  </div>
+                </td>
+                <td class="text-secondary">{{ item.timeIn }}</td>
+                <td>
+                  <span class="status-pill" [class.in]="item.status === 'In'" [class.out]="item.status === 'Out'">
+                    {{ item.status === 'In' ? 'Trong bãi' : 'Đã ra' }}
+                  </span>
+                </td>
+              </tr>
+              <tr *ngIf="paginatedRecords.length === 0">
+                <td colspan="5" class="empty-state">
+                  <ion-icon name="file-tray-outline"></ion-icon>
+                  <p>Không tìm thấy dữ liệu phù hợp</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <footer class="pagination-footer" *ngIf="totalPages > 0">
+          <span class="page-count">Trang {{ currentPage }} / {{ totalPages }}</span>
+          <div class="page-nav">
+            <button class="nav-btn" (click)="prevPage()" [disabled]="currentPage === 1">
+              <ion-icon name="chevron-back-outline"></ion-icon>
+            </button>
+            <div class="page-numbers">
+              <ng-container *ngFor="let page of visiblePages">
+                <button 
+                  [class.active]="page === currentPage"
+                  [disabled]="page === '...'"
+                  (click)="goToPage(page)">
+                  {{ page }}
+                </button>
+              </ng-container>
+            </div>
+            <button class="nav-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </button>
+          </div>
+        </footer>
+      </section>
     </div>
   </div>
 </ion-content>

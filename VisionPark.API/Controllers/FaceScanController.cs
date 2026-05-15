@@ -161,110 +161,105 @@ namespace VisionPark.API.Controllers
         [HttpPost("recognize")]
         public async Task<IActionResult> RecognizeFace([FromBody] ImageData data)
         {
-            // CẢNH BÁO: Đây là phần NHẬN DIỆN GIẢ LẬP để minh họa luồng hoạt động.
-            // Nhận diện ngoài đời thực yêu cầu thư viện AI chuyên dụng (vd: FaceNet, ArcFace)
-            // để tạo vector đặc trưng và so sánh chúng.
             try
             {
-                if (string.IsNullOrEmpty(data.Base64Image)) return BadRequest("Dữ liệu ảnh không được để trống.");
+                if (string.IsNullOrEmpty(data.Base64Image)) return BadRequest(new { message = "Dữ liệu ảnh không được để trống." });
 
                 var base64Data = data.Base64Image;
                 if (base64Data.Contains(",")) base64Data = base64Data.Substring(base64Data.IndexOf(",") + 1);
-                
+
                 byte[] imageBytes = Convert.FromBase64String(base64Data);
 
                 // --- NHẬN DIỆN KHUÔN MẶT TRỰC TIẾP BẰNG C# (.NET) ---
                 int? recognizedUserId = null;
-                try 
+                try
                 {
-                        var registeredUsers = await _context.Users
-                            .Where(u => u.FaceImageUrl != null)
-                            .Select(u => new { userId = u.UserID, image = u.FaceImageUrl })
-                            .ToListAsync();
+                    var registeredUsers = await _context.Users
+                        .Where(u => u.FaceImageUrl != null)
+                        .Select(u => new { userId = u.UserID, image = u.FaceImageUrl })
+                        .ToListAsync();
 
-                        // Khởi tạo mô hình AI duy nhất 1 lần
-                        if (_fr == null)
+                    // Khởi tạo mô hình AI duy nhất 1 lần
+                    if (_fr == null)
+                    {
+                        lock (_aiLock)
                         {
-                            lock (_aiLock)
-                            {
-                                if (_fr == null) _fr = FaceRecognitionDotNet.FaceRecognition.Create("Models");
-                            }
+                            if (_fr == null) _fr = FaceRecognitionDotNet.FaceRecognition.Create("Models");
                         }
+                    }
 
-                        // Phân tích ảnh vừa quét
-                        using var scanMs = new System.IO.MemoryStream(imageBytes);
-                        using var scanBmp = new System.Drawing.Bitmap(scanMs);
-                        using var scanImg = FaceRecognitionDotNet.FaceRecognition.LoadImage(scanBmp);
-                        var scanEncodings = _fr.FaceEncodings(scanImg).ToArray();
+                    // Phân tích ảnh vừa quét
+                    using var scanMs = new System.IO.MemoryStream(imageBytes);
+                    using var scanBmp = new System.Drawing.Bitmap(scanMs);
+                    using var scanImg = FaceRecognitionDotNet.FaceRecognition.LoadImage(scanBmp);
+                    var scanEncodings = _fr.FaceEncodings(scanImg).ToArray();
 
-                        if (scanEncodings.Length == 0)
+                    if (scanEncodings.Length == 0)
+                    {
+                        return Ok(new { success = false, message = "Không tìm thấy khuôn mặt rõ nét trong ảnh vừa chụp." });
+                    }
+
+                    if (scanEncodings.Length > 0)
+                    {
+                        var scanEncoding = scanEncodings[0];
+                        double minDistance = 0.5; // Ngưỡng an toàn
+                        double closestDistance = 1.0;
+
+                        foreach (var user in registeredUsers)
                         {
-                            return Ok(new { success = false, message = "Không tìm thấy khuôn mặt rõ nét trong ảnh vừa chụp." });
-                        }
-
-                        if (scanEncodings.Length > 0)
-                        {
-                            var scanEncoding = scanEncodings[0];
-                            double minDistance = 0.5; // Ngưỡng khắt khe (0.4 - 0.5 là an toàn)
-                            double closestDistance = 1.0; // Biến lưu lại sai số thấp nhất để xem trên UI
-
-                            foreach (var user in registeredUsers)
+                            try
                             {
-                                try
+                                if (string.IsNullOrEmpty(user.image)) continue;
+
+                                var dbBase64 = user.image;
+                                if (dbBase64.Contains(",")) dbBase64 = dbBase64.Substring(dbBase64.IndexOf(",") + 1);
+
+                                byte[] dbImageBytes = Convert.FromBase64String(dbBase64);
+
+                                using var dbMs = new System.IO.MemoryStream(dbImageBytes);
+                                using var dbBmp = new System.Drawing.Bitmap(dbMs);
+                                using var dbImg = FaceRecognitionDotNet.FaceRecognition.LoadImage(dbBmp);
+                                var dbEncodings = _fr.FaceEncodings(dbImg).ToArray();
+
+                                if (dbEncodings.Length > 0)
                                 {
-                                    if (string.IsNullOrEmpty(user.image)) continue;
-                                    
-                                    var dbBase64 = user.image;
-                                    if (dbBase64.Contains(",")) dbBase64 = dbBase64.Substring(dbBase64.IndexOf(",") + 1);
-                                    
-                                    byte[] dbImageBytes = Convert.FromBase64String(dbBase64);
-                                    
-                                    using var dbMs = new System.IO.MemoryStream(dbImageBytes);
-                                    using var dbBmp = new System.Drawing.Bitmap(dbMs);
-                                    using var dbImg = FaceRecognitionDotNet.FaceRecognition.LoadImage(dbBmp);
-                                    var dbEncodings = _fr.FaceEncodings(dbImg).ToArray();
+                                    double distance = FaceRecognitionDotNet.FaceRecognition.FaceDistance(dbEncodings[0], scanEncoding);
+                                    if (distance < closestDistance) closestDistance = distance;
 
-                                    if (dbEncodings.Length > 0)
+                                    if (distance < minDistance)
                                     {
-                                        // Tính tỷ lệ sai lệch giữa 2 khuôn mặt
-                                        double distance = FaceRecognitionDotNet.FaceRecognition.FaceDistance(dbEncodings[0], scanEncoding);
-                                        if (distance < closestDistance) closestDistance = distance;
-
-                                        if (distance < minDistance)
-                                        {
-                                            minDistance = distance;
-                                            recognizedUserId = user.userId;
-                                        }
+                                        minDistance = distance;
+                                        recognizedUserId = user.userId;
                                     }
                                 }
-                                catch (Exception)
-                                {
-                                    // Bỏ qua user này nếu dữ liệu Base64 trong Database bị hỏng (không thể tạo thành Bitmap)
-                                    continue;
-                                }
+                            }
+                            catch (Exception)
+                            {
+                                continue;
                             }
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        return Ok(new { success = false, message = "Lỗi xử lý AI C#: " + ex.Message });
-                    }
+                }
+                catch (Exception ex)
+                {
+                    return Ok(new { success = false, message = "Lỗi xử lý thuật toán AI: " + ex.Message });
+                }
 
-                    if (recognizedUserId.HasValue)
+                if (recognizedUserId.HasValue)
+                {
+                    var recognizedUser = await _context.Users
+                        .Where(u => u.UserID == recognizedUserId.Value)
+                        .Select(u => new { u.UserID, u.FullName, u.Role, u.FaceImageUrl })
+                        .FirstOrDefaultAsync();
+
+                    if (recognizedUser != null)
                     {
-                        var recognizedUser = await _context.Users
-                            .Where(u => u.UserID == recognizedUserId.Value)
-                            .Select(u => new { u.UserID, u.FullName, u.Role, u.FaceImageUrl })
-                            .FirstOrDefaultAsync();
-                            
-                        if (recognizedUser != null)
-                        {
-                        // --- GHI NHẬN CHẤM CÔNG THẬT (REAL DATA INSERT) ---
+                        // --- GHI NHẬN CHẤM CÔNG THẬT ---
                         var today = DateTime.Now.Date;
-                        
-                        // Lấy danh sách các lần chấm công trong ngày, sắp xếp mới nhất lên đầu
+                        var currentTime = DateTime.Now;
+
                         var attendancesToday = await _context.Attendances
-                            .Where(a => a.UserId == recognizedUser.UserID && a.CheckInTime.Date == today)
+                            .Where(a => a.UserId == recognizedUser.UserID && a.Date == today)
                             .OrderByDescending(a => a.CheckInTime)
                             .ToListAsync();
 
@@ -273,43 +268,51 @@ namespace VisionPark.API.Controllers
                         if (latestAttendance == null)
                         {
                             // Chưa có lần nào -> Check-in ca mới
-                            _context.Attendances.Add(new Attendance {
+                            _context.Attendances.Add(new Attendance
+                            {
                                 UserId = recognizedUser.UserID,
-                                CheckInTime = DateTime.Now
+                                Date = today, // 👉 Đã sửa: Thêm ngày để không bị lỗi SQL
+                                CheckInTime = currentTime,
+                                Status = "Thành công" // 👉 Bổ sung Status
                             });
                         }
                         else if (latestAttendance.CheckOutTime == null)
                         {
-                            // Đã có Check-in nhưng chưa có Check-out -> Cập nhật Check-out
-                            latestAttendance.CheckOutTime = DateTime.Now;
+                            // Cập nhật Check-out
+                            latestAttendance.CheckOutTime = currentTime;
                         }
                         else if (attendancesToday.Count < 3)
                         {
-                            // Đã check-out ca trước đó. Nếu số ca trong ngày < 3, cho phép mở ca mới (Dòng hiển thị mới)
-                            _context.Attendances.Add(new Attendance {
+                            // Mở ca mới (Ví dụ: đi ăn trưa về)
+                            _context.Attendances.Add(new Attendance
+                            {
                                 UserId = recognizedUser.UserID,
-                                CheckInTime = DateTime.Now
+                                Date = today, // 👉 Đã sửa
+                                CheckInTime = currentTime,
+                                Status = "Thành công"
                             });
                         }
                         else
                         {
-                            // Nếu đã đủ 3 dòng trong ngày, thì chỉ cập nhật giờ Check-out của ca cuối cùng (ca thứ 3)
-                            latestAttendance.CheckOutTime = DateTime.Now;
+                            // Cập nhật giờ ca cuối
+                            latestAttendance.CheckOutTime = currentTime;
                         }
-                        
+
                         await _context.SaveChangesAsync();
 
                         return Ok(new { success = true, message = "Nhận diện thành công!", user = recognizedUser });
-                        }
                     }
-                return Ok(new { success = false, message = "Không nhận diện được." });
+                }
+
+                return Ok(new { success = false, message = "Khuôn mặt lạ, không có trong hệ thống!" });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Lỗi server: {ex.Message}");
+                // 👉 Đã sửa: Trả về Object JSON thay vì String để Angular đọc được lỗi chính xác
+                string errorMsg = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return StatusCode(500, new { success = false, message = $"Lỗi DB/Server: {errorMsg}" });
             }
         }
-
         [HttpPost("detect-live")]
         public IActionResult DetectFaceLive([FromBody] ImageData data)
         {

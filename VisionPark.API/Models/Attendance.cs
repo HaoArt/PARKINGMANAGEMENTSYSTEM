@@ -17,7 +17,8 @@ namespace VisionPark.API.Models
 
         public DateTime CheckInTime { get; set; }
         public DateTime? CheckOutTime { get; set; }
-
+        public DateTime Date { get; set; }
+        public string? Status { get; set; }
         // Thêm cột mới để lưu ghi chú (có thể null)
         public string? Note { get; set; }
     }

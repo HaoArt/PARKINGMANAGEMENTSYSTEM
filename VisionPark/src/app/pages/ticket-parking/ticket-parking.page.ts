@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core'; // Thêm ChangeDetectorRef
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -9,6 +9,14 @@ import {
   IonCardContent,
   Platform,
   ToastController,
+  IonCardHeader,
+  IonCard,
+  IonCardTitle,
+  IonCol,
+  IonItem,
+  IonLabel,
+  IonButton,
+  IonSpinner,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import * as icons from 'ionicons/icons';
@@ -25,10 +33,8 @@ interface MonthlyTicketRecord {
   registerPlate: string;
   vehicleType: string;
   cardUID: string;
-
   startDate: string;
   endDate: string;
-
   isActive: boolean;
   status: string;
 }
@@ -38,8 +44,15 @@ interface MonthlyTicketRecord {
   templateUrl: './ticket-parking.page.html',
   styleUrls: ['./ticket-parking.page.scss'],
   standalone: true,
-
   imports: [
+    IonSpinner,
+    IonButton,
+    IonLabel,
+    IonItem,
+    IonCol,
+    IonCardTitle,
+    IonCard,
+    IonCardHeader,
     IonCardContent,
     IonRow,
     IonGrid,
@@ -75,10 +88,8 @@ export class TicketParkingPage implements OnInit {
     cardUID: '',
     customerName: '',
     phoneNumber: '',
-
     registerPlate: '',
-    vehicleTypeID: 1,
-
+    vehicleTypeID: 1, // Mặc định 1 là Ô tô
     durationMonths: 1,
   };
 
@@ -104,7 +115,6 @@ export class TicketParkingPage implements OnInit {
       next: (res: any) => {
         if (res?.data) {
           this.allMonthlyTickets = res.data;
-
           this.applyFilters();
         }
         this.isLoading = false;
@@ -184,7 +194,10 @@ export class TicketParkingPage implements OnInit {
       return;
     }
     if (!this.selectedImageFile) {
-      this.showToast('Vui lòng tải lên ảnh chụp xe để AI đọc biển số!', 'warning');
+      this.showToast(
+        'Vui lòng tải lên ảnh chụp xe để AI đọc biển số!',
+        'warning',
+      );
       return;
     }
     if (!this.regData.customerName) {
@@ -198,23 +211,32 @@ export class TicketParkingPage implements OnInit {
     formData.append('CardUID', this.regData.cardUID);
     formData.append('CustomerName', this.regData.customerName);
     formData.append('PhoneNumber', this.regData.phoneNumber);
+
     if (this.regData.registerPlate) {
       formData.append('RegisterPlate', this.regData.registerPlate);
     }
+
+    // Đã tích hợp vehicleTypeID gửi sang Backend
     formData.append('VehicleTypeID', this.regData.vehicleTypeID.toString());
     formData.append('DurationMonths', this.regData.durationMonths.toString());
     formData.append('VehicleImage', this.selectedImageFile);
 
     this.api.registerMonthly(formData).subscribe({
       next: (res: any) => {
-        this.showToast(`${res.message}\nBiển số AI đọc được: ${res.detectedPlate}`, 'success');
+        this.showToast(
+          `${res.message}\nBiển số AI đọc được: ${res.detectedPlate}`,
+          'success',
+        );
         this.resetForm();
         this.loadTickets();
         this.isSubmitting = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
-        this.showToast(err.error?.message || err.error || 'Lỗi đăng ký vé tháng!', 'danger');
+        this.showToast(
+          err.error?.message || err.error || 'Lỗi đăng ký vé tháng!',
+          'danger',
+        );
         this.isSubmitting = false;
         this.cdr.detectChanges();
       },
@@ -227,7 +249,7 @@ export class TicketParkingPage implements OnInit {
       customerName: '',
       phoneNumber: '',
       registerPlate: '',
-      vehicleTypeID: 1,
+      vehicleTypeID: 1, // Trả về mặc định là 1 khi reset
       durationMonths: 1,
     };
     this.selectedImageFile = null;
@@ -270,7 +292,10 @@ export class TicketParkingPage implements OnInit {
     }
   }
 
-  async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'danger') {
+  async showToast(
+    message: string,
+    color: 'success' | 'danger' | 'warning' = 'danger',
+  ) {
     let iconName = 'alert-circle-outline';
     if (color === 'success') iconName = 'checkmark-circle-outline';
     else if (color === 'warning') iconName = 'warning-outline';

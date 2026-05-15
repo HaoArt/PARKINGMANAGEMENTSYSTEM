@@ -1,153 +1,204 @@
-<ion-content class="app-bg">
+<ion-content [fullscreen]="true" class="premium-dashboard">
   <app-navbar></app-navbar>
 
-  <div class="page-container">
-
-    <div class="page-header">
-      <h2>Phát hành Thẻ VisionPark</h2>
-      <p>Nhập thông tin chi tiết để cấp phát thẻ NFC mới cho phương tiện.</p>
-    </div>
+  <div class="main-wrapper">
+    <header class="page-header">
+      <div class="header-content">
+        <h1>Phát hành Thẻ VisionPark</h1>
+        <p>
+          Nhập thông tin chi tiết để cấp phát thẻ NFC vé tháng/quý/năm cho
+          phương tiện.
+        </p>
+      </div>
+    </header>
 
     <div class="split-layout">
-
-      <div class="gray-panel">
-        <h3 class="panel-title">Phát hành thẻ mới</h3>
-
-        <div class="form-group">
-          <label>MÃ THẺ NFC</label>
-          <div class="input-box">
-
-            <input
-              type="text"
-              placeholder="Quẹt thẻ hoặc nhập mã..."
-              [(ngModel)]="regData.cardUID"
-            />
-            <div
-              class="icon-btn blue-icon"
-              title="Quét thẻ"
-              (click)="startNFC()"
-            >
-
-              <ion-icon name="scan-outline"></ion-icon>
+      <div class="glass-card form-card">
+        <div class="card-header border-bottom">
+          <h3 class="flex items-center gap-2 m-0 text-main">
+            <div class="icon-box primary">
+              <ion-icon name="id-card-outline"></ion-icon>
             </div>
-          </div>
+            Phát hành thẻ mới
+          </h3>
         </div>
 
-        <div class="form-group">
-          <label>LOẠI VÉ</label>
-          <div class="input-box">
-            <select [(ngModel)]="regData.durationMonths">
-              <option [value]="1">Vé tháng</option>
-              <option [value]="3">Vé quý</option>
-              <option [value]="12">Vé năm</option>
-            </select>
+        <div class="card-body">
+          <div class="form-group mt-2">
+            <label>MÃ THẺ UID (NFC)</label>
+            <div class="premium-input readonly-input">
+              <ion-icon name="scan-outline" class="input-icon"></ion-icon>
+              <input
+                type="text"
+                placeholder="Quẹt thẻ hoặc nhập mã..."
+                [(ngModel)]="regData.cardUID"
+              />
+              <div class="scan-indicator" title="Quét thẻ" (click)="startNFC()">
+                <ion-icon name="wifi-outline" class="pulse-anim"></ion-icon>
+              </div>
+            </div>
+          </div>
 
+          <div class="grid-2-col gap-4">
+            <div class="form-group">
+              <label>LOẠI VÉ</label>
+              <div class="premium-input select-wrapper">
+                <ion-icon name="calendar-outline" class="input-icon"></ion-icon>
+                <select [(ngModel)]="regData.durationMonths">
+                  <option [value]="1">Vé tháng</option>
+                  <option [value]="3">Vé quý</option>
+                  <option [value]="12">Vé năm</option>
+                </select>
+                <ion-icon
+                  name="chevron-down-outline"
+                  class="dropdown-icon"
+                ></ion-icon>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>LOẠI XE</label>
+              <div class="premium-input select-wrapper">
+                <ion-icon
+                  name="car-sport-outline"
+                  class="input-icon"
+                ></ion-icon>
+                <select [(ngModel)]="regData.vehicleTypeID">
+                  <option [value]="1">Ô tô</option>
+                  <option [value]="2">Xe máy</option>
+                </select>
+                <ion-icon
+                  name="chevron-down-outline"
+                  class="dropdown-icon"
+                ></ion-icon>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>HỌ VÀ TÊN CHỦ XE</label>
+            <div class="premium-input">
+              <ion-icon name="person-outline" class="input-icon"></ion-icon>
+              <input
+                type="text"
+                placeholder="Nhập họ và tên..."
+                [(ngModel)]="regData.customerName"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>BIỂN SỐ XE</label>
+            <div class="premium-input">
+              <ion-icon name="text-outline" class="input-icon"></ion-icon>
+              <input
+                type="text"
+                placeholder="VD: 51H-123.45"
+                [(ngModel)]="regData.registerPlate"
+                class="uppercase font-bold"
+              />
+
+              <input
+                type="file"
+                #fileInput
+                class="hidden"
+                accept="image/*"
+                (change)="onFileSelected($event)"
+              />
+
+              <button
+                class="btn-icon-only ai-scan-btn"
+                (click)="handleImageClick(fileInput)"
+                title="Chụp ảnh AI"
+              >
+                <ion-icon name="camera-outline"></ion-icon>
+              </button>
+            </div>
+
+            <div class="image-preview-modern mt-3" *ngIf="imagePreview">
+              <img [src]="imagePreview" alt="Preview" />
+              <div class="preview-overlay">
+                <button
+                  class="btn-delete-img"
+                  (click)="imagePreview = null; selectedImageFile = null"
+                >
+                  <ion-icon name="trash-outline"></ion-icon> Xóa ảnh
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <button
+            class="btn-primary full-width mt-4"
+            (click)="onSubmit()"
+            [disabled]="isSubmitting"
+          >
             <ion-icon
-              name="chevron-down-outline"
-              class="dropdown-icon"
+              [name]="isSubmitting ? 'refresh-outline' : 'save-outline'"
+              [class.spin-anim]="isSubmitting"
             ></ion-icon>
-
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>HỌ VÀ TÊN CHỦ XE</label>
-          <div class="input-box">
-
-            <input
-              type="text"
-              placeholder="Nhập họ và tên..."
-              [(ngModel)]="regData.customerName"
-            />
-
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>BIỂN SỐ XE</label>
-          <div class="input-box">
-
-            <input
-              type="text"
-              placeholder="VD: 51H-123.45"
-              [(ngModel)]="regData.registerPlate"
-            />
-
-            <!-- INPUT ẨN DÀNH CHO MÁY TÍNH -->
-            <input
-              type="file"
-              #fileInput
-              class="hidden"
-              accept="image/*"
-              (change)="onFileSelected($event)"
-            />
-
-            <!-- NÚT GỌI CHỌN FILE THÔNG MINH -->
-            <div
-              class="icon-btn gray-icon"
-              (click)="handleImageClick(fileInput)"
-              title="Chụp ảnh AI"
+            <span
+              >{{ isSubmitting ? 'Đang xử lý...' : 'Lưu thông tin thẻ' }}</span
             >
-              <ion-icon name="camera-outline"></ion-icon>
-            </div>
-          </div>
-
-          <!-- KHUNG XEM TRƯỚC ẢNH -->
-          <div class="image-preview-mini" *ngIf="imagePreview">
-            <img [src]="imagePreview" alt="Preview" />
-            <span (click)="imagePreview = null; selectedImageFile = null"
-              >Xóa ảnh</span
-            >
-          </div>
+          </button>
         </div>
-
-        <button
-          class="submit-btn"
-          (click)="onSubmit()"
-          [disabled]="isSubmitting"
-        >
-          <ion-icon name="save-outline"></ion-icon>
-          {{ isSubmitting ? 'Đang xử lý...' : 'Lưu thông tin thẻ' }}
-        </button>
       </div>
 
-      <!-- BẢNG DANH SÁCH THẺ -->
-      <div class="gray-panel">
-        <div class="panel-header">
-          <div class="filter-box">
-            <ion-icon name="options-outline"></ion-icon>
-            <select [(ngModel)]="filterStatus" (change)="applyFilters()">
-              <option value="all">Tất cả thẻ</option>
-              <option value="active">Đang hoạt động</option>
-              <option value="inactive">Đã khóa</option>
-            </select>
+      <div class="glass-card table-card">
+        <div class="table-header">
+          <h3>Danh sách Vé Phát Hành</h3>
+          <div class="table-tools">
+            <div class="filter-dropdown">
+              <select [(ngModel)]="filterStatus" (change)="applyFilters()">
+                <option value="all">Tất cả trạng thái</option>
+                <option value="active">Đang hoạt động</option>
+                <option value="inactive">Đã khóa</option>
+              </select>
+              <ion-icon name="chevron-down-outline"></ion-icon>
+            </div>
           </div>
         </div>
 
-        <div class="table-container">
-          <table>
+        <div class="responsive-table-wrapper">
+          <table class="premium-table condensed-table">
             <thead>
               <tr>
                 <th>MÃ NFC</th>
                 <th>BIỂN SỐ</th>
                 <th>LOẠI THẺ</th>
-                <th>NGÀY PHÁT HÀNH</th>
+                <th>NGÀY CẤP</th>
                 <th class="text-right">TRẠNG THÁI</th>
               </tr>
             </thead>
             <tbody>
-              <tr class="row-card" *ngFor="let item of paginatedTickets">
-                <td class="nfc-col">
-                  {{ item.cardUID ? item.cardUID : '---' }}
+              <tr class="table-row" *ngFor="let item of paginatedTickets">
+                <td data-label="Mã NFC">
+                  <span class="font-mono font-bold text-muted tracking-wide"
+                    >{{ item.cardUID ? item.cardUID : '---' }}</span
+                  >
                 </td>
-                <td class="plate-col">{{ item.registerPlate }}</td>
-                <td class="type-col">Vé tháng</td>
-                <td class="date-col">{{ item.startDate | slice:0:10 }}</td>
-                <td class="status-col text-right">
+
+                <td data-label="Biển số" class="bg-highlight-soft">
+                  <div class="plate-container text-xs">
+                    {{ item.registerPlate }}
+                  </div>
+                </td>
+
+                <td data-label="Loại thẻ">
+                  <span class="font-bold text-main">Vé tháng</span>
+                </td>
+
+                <td data-label="Ngày cấp">
+                  <span class="text-sm font-bold text-primary"
+                    >{{ item.startDate | slice:0:10 }}</span
+                  >
+                </td>
+
+                <td data-label="Trạng thái" class="text-right">
                   <span
-                    class="badge"
-                    [class.active]="item.isActive"
-                    [class.inactive]="!item.isActive"
+                    class="status-pill"
+                    [class.in]="item.isActive"
+                    [class.out]="!item.isActive"
                   >
                     {{ item.isActive ? 'Hoạt động' : 'Đã khóa' }}
                   </span>
@@ -155,30 +206,47 @@
               </tr>
 
               <tr *ngIf="paginatedTickets.length === 0 && !isLoading">
-                <td colspan="5" class="empty-state">
-                  Chưa có thẻ nào được phát hành.
+                <td colspan="5" class="empty-state py-12">
+                  <ion-icon name="document-text-outline"></ion-icon>
+                  <p>Chưa có thẻ nào được phát hành.</p>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <!-- PHÂN TRANG -->
-        <div class="pagination" *ngIf="totalPages > 0">
-          <span class="page-info">Trang {{ currentPage }} / {{ totalPages }}</span>
-          <div class="page-controls">
-            <button (click)="prevPage()" [disabled]="currentPage === 1"><ion-icon name="chevron-back-outline"></ion-icon></button>
-            
-            <ng-container *ngFor="let page of visiblePages">
-              <button 
-                [class.active]="page === currentPage" 
-                [disabled]="page === '...'"
-                (click)="goToPage(page)">{{ page }}</button>
-            </ng-container>
-            
-            <button (click)="nextPage()" [disabled]="currentPage === totalPages"><ion-icon name="chevron-forward-outline"></ion-icon></button>
+        <footer class="pagination-footer" *ngIf="totalPages > 0">
+          <span class="page-count"
+            >Trang {{ currentPage }} / {{ totalPages }}</span
+          >
+          <div class="page-nav">
+            <button
+              class="nav-btn"
+              (click)="prevPage()"
+              [disabled]="currentPage === 1"
+            >
+              <ion-icon name="chevron-back-outline"></ion-icon>
+            </button>
+            <div class="page-numbers">
+              <ng-container *ngFor="let page of visiblePages">
+                <button
+                  [class.active]="page === currentPage"
+                  [disabled]="page === '...'"
+                  (click)="goToPage(page)"
+                >
+                  {{ page }}
+                </button>
+              </ng-container>
+            </div>
+            <button
+              class="nav-btn"
+              (click)="nextPage()"
+              [disabled]="currentPage === totalPages"
+            >
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </button>
           </div>
-        </div>
+        </footer>
       </div>
     </div>
   </div>

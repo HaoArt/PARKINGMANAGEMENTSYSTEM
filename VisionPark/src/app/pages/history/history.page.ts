@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core'; // Thêm ChangeDetectorRef
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -23,7 +23,23 @@ import {
   Platform,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import * as icons from 'ionicons/icons';
+import {
+  scanOutline,
+  idCardOutline,
+  radioOutline,
+  checkmarkCircleOutline,
+  closeCircleOutline,
+  informationCircleOutline,
+  cardOutline,
+  chevronDownOutline,
+  searchOutline,
+  downloadOutline,
+  documentTextOutline,
+  chevronBackOutline,
+  chevronForwardOutline,
+  carSportOutline, // Đã thêm
+  bicycleOutline, // Đã thêm
+} from 'ionicons/icons';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { Api } from '../../services/api';
 // 👉 THÊM PLUGIN NFC
@@ -106,7 +122,23 @@ export class HistoryPage implements OnInit {
     private nfc: NFC, // Tiêm NFC
     private cdr: ChangeDetectorRef, // Tiêm ChangeDetectorRef để chống đơ màn hình
   ) {
-    addIcons({ ...icons });
+    addIcons({
+      scanOutline,
+      idCardOutline,
+      radioOutline,
+      checkmarkCircleOutline,
+      closeCircleOutline,
+      informationCircleOutline,
+      cardOutline,
+      chevronDownOutline,
+      searchOutline,
+      downloadOutline,
+      documentTextOutline,
+      chevronBackOutline,
+      chevronForwardOutline,
+      carSportOutline,
+      bicycleOutline,
+    });
   }
 
   ngOnInit() {
@@ -132,6 +164,7 @@ export class HistoryPage implements OnInit {
       console.warn('NFC plugin chỉ hoạt động trên thiết bị thực.');
     }
   }
+
   handleTagEvent(event: any) {
     // 👉 1. LOGIC CHỐNG ĐÚP (COOLDOWN)
     const currentTime = new Date().getTime();

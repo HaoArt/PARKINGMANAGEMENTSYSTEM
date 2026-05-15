@@ -60,7 +60,7 @@ namespace VisionPark.API.Controllers
             if (!isPasswordValid)
             {
                 // Tạm thời hiển thị chi tiết để Debug (Sẽ thấy rõ nếu có dấu cách thừa hoặc sai mật khẩu)
-                return Unauthorized(new { Message = $"Sai mật khẩu! Bạn vừa nhập: '{request.Password}' - Chuỗi trong DB đang lưu: '{user.PasswordHash}'" });
+                return Unauthorized(new { Message = $"Sai mật khẩu! Bạn vừa nhập!!!" });
             }
 
             if (!user.IsActive)
