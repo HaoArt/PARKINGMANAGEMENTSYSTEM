@@ -1,163 +1,208 @@
-<ion-content>
+<ion-content [fullscreen]="true" class="premium-dashboard">
   <app-navbar></app-navbar>
-  <div class="timekeeping-container">
-    <div class="page-header">
-      <h2 class="page-title">Chấm công & Quản lý Khuôn mặt</h2>
-      <p>Nhận diện khuôn mặt AI để điểm danh nhân viên</p>
-    </div>
 
-    <!-- Main Grid -->
-    <div class="split-layout mt-4">
-      <!-- Left Column: Camera Area -->
-      <div class="gray-panel">
-        <!-- Lớp phủ Loading -->
-        <div *ngIf="isProcessing" class="panel-loading-overlay">
+  <div class="main-wrapper relative">
+    <header class="page-header">
+      <div class="header-content">
+        <h1>Chấm công & Quản lý Khuôn mặt</h1>
+        <p>
+          Nhận diện khuôn mặt AI (Face ID) để điểm danh nhân viên vào ca trực.
+        </p>
+      </div>
+    </header>
+
+    <div class="split-layout">
+      <div class="glass-card flex flex-col relative overflow-hidden">
+        <div *ngIf="isProcessing" class="loading-overlay">
           <div class="spinner"></div>
           <p>Hệ thống AI đang phân tích...</p>
         </div>
 
-        <!-- Time Display for Timekeeping -->
-        <div class="panel-header timekeeping-header">
-          <h3 class="panel-title">Máy Chấm Công Face ID</h3>
+        <div class="card-header border-bottom flex-justify">
+          <h3 class="flex items-center gap-2 m-0 text-main">
+            <div class="icon-box primary">
+              <ion-icon name="scan-outline"></ion-icon>
+            </div>
+            Máy Chấm Công
+          </h3>
           <div class="digital-clock">
             <span class="time">{{ currentTime | date: "HH:mm:ss" }}</span>
             <span class="date">{{ currentTime | date: "dd/MM/yyyy" }}</span>
           </div>
         </div>
 
-        <div class="camera-controls">
-          <button
-            class="submit-btn"
-            (click)="startCamera()"
-            *ngIf="!isCameraOn"
-            [disabled]="isProcessing"
-          >
-            Mở Webcam
-          </button>
-          <button
-            class="submit-btn bg-green"
-            (click)="captureImage()"
-            *ngIf="isCameraOn"
-            [disabled]="isProcessing"
-          >
-            📸 Chụp & Chấm công
-          </button>
-          <button
-            class="submit-btn bg-red"
-            (click)="stopCamera()"
-            *ngIf="isCameraOn"
-            [disabled]="isProcessing"
-          >
-            Tắt Webcam
-          </button>
-        </div>
-
-        <div class="video-container" [class.camera-off]="!isCameraOn">
-          <video #videoElement autoplay playsinline *ngIf="isCameraOn"></video>
-          <canvas
-            #overlayCanvas
-            class="overlay-canvas"
-            *ngIf="isCameraOn"
-          ></canvas>
-
-          <div class="camera-placeholder" *ngIf="!isCameraOn">
-            <p>Camera đang tắt</p>
-            <p class="upload-hint">Hoặc tải ảnh lên từ máy tính:</p>
-            <input
-              type="file"
-              accept="image/*"
-              class="custom-file-input"
-              (change)="onFileSelected($event)"
+        <div class="card-body flex flex-col h-full">
+          <div class="camera-controls">
+            <button
+              class="btn-primary flex-1"
+              (click)="startCamera()"
+              *ngIf="!isCameraOn"
               [disabled]="isProcessing"
-            />
-          </div>
-        </div>
+            >
+              <ion-icon name="videocam-outline"></ion-icon>
+              <span>Mở Camera</span>
+            </button>
 
-        <!-- Preview Selected File -->
-        <div *ngIf="!isCameraOn && imageBase64" class="image-preview">
-          <h4>Ảnh tải lên:</h4>
-          <img [src]="imageBase64" alt="Preview" />
-        </div>
+            <button
+              class="btn-success flex-1"
+              (click)="captureImage()"
+              *ngIf="isCameraOn"
+              [disabled]="isProcessing"
+            >
+              <ion-icon name="camera-outline"></ion-icon>
+              <span>Chụp & Chấm công</span>
+            </button>
 
-        <!-- Recognition Result -->
-        <div *ngIf="recognitionResult" class="result-card mt-3">
-          <div class="result-header">
-            <span class="success-icon">✅</span>
-            <h4>Chấm công thành công!</h4>
+            <button
+              class="btn-danger"
+              (click)="stopCamera()"
+              *ngIf="isCameraOn"
+              [disabled]="isProcessing"
+            >
+              <ion-icon name="stop-circle-outline"></ion-icon>
+            </button>
           </div>
-          <div class="result-details">
-            <img [src]="recognitionResult.faceImageUrl" alt="Result" />
-            <div>
-              <p><strong>Họ tên:</strong> {{ recognitionResult.fullName }}</p>
-              <p>
-                <strong>Thời gian:</strong>
-                <span class="highlight-time">{{
-                  currentTime | date: "HH:mm:ss dd/MM/yyyy"
-                }}</span>
-              </p>
+
+          <div class="video-container mt-4" [class.camera-off]="!isCameraOn">
+            <video
+              #videoElement
+              autoplay
+              playsinline
+              *ngIf="isCameraOn"
+            ></video>
+            <canvas
+              #overlayCanvas
+              class="overlay-canvas"
+              *ngIf="isCameraOn"
+            ></canvas>
+
+            <div class="camera-placeholder" *ngIf="!isCameraOn">
+              <ion-icon name="videocam-off-outline"></ion-icon>
+              <p class="mt-2">Camera đang tắt</p>
+
+              <div class="upload-section mt-4">
+                <p class="upload-hint">Hoặc tải ảnh lên từ thiết bị:</p>
+                <input
+                  type="file"
+                  accept="image/*"
+                  class="custom-file-input"
+                  (change)="onFileSelected($event)"
+                  [disabled]="isProcessing"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div
+            *ngIf="!isCameraOn && imageBase64 && !recognitionResult"
+            class="image-preview mt-4"
+          >
+            <img [src]="imageBase64" alt="Preview" />
+          </div>
+
+          <div *ngIf="recognitionResult" class="result-card success-anim mt-4">
+            <div class="status-alert success mb-3">
+              <ion-icon name="checkmark-circle"></ion-icon>
+              <span>Chấm công thành công!</span>
+            </div>
+
+            <div class="result-details flex gap-4 items-center">
+              <div class="avatar-ring">
+                <img [src]="recognitionResult.faceImageUrl" alt="Result" />
+              </div>
+              <div class="info-list flex-1">
+                <p class="name text-lg font-bold text-main m-0">
+                  {{ recognitionResult.fullName }}
+                </p>
+                <p class="time mt-1 text-sm text-muted">
+                  <ion-icon name="time-outline" class="mr-1"></ion-icon>
+                  Lúc:
+                  <span class="highlight-time">{{
+                    currentTime | date: "HH:mm:ss dd/MM/yyyy"
+                  }}</span>
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Right Column: History -->
-      <div class="gray-panel">
-        <div class="panel-header">
-          <h3 class="panel-title">Lịch sử Chấm công</h3>
-          <button class="btn-outline" (click)="loadAttendanceSummary()">
-            Tải lại
+      <div class="glass-card flex flex-col">
+        <div class="card-header border-bottom flex-justify">
+          <h3 class="flex items-center gap-2 m-0 text-main">
+            <div class="icon-box teal">
+              <ion-icon name="calendar-outline"></ion-icon>
+            </div>
+            Lịch sử Chấm công
+          </h3>
+          <button
+            class="btn-icon-only"
+            (click)="loadAttendanceSummary()"
+            title="Làm mới"
+          >
+            <ion-icon name="refresh-outline"></ion-icon>
           </button>
         </div>
-        <div class="attendance-list">
-          <!-- Lặp qua từng nhóm ngày -->
-          <div *ngFor="let dayGroup of attendanceSummary" class="day-group">
-            <h4 class="day-header">
-              {{ dayGroup.date | date: "fullDate" : "" : "vi" }}
-            </h4>
-            <!-- Lặp qua các bản ghi trong ngày -->
+
+        <div class="card-body overflow-y-auto">
+          <div class="attendance-list">
             <div
-              *ngFor="let record of dayGroup.records"
-              class="attendance-record row-card"
+              *ngFor="let dayGroup of attendanceSummary"
+              class="day-group mb-6"
             >
-              <img [src]="record.faceImageUrl" alt="Avatar" class="avatar" />
-              <div class="record-info">
-                <p class="name">{{ record.fullName }}</p>
-                <div class="time-details">
-                  <div class="check-in">
-                    <span class="label">Vào:</span>
-                    <span class="time">{{
-                      record.checkInTime | date: "HH:mm"
-                    }}</span>
-                  </div>
-                  <div class="check-out">
-                    <span class="label">Ra:</span>
-                    <span class="time" [class.pending]="!record.checkOutTime">
-                      {{
-                        record.checkOutTime
-                          ? (record.checkOutTime | date: "HH:mm")
-                          : "Chưa có"
-                      }}
-                    </span>
+              <h4 class="day-header flex items-center gap-2">
+                <ion-icon name="today-outline" class="text-teal"></ion-icon>
+                {{ dayGroup.date | date: "fullDate" : "" : "vi" }}
+              </h4>
+
+              <div *ngFor="let record of dayGroup.records" class="history-item">
+                <div class="flex items-center gap-3">
+                  <img
+                    [src]="record.faceImageUrl"
+                    alt="Avatar"
+                    class="employee-avatar"
+                  />
+                  <div class="record-info">
+                    <p class="name m-0">{{ record.fullName }}</p>
+                    <div class="time-badges mt-2 flex gap-2">
+                      <span class="badge in"
+                        >Vào: {{ record.checkInTime | date: "HH:mm" }}</span
+                      >
+
+                      <span
+                        class="badge"
+                        [ngClass]="record.checkOutTime ? 'out' : 'pending'"
+                      >
+                        Ra:
+                        {{
+                          record.checkOutTime
+                            ? (record.checkOutTime | date: "HH:mm")
+                            : "Chưa có"
+                        }}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="work-duration" *ngIf="record.workDuration">
-                {{ record.workDuration }}
+
+                <div class="work-duration" *ngIf="record.workDuration">
+                  <ion-icon name="hourglass-outline" class="mr-1"></ion-icon>
+                  {{ record.workDuration }}
+                </div>
               </div>
             </div>
-          </div>
-          <!-- Trạng thái rỗng -->
-          <div
-            *ngIf="!attendanceSummary || attendanceSummary.length === 0"
-            class="empty-state"
-          >
-            <p>Chưa có dữ liệu chấm công.</p>
+
+            <div
+              *ngIf="!attendanceSummary || attendanceSummary.length === 0"
+              class="empty-state py-12"
+            >
+              <ion-icon name="file-tray-outline"></ion-icon>
+              <p>Chưa có dữ liệu chấm công nào.</p>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Hidden Canvas for capturing frame -->
-    <canvas #canvasElement style="display: none"></canvas>
+    <canvas #canvasElement class="hidden"></canvas>
   </div>
 </ion-content>

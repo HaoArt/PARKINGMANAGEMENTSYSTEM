@@ -5,11 +5,24 @@ import {
   IonContent,
   IonIcon,
   ToastController,
-  AlertController, // Thêm AlertController để làm hộp thoại xác nhận xóa
+  AlertController,
   Platform,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import * as icons from 'ionicons/icons';
+import {
+  wifiOutline,
+  chevronDownOutline,
+  closeOutline,
+  saveOutline,
+  addCircleOutline,
+  refreshOutline,
+  createOutline,
+  trashOutline,
+  cubeOutline,
+  chevronBackOutline,
+  chevronForwardOutline,
+  informationCircleOutline, // Added for helper text
+} from 'ionicons/icons';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { Api } from '../../services/api';
 import { NFC, Ndef } from '@awesome-cordova-plugins/nfc/ngx';
@@ -32,24 +45,22 @@ interface CardRecord {
 export class CardRegistrationPage implements OnInit {
   private api = inject(Api);
   private toastCtrl = inject(ToastController);
-  private alertCtrl = inject(AlertController); // Tiêm Alert
+  private alertCtrl = inject(AlertController);
   private platform = inject(Platform);
 
   isLoading = false;
   isSubmitting = false;
-  isEditing = false; // Biến kiểm tra xem đang Thêm hay Sửa
-  editingCardId: number | null = null; // Lưu ID thẻ đang sửa
+  isEditing = false;
+  editingCardId: number | null = null;
 
   systemCards: CardRecord[] = [];
   paginatedCards: CardRecord[] = [];
 
-  // Phân trang
   currentPage: number = 1;
   itemsPerPage: number = 5;
   totalPages: number = 1;
   visiblePages: (number | string)[] = [];
 
-  // Dữ liệu thẻ trên Form (Thêm trường status để Admin có thể khóa thẻ)
   cardForm = {
     cardUID: '',
     cardType: 'Monthly',
@@ -60,7 +71,21 @@ export class CardRegistrationPage implements OnInit {
     private nfc: NFC,
     private cdr: ChangeDetectorRef,
   ) {
-    addIcons({ ...icons });
+    // Explicitly add icons used in HTML
+    addIcons({
+      wifiOutline,
+      chevronDownOutline,
+      closeOutline,
+      saveOutline,
+      addCircleOutline,
+      refreshOutline,
+      createOutline,
+      trashOutline,
+      cubeOutline,
+      chevronBackOutline,
+      chevronForwardOutline,
+      informationCircleOutline,
+    });
   }
 
   ngOnInit() {
@@ -70,13 +95,11 @@ export class CardRegistrationPage implements OnInit {
 
   startNFC() {
     if (this.platform.is('capacitor') || this.platform.is('cordova')) {
-      // 1. Lắng nghe thẻ NFC cơ bản (Thẻ trắng)
       this.nfc.addTagDiscoveredListener().subscribe({
         next: (event: any) => this.handleTagEvent(event),
         error: (err) => console.error('Lỗi NFC Tag:', err),
       });
 
-      // 2. BẮT BUỘC: Lắng nghe thẻ có chứa dữ liệu NDEF để chặn Android chuyển hướng
       this.nfc.addNdefListener().subscribe({
         next: (event: any) => this.handleTagEvent(event),
         error: (err) => console.error('Lỗi NFC NDEF:', err),
@@ -86,17 +109,13 @@ export class CardRegistrationPage implements OnInit {
     }
   }
 
-  // Tách logic xử lý ra một hàm riêng để dùng chung cho gọn
   handleTagEvent(event: any) {
     if (event && event.tag && event.tag.id) {
       const scannedUID = this.nfc.bytesToHexString(event.tag.id).toUpperCase();
-      this.cardForm.cardUID = scannedUID; // Đổi thành this.inputNfcId nếu là trang History
+      this.cardForm.cardUID = scannedUID;
 
       this.cdr.detectChanges();
       this.showToast('Đã nhận mã thẻ: ' + scannedUID, 'success');
-
-      // Nếu ở trang History thì nhớ gọi thêm hàm này:
-      // this.onProcessCard(scannedUID);
     }
   }
 
@@ -104,7 +123,6 @@ export class CardRegistrationPage implements OnInit {
     this.isLoading = true;
     this.api.getAllCards().subscribe({
       next: (res: any) => {
-        // CẬP NHẬT: Xử lý dữ liệu trả về trực tiếp dưới dạng mảng
         let rawData = [];
         if (res && res.data) {
           rawData = res.data;
@@ -135,12 +153,10 @@ export class CardRegistrationPage implements OnInit {
     });
   }
 
-  // Chuyển sang chế độ Sửa khi bấm vào icon Edit trên bảng
   editCard(item: CardRecord) {
     this.isEditing = true;
     this.editingCardId = item.cardID;
 
-    // Đổ dữ liệu từ bảng lên Form
     this.cardForm = {
       cardUID: item.cardUID,
       cardType: item.cardType,
@@ -148,14 +164,12 @@ export class CardRegistrationPage implements OnInit {
     };
   }
 
-  // Hủy chế độ sửa
   cancelEdit() {
     this.isEditing = false;
     this.editingCardId = null;
     this.resetForm();
   }
 
-  // Hàm Lưu (Gộp chung cả Thêm mới và Cập nhật)
   saveCard() {
     if (!this.cardForm.cardUID) {
       this.showToast('Vui lòng quẹt thẻ để lấy mã NFC!', 'warning');
@@ -165,7 +179,6 @@ export class CardRegistrationPage implements OnInit {
     this.isSubmitting = true;
 
     if (this.isEditing && this.editingCardId) {
-      // GỌI API CẬP NHẬT
       this.api.updateCard(this.editingCardId, this.cardForm).subscribe({
         next: (res: any) => {
           this.showToast('Cập nhật thẻ thành công!', 'success');
@@ -184,7 +197,6 @@ export class CardRegistrationPage implements OnInit {
         },
       });
     } else {
-      // GỌI API THÊM MỚI
       this.api.createCard(this.cardForm).subscribe({
         next: (res: any) => {
           this.showToast('Thêm thẻ thành công!', 'success');
@@ -202,7 +214,6 @@ export class CardRegistrationPage implements OnInit {
     }
   }
 
-  // Hàm Xóa có hộp thoại xác nhận
   async deleteCard(cardID: number) {
     const alert = await this.alertCtrl.create({
       header: 'Xác nhận xóa',
@@ -257,7 +268,6 @@ export class CardRegistrationPage implements OnInit {
     toast.present();
   }
 
-  // --- LOGIC PHÂN TRANG ---
   calculatePagination() {
     this.totalPages = Math.ceil(this.systemCards.length / this.itemsPerPage);
 

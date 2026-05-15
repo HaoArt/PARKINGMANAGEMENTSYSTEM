@@ -9,9 +9,30 @@ import { Api } from '../../services/api';
 import { CommonModule, registerLocaleData } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import localeVi from '@angular/common/locales/vi';
-import { IonContent, IonGrid, IonRow } from '@ionic/angular/standalone';
+import {
+  IonContent,
+  IonGrid,
+  IonRow,
+  IonIcon,
+} from '@ionic/angular/standalone';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { NotificationService } from '../../services/notification.service';
+
+import { addIcons } from 'ionicons';
+import {
+  videocamOutline,
+  cameraOutline,
+  stopCircleOutline,
+  videocamOffOutline,
+  scanOutline,
+  calendarOutline,
+  todayOutline,
+  hourglassOutline,
+  timeOutline,
+  refreshOutline,
+  checkmarkCircle,
+  fileTrayOutline,
+} from 'ionicons/icons';
 
 // Đăng ký dữ liệu ngôn ngữ tiếng Việt
 registerLocaleData(localeVi, 'vi');
@@ -20,6 +41,7 @@ registerLocaleData(localeVi, 'vi');
   selector: 'app-timekeeping',
   standalone: true,
   imports: [
+    IonIcon,
     IonRow,
     IonGrid,
     CommonModule,
@@ -34,6 +56,7 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
   @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
   @ViewChild('canvasElement') canvasElement!: ElementRef<HTMLCanvasElement>;
   @ViewChild('overlayCanvas') overlayCanvas!: ElementRef<HTMLCanvasElement>;
+
   imageBase64: string | null = null;
   scanResult: any = null;
   attendanceSummary: any[] = [];
@@ -51,7 +74,23 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
   constructor(
     private api: Api,
     private notification: NotificationService,
-  ) {}
+  ) {
+    // Thêm icons cần thiết cho giao diện mới
+    addIcons({
+      videocamOutline,
+      cameraOutline,
+      stopCircleOutline,
+      videocamOffOutline,
+      scanOutline,
+      calendarOutline,
+      todayOutline,
+      hourglassOutline,
+      timeOutline,
+      refreshOutline,
+      checkmarkCircle,
+      fileTrayOutline,
+    });
+  }
 
   ngOnInit() {
     this.loadAttendanceSummary();
@@ -162,7 +201,7 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (faces && faces.length > 0) {
-      ctx.strokeStyle = '#00ff00'; // Đổi viền xanh lá cho tracking
+      ctx.strokeStyle = '#2dd4bf'; // Đổi viền sang màu Teal cao cấp
       ctx.lineWidth = 4;
       faces.forEach((face) => {
         const x = face.x || face.X;

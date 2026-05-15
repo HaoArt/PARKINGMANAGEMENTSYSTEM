@@ -1,138 +1,225 @@
-<ion-content class="app-bg" style="--background: #f4f6f8;">
+<ion-content [fullscreen]="true" class="premium-dashboard">
   <app-navbar></app-navbar>
 
-  <div class="px-6 md:px-10 py-8 max-w-[1400px] mx-auto">
-    
-    <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
-      
-      <ion-segment [value]="CurrentTab" (ionChange)="segmentChanged($event)" class="bg-white rounded-xl shadow-sm p-1.5 border border-gray-200 max-w-[500px] m-0">
-        <ion-segment-button value="general" class="rounded-lg">
-          <ion-label class="font-bold tracking-wide flex items-center justify-center py-1.5 text-[13px]">
-            <ion-icon name="settings-outline" class="mr-2 text-[18px]"></ion-icon> Cài đặt chung
+  <div class="main-wrapper">
+    <header class="page-header">
+      <div class="header-content">
+        <h1>Cài đặt Hệ thống</h1>
+        <p>Cấu hình thông số hoạt động và bảng giá dịch vụ bãi đỗ xe.</p>
+      </div>
+    </header>
+
+    <div class="top-actions-bar">
+      <ion-segment
+        [value]="CurrentTab"
+        (ionChange)="segmentChanged($event)"
+        class="premium-segment"
+      >
+        <ion-segment-button value="general">
+          <ion-label class="flex items-center gap-2">
+            <ion-icon name="settings-outline"></ion-icon>
+            Cài đặt chung
           </ion-label>
         </ion-segment-button>
-        <ion-segment-button value="pricing" class="rounded-lg">
-          <ion-label class="font-bold tracking-wide flex items-center justify-center py-1.5 text-[13px]">
-            <ion-icon name="cash-outline" class="mr-2 text-[18px]"></ion-icon> Cấu hình Giá vé
+        <ion-segment-button value="pricing">
+          <ion-label class="flex items-center gap-2">
+            <ion-icon name="cash-outline"></ion-icon>
+            Cấu hình Giá vé
           </ion-label>
         </ion-segment-button>
       </ion-segment>
 
-      <button class="bg-[#003399] text-white px-6 py-3 rounded-xl text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-[#002277] transition-all shadow-md disabled:opacity-60" (click)="saveSettings()" [disabled]="isSaving">
-        <ion-icon *ngIf="!isSaving" name="save-outline" class="text-[18px]"></ion-icon>
-        <ion-icon *ngIf="isSaving" name="refresh-outline" class="text-[18px] animate-spin"></ion-icon>
-        {{ isSaving ? 'Đang lưu...' : 'Lưu thay đổi' }}
+      <button
+        class="btn-primary"
+        (click)="saveSettings()"
+        [disabled]="isSaving || isLoading"
+      >
+        <ion-icon
+          [name]="isSaving ? 'refresh-outline' : 'save-outline'"
+          [class.spin-anim]="isSaving"
+        ></ion-icon>
+        <span>{{ isSaving ? 'Đang lưu hệ thống...' : 'Lưu thay đổi' }}</span>
       </button>
-
     </div>
 
-    <div *ngIf="CurrentTab === 'general'" class="animate-fade-in">
-      <!-- SKELETON LOADING BẢNG CHUNG -->
-      <div *ngIf="isLoading" class="p-6 bg-white rounded-2xl border border-gray-200 shadow-sm max-w-[800px] flex flex-col gap-4">
-        <div class="h-6 bg-gray-200 rounded w-1/3 animate-pulse mb-2"></div>
-        <div class="h-12 bg-gray-100 rounded-xl animate-pulse"></div>
-        <div class="h-12 bg-gray-100 rounded-xl animate-pulse"></div>
-        <div class="h-12 bg-gray-100 rounded-xl animate-pulse"></div>
+    <div *ngIf="CurrentTab === 'general'" class="animate-fade-in mt-6">
+      <div *ngIf="isLoading" class="glass-card max-w-3xl skeleton-card">
+        <div class="skeleton-line w-1/3 mb-6"></div>
+        <div class="skeleton-box h-12 mb-4"></div>
+        <div class="skeleton-box h-12 mb-4"></div>
+        <div class="skeleton-box h-12"></div>
       </div>
 
-      <ion-grid class="p-0" *ngIf="!isLoading">
-        <ion-row>
-          <ion-col size="12" size-md="8" size-lg="6">
-            <ion-card class="m-0 border border-gray-200 shadow-sm rounded-2xl">
-              <ion-card-header class="bg-white border-b border-gray-100 py-4 px-6">
-                <ion-card-title class="text-gray-800 font-extrabold text-[16px] flex items-center">
-                  <ion-icon name="business-outline" class="mr-2 text-xl text-[#003399]"></ion-icon> Thông tin bãi đỗ xe
-                </ion-card-title>
-              </ion-card-header>
-              <ion-card-content class="p-6 bg-gray-50 flex flex-col gap-4">
-                
-                <ion-item lines="none" class="bg-white rounded-xl border border-gray-200 shadow-sm">
-                  <ion-input label="Tên bãi xe (Hiển thị trên vé)" label-placement="floating" [(ngModel)]="SystemConfig.ParkingName"></ion-input>
-                </ion-item>
-
-                <ion-item lines="none" class="bg-white rounded-xl border border-gray-200 shadow-sm">
-                  <ion-input type="number" min="0" label="Sức chứa tối đa (xe)" label-placement="floating" [(ngModel)]="SystemConfig.MaxCapacity"></ion-input>
-                </ion-item>
-
-                <div class="flex gap-4">
-                  <ion-item lines="none" class="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm">
-                    <ion-input type="time" label="Giờ mở cửa" label-placement="floating" [(ngModel)]="SystemConfig.OpenTime"></ion-input>
-                  </ion-item>
-                  <ion-item lines="none" class="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm">
-                    <ion-input type="time" label="Giờ đóng cửa" label-placement="floating" [(ngModel)]="SystemConfig.CloseTime"></ion-input>
-                  </ion-item>
-                </div>
-
-                <ion-item lines="none" class="bg-white rounded-xl border border-gray-200 shadow-sm">
-                  <ion-icon name="call-outline" slot="start" class="text-gray-400 mt-2"></ion-icon>
-                  <ion-input type="tel" label="Hotline hỗ trợ sự cố" label-placement="floating" [(ngModel)]="SystemConfig.Hotline"></ion-input>
-                </ion-item>
-
-              </ion-card-content>
-            </ion-card>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </div>
-
-    <div *ngIf="CurrentTab === 'pricing'" class="animate-fade-in">
-      <!-- SKELETON LOADING BẢNG GIÁ -->
-      <div *ngIf="isLoading" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="p-6 bg-white rounded-2xl border border-gray-200 shadow-sm h-[300px] flex flex-col gap-4">
-          <div class="h-6 bg-gray-200 rounded w-1/2 animate-pulse mb-4"></div>
-          <div class="h-12 bg-gray-100 rounded-xl animate-pulse"></div>
-          <div class="h-12 bg-gray-100 rounded-xl animate-pulse"></div>
+      <div class="glass-card max-w-3xl" *ngIf="!isLoading">
+        <div class="card-header border-bottom">
+          <h3 class="flex items-center gap-2 m-0 text-main">
+            <div class="icon-box primary">
+              <ion-icon name="business-outline"></ion-icon>
+            </div>
+            Thông tin cơ sở hạ tầng
+          </h3>
         </div>
-        <div class="p-6 bg-white rounded-2xl border border-gray-200 shadow-sm h-[300px] flex flex-col gap-4 hidden md:flex">
-          <div class="h-6 bg-gray-200 rounded w-1/2 animate-pulse mb-4"></div>
-          <div class="h-12 bg-gray-100 rounded-xl animate-pulse"></div>
-          <div class="h-12 bg-gray-100 rounded-xl animate-pulse"></div>
-        </div>
-      </div>
 
-      <ion-grid class="p-0" *ngIf="!isLoading">
-        <ion-row class="gap-y-6">
-          
-          <ion-col size="12" size-md="6" *ngFor="let rule of PricingRules">
-            <ion-card class="m-0 h-full border border-gray-200 shadow-sm rounded-2xl mx-2">
-              <ion-card-header class="bg-white border-b border-gray-100 py-4 px-6 flex justify-between items-center">
-                <ion-card-title class="text-gray-800 font-extrabold text-[16px] flex items-center">
-                  <ion-icon [name]="rule.VehicleType === 'Ô tô' ? 'car-outline' : 'bicycle-outline'" class="mr-2 text-[22px] text-[#003399]"></ion-icon> 
-                  Bảng giá: {{ rule.VehicleType }}
-                </ion-card-title>
-              </ion-card-header>
-              
-              <ion-card-content class="p-6 bg-gray-50 flex flex-col gap-4">
-                
-                <ion-item lines="none" class="bg-white rounded-xl border border-gray-200 shadow-sm">
-                  <ion-input type="number" min="0" label="Giá vé lượt (VNĐ/lần)" label-placement="floating" [(ngModel)]="rule.PricePerEntry"></ion-input>
-                </ion-item>
-
-                <ion-item lines="none" class="bg-white rounded-xl border border-gray-200 shadow-sm">
-                  <ion-input type="number" min="0" label="Giá đăng ký theo Tháng (VNĐ/tháng)" label-placement="floating" [(ngModel)]="rule.PricePerMonth"></ion-input>
-                </ion-item>
-
-                <ion-item lines="none" class="bg-white rounded-xl border border-gray-200 shadow-sm">
-                  <ion-input type="number" min="0" label="Giá đăng ký theo Quý (VNĐ/3 tháng)" label-placement="floating" [(ngModel)]="rule.PricePerQuarter"></ion-input>
-                </ion-item>
-
-                <ion-item lines="none" class="bg-white rounded-xl border border-gray-200 shadow-sm">
-                  <ion-input type="number" min="0" label="Giá đăng ký theo Năm (VNĐ/năm)" label-placement="floating" [(ngModel)]="rule.PricePerYear"></ion-input>
-                </ion-item>
-
-              </ion-card-content>
-            </ion-card>
-          </ion-col>
-
-          <!-- THÔNG BÁO KHI CHƯA CÓ BẢNG GIÁ -->
-          <div *ngIf="PricingRules.length === 0" class="w-full flex flex-col items-center justify-center py-12">
-            <ion-icon name="cash-outline" class="text-6xl text-gray-300 mb-4"></ion-icon>
-            <p class="text-gray-500 font-medium">Chưa có dữ liệu bảng giá nào được thiết lập trong hệ thống.</p>
+        <div class="card-body">
+          <div class="form-group">
+            <label>Tên bãi xe (Hiển thị trên vé/hóa đơn)</label>
+            <div class="premium-input">
+              <ion-icon name="text-outline" class="input-icon"></ion-icon>
+              <input
+                type="text"
+                placeholder="Nhập tên bãi xe..."
+                [(ngModel)]="SystemConfig.ParkingName"
+              />
+            </div>
           </div>
 
-        </ion-row>
-      </ion-grid>
+          <div class="form-group">
+            <label>Sức chứa tối đa (Số lượng xe)</label>
+            <div class="premium-input">
+              <ion-icon name="car-sport-outline" class="input-icon"></ion-icon>
+              <input
+                type="number"
+                min="0"
+                placeholder="VD: 1000"
+                [(ngModel)]="SystemConfig.MaxCapacity"
+              />
+            </div>
+          </div>
+
+          <div class="grid-2-col gap-4">
+            <div class="form-group">
+              <label>Giờ mở cửa</label>
+              <div class="premium-input">
+                <ion-icon
+                  name="time-outline"
+                  class="input-icon text-teal"
+                ></ion-icon>
+                <input type="time" [(ngModel)]="SystemConfig.OpenTime" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Giờ đóng cửa</label>
+              <div class="premium-input">
+                <ion-icon
+                  name="time-outline"
+                  class="input-icon text-danger"
+                ></ion-icon>
+                <input type="time" [(ngModel)]="SystemConfig.CloseTime" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group mt-2">
+            <label>Hotline hỗ trợ sự cố</label>
+            <div class="premium-input">
+              <ion-icon name="call-outline" class="input-icon"></ion-icon>
+              <input
+                type="tel"
+                placeholder="Nhập số điện thoại..."
+                [(ngModel)]="SystemConfig.Hotline"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
+    <div *ngIf="CurrentTab === 'pricing'" class="animate-fade-in mt-6">
+      <div *ngIf="isLoading" class="grid-2-col gap-6">
+        <div class="glass-card skeleton-card h-64" *ngFor="let i of [1,2]">
+          <div class="skeleton-line w-1/2 mb-6"></div>
+          <div class="skeleton-box h-12 mb-4"></div>
+          <div class="skeleton-box h-12"></div>
+        </div>
+      </div>
+
+      <div
+        *ngIf="PricingRules.length === 0 && !isLoading"
+        class="empty-state py-12"
+      >
+        <div class="icon-circle mb-4">
+          <ion-icon name="cash-outline"></ion-icon>
+        </div>
+        <h4>Chưa có bảng giá</h4>
+        <p>
+          Hệ thống chưa thiết lập dữ liệu bảng giá cho các loại phương tiện.
+        </p>
+      </div>
+
+      <div
+        class="grid-2-col gap-6"
+        *ngIf="!isLoading && PricingRules.length > 0"
+      >
+        <div class="glass-card" *ngFor="let rule of PricingRules">
+          <div class="card-header border-bottom flex-justify">
+            <h3 class="flex items-center gap-2 m-0 text-main font-bold">
+              <div
+                class="icon-box"
+                [ngClass]="rule.VehicleType === 'Ô tô' ? 'primary' : 'teal'"
+              >
+                <ion-icon
+                  [name]="rule.VehicleType === 'Ô tô' ? 'car-outline' : 'bicycle-outline'"
+                ></ion-icon>
+              </div>
+              Bảng giá: {{ rule.VehicleType }}
+            </h3>
+          </div>
+
+          <div class="card-body">
+            <div class="form-group">
+              <label>Giá vé lượt (VNĐ/lần)</label>
+              <div class="premium-input">
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  [(ngModel)]="rule.PricePerEntry"
+                />
+                <span class="currency-tag">VNĐ</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Đăng ký Tháng (VNĐ/tháng)</label>
+              <div class="premium-input">
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  [(ngModel)]="rule.PricePerMonth"
+                />
+                <span class="currency-tag">VNĐ</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Đăng ký Quý (VNĐ/3 tháng)</label>
+              <div class="premium-input">
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  [(ngModel)]="rule.PricePerQuarter"
+                />
+                <span class="currency-tag">VNĐ</span>
+              </div>
+            </div>
+
+            <div class="form-group mb-0">
+              <label>Đăng ký Năm (VNĐ/năm)</label>
+              <div class="premium-input">
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  [(ngModel)]="rule.PricePerYear"
+                />
+                <span class="currency-tag">VNĐ</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </ion-content>

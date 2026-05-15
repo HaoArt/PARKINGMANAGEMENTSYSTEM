@@ -119,7 +119,6 @@ export class UsersPage implements OnInit, OnDestroy {
       duration: 2500,
       color: color,
       position: 'top',
-
       cssClass: `toast-top-right toast-${color}`,
       icon:
         color === 'success'
@@ -219,7 +218,7 @@ export class UsersPage implements OnInit, OnDestroy {
         return;
       }
 
-      // SỬA Ở ĐÂY: Chỉ gửi đúng 4 trường cần thiết, tuyệt đối không gửi userID = null
+      // Chỉ gửi đúng 4 trường cần thiết
       const payload = {
         fullName: this.editingUser.fullName,
         userName: this.editingUser.userName,
@@ -234,7 +233,6 @@ export class UsersPage implements OnInit, OnDestroy {
           this.loadUsers();
         },
         error: (err: any) => {
-          // Bắt thêm lỗi validation mặc định của .NET (err.error.title) để dễ debug hơn
           const errorMsg =
             err.error?.Message || err.error?.title || 'Lỗi thêm nhân viên!';
           this.showToast(errorMsg, 'danger');
@@ -242,7 +240,7 @@ export class UsersPage implements OnInit, OnDestroy {
         },
       });
     } else {
-      // SỬA Ở ĐÂY: Dành riêng cho Update
+      // Dành riêng cho Update
       const payload = {
         fullName: this.editingUser.fullName,
         userName: this.editingUser.userName,
@@ -266,6 +264,7 @@ export class UsersPage implements OnInit, OnDestroy {
       });
     }
   }
+
   // --- XÓA NHÂN VIÊN ---
   async deleteUser(user: UserRecord) {
     if (user.role === 'Admin')

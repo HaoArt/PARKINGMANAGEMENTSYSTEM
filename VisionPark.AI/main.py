@@ -10,19 +10,55 @@ app = FastAPI()
 
 print("Đang tải các mô hình AI vào bộ nhớ, vui lòng đợi vài giây...")
 
-# 1. Tải EasyOCR (Tối ưu thông số)
 reader = easyocr.Reader(['en'], gpu=False)
 
-# 2. Tải mô hình YOLO
+
 try:
     yolo_model = YOLO('plate_model.pt') 
     print("AI đã sẵn sàng hoạt động!")
 except Exception as e:
     print(f"LỖI: Không tìm thấy file model YOLO. {e}")
 
-# ==========================================
-# CÁC HÀM XỬ LÝ ẢNH & CHUỖI SIÊU CẤP
-# ==========================================
+
+import re
+
+def clean_plate_text(raw_text):
+    # Bước 1: Xóa mọi dấu câu rác, khoảng trắng. Chỉ giữ lại Chữ và Số
+    clean_text = re.sub(r'[^A-Z0-9]', '', str(raw_text).upper())
+    
+    # Bước 2: Chặn lỗi nhầm ốc vít thành số 1 (Cắt đuôi nếu vượt 9 ký tự)
+    if len(clean_text) > 9:
+        clean_text = clean_text[:9]
+        
+    # Bước 3: Tự động bóc tách thành phần để nhận biết Ô tô hay Xe máy
+    # Nhóm 1: Mã tỉnh (2 số)
+    # Nhóm 2: Sê-ri (Chữ cái kèm số hoặc 2 chữ cái)
+    # Nhóm 3: Đuôi số (4 hoặc 5 số)
+    match = re.match(r'^(\d{2})([A-Z]+[0-9]?)(\d{4,5})$', clean_text)
+    
+    if match:
+        province = match.group(1) # VD: '75'
+        series = match.group(2)   # VD: 'A', 'B1', 'LD'
+        tail = match.group(3)     # VD: '12345', '2588'
+        
+        # --- Format phần Đuôi ---
+        if len(tail) == 5:
+            tail_formatted = f"{tail[:3]}.{tail[3:]}" # 5 số thì chèn dấu chấm
+        else:
+            tail_formatted = tail # 4 số cũ thì viết liền
+            
+        # --- Format phần Đầu ---
+        # Ô tô thường có Sê-ri 1 chữ cái (A, B, C...) hoặc mã đặc biệt (LD, KT, R...)
+        if len(series) == 1 or series in ['LD', 'KT', 'DA', 'R', 'RM', 'MK']:
+            prefix = f"{province}{series}"   # Chuẩn ô tô: 75A
+        else:
+            prefix = f"{province}-{series}"  # Chuẩn xe máy: 75-B1
+            
+        # Ghép lại hoàn chỉnh
+        return f"{prefix}-{tail_formatted}"
+        
+    # Nếu AI đọc thiếu nét quá nặng không ra form biển số, thì trả về chuỗi liền
+    return clean_text
 
 def enhance_image_for_ocr(img):
     """Tiền xử lý ảnh chuyên sâu để EasyOCR đọc chính xác hơn"""
@@ -173,6 +209,7 @@ async def recognize_plate(image: UploadFile = File(...)):
         # 5. Ép luật Biển số VN
         final_plate = clean_vietnam_plate(raw_text) 
         final_plate = format_plate(final_plate)     
+        final_plate = clean_plate_text(final_plate)
 
         print(f"-> KẾT QUẢ: {final_plate} | CONF: {avg_confidence:.2f}")
 

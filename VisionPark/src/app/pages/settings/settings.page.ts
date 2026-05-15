@@ -34,6 +34,8 @@ import {
   timeOutline,
   callOutline,
   refreshOutline,
+  textOutline, // Added for new UI
+  carSportOutline, // Added for new UI
 } from 'ionicons/icons';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 
@@ -98,6 +100,8 @@ export class SettingsPage implements OnInit {
       timeOutline,
       callOutline,
       refreshOutline,
+      textOutline,
+      carSportOutline,
     });
   }
 
@@ -159,15 +163,15 @@ export class SettingsPage implements OnInit {
         maxCapacity: Number(this.SystemConfig.MaxCapacity) || 0,
         openTime: this.SystemConfig.OpenTime,
         closeTime: this.SystemConfig.CloseTime,
-        hotline: this.SystemConfig.Hotline
+        hotline: this.SystemConfig.Hotline,
       },
-      pricingRules: this.PricingRules.map(r => ({
+      pricingRules: this.PricingRules.map((r) => ({
         ruleId: Number(r.RuleId),
         pricePerEntry: Number(r.PricePerEntry) || 0,
         pricePerMonth: Number(r.PricePerMonth) || 0,
         pricePerQuarter: Number(r.PricePerQuarter) || 0,
-        pricePerYear: Number(r.PricePerYear) || 0
-      }))
+        pricePerYear: Number(r.PricePerYear) || 0,
+      })),
     };
 
     this.api.saveSettings(payload).subscribe({
@@ -185,7 +189,11 @@ export class SettingsPage implements OnInit {
       error: async (err) => {
         this.isSaving = false;
         const toast = await this.toastCtrl.create({
-          message: err.error?.message || err.error?.Message || err.error?.title || 'Lỗi khi lưu cài đặt!',
+          message:
+            err.error?.message ||
+            err.error?.Message ||
+            err.error?.title ||
+            'Lỗi khi lưu cài đặt!',
           duration: 2500,
           color: 'dark',
           position: 'top',

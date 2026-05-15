@@ -1,15 +1,42 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { 
-  IonContent, IonHeader, IonTitle, IonToolbar, 
-  IonFooter, IonButtons, IonMenuButton, IonIcon, IonButton 
+import {
+  IonContent,
+  IonHeader,
+  IonTitle,
+  IonToolbar,
+  IonFooter,
+  IonButtons,
+  IonMenuButton,
+  IonIcon,
+  IonButton,
+  IonCard,
 } from '@ionic/angular/standalone';
-import { NavbarComponent } from '../../shared/components/navbar/navbar.component'; 
+import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { addIcons } from 'ionicons';
-import { 
-  carOutline, cashOutline, searchOutline, chevronBackOutline, 
-  chevronForwardOutline, optionsOutline, car, arrowUpOutline, bicycle, cameraOutline, refreshOutline, scanOutline, chevronDownOutline, saveOutline, downloadOutline } from 'ionicons/icons';
+import {
+  carOutline,
+  cashOutline,
+  searchOutline,
+  chevronBackOutline,
+  chevronForwardOutline,
+  optionsOutline,
+  car,
+  arrowUpOutline,
+  bicycle,
+  cameraOutline,
+  refreshOutline,
+  scanOutline,
+  chevronDownOutline,
+  saveOutline,
+  downloadOutline,
+  carSportOutline, // Added for modern UI
+  bicycleOutline, // Added for modern UI
+  pulseOutline, // Added for modern UI
+  filterOutline, // Added for modern UI
+  fileTrayOutline, // Added for empty state UI
+} from 'ionicons/icons';
 import { Api } from '../../services/api';
 
 interface ParkingRecord {
@@ -25,30 +52,66 @@ interface ParkingRecord {
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
   standalone: true,
-  imports: [ IonButton, IonIcon, CommonModule, FormsModule, IonContent, IonHeader, IonTitle, IonToolbar, IonFooter, IonButtons, IonMenuButton, NavbarComponent]
+  imports: [
+    IonCard,
+    IonButton,
+    IonIcon,
+    CommonModule,
+    FormsModule,
+    IonContent,
+    IonHeader,
+    IonTitle,
+    IonToolbar,
+    IonFooter,
+    IonButtons,
+    IonMenuButton,
+    NavbarComponent,
+  ],
 })
 export class DashboardPage implements OnInit {
   stats = {
-
-    totalVehicles: 0, availableSlots: 100, revenueToday: '0', fillRate: 0,
-    maxCapacity: 100
-
+    totalVehicles: 0,
+    availableSlots: 100,
+    revenueToday: '0',
+    fillRate: 0,
+    maxCapacity: 100,
   };
-  
+
   allRecords: ParkingRecord[] = [];
   filteredRecords: ParkingRecord[] = [];
   paginatedRecords: ParkingRecord[] = [];
-  
+
   searchTerm: string = '';
-  filterStatus: string = 'all'; 
-  
+  filterStatus: string = 'all';
+
   currentPage: number = 1;
   itemsPerPage: number = 5;
   totalPages: number = 1;
   visiblePages: (number | string)[] = [];
 
-  constructor(private api: Api) { 
-    addIcons({cameraOutline,refreshOutline,scanOutline,chevronDownOutline,saveOutline,optionsOutline,carOutline,cashOutline,searchOutline,chevronBackOutline,chevronForwardOutline,car,arrowUpOutline,bicycle,downloadOutline});
+  constructor(private api: Api) {
+    addIcons({
+      cameraOutline,
+      refreshOutline,
+      scanOutline,
+      chevronDownOutline,
+      saveOutline,
+      optionsOutline,
+      carOutline,
+      cashOutline,
+      searchOutline,
+      chevronBackOutline,
+      chevronForwardOutline,
+      car,
+      arrowUpOutline,
+      bicycle,
+      downloadOutline,
+      carSportOutline,
+      bicycleOutline,
+      pulseOutline,
+      filterOutline,
+      fileTrayOutline,
+    });
   }
 
   ngOnInit() {
@@ -65,37 +128,50 @@ export class DashboardPage implements OnInit {
 
         // Xử lý các dạng dữ liệu C# API có thể trả về
         if (settingsData?.systemConfig || settingsData?.SystemConfig) {
-          // Cấu trúc mới nhất của Settings API
-          const sysConfig = settingsData.systemConfig || settingsData.SystemConfig;
-          capacity = Number(sysConfig.maxCapacity || sysConfig.MaxCapacity || 100);
+          const sysConfig =
+            settingsData.systemConfig || settingsData.SystemConfig;
+          capacity = Number(
+            sysConfig.maxCapacity || sysConfig.MaxCapacity || 100,
+          );
         } else {
           if (Array.isArray(settingsData)) {
-            // 1. Nếu API trả về mảng Key-Value (vd: [{ settingKey: 'MaxCapacity', settingValue: '150' }])
-            const capSetting = settingsData.find((s: any) => 
-              s.settingKey === 'MaxCapacity' || s.SettingKey === 'MaxCapacity' || s.key === 'MaxCapacity'
+            const capSetting = settingsData.find(
+              (s: any) =>
+                s.settingKey === 'MaxCapacity' ||
+                s.SettingKey === 'MaxCapacity' ||
+                s.key === 'MaxCapacity',
             );
             if (capSetting) {
-              capacity = Number(capSetting.settingValue || capSetting.SettingValue || capSetting.value);
-            } 
-            // 2. Nếu API trả về mảng Object 1 phần tử (vd: [{ id: 1, maxCapacity: 150 }])
-            else if (settingsData.length > 0) {
-              capacity = Number(settingsData[0].maxCapacity || settingsData[0].MaxCapacity || 100);
+              capacity = Number(
+                capSetting.settingValue ||
+                  capSetting.SettingValue ||
+                  capSetting.value,
+              );
+            } else if (settingsData.length > 0) {
+              capacity = Number(
+                settingsData[0].maxCapacity ||
+                  settingsData[0].MaxCapacity ||
+                  100,
+              );
             }
           } else {
-            // 3. Nếu API trả về trực tiếp Object (vd: { maxCapacity: 150 })
-            capacity = Number(settingsData?.maxCapacity || settingsData?.MaxCapacity || 100);
+            capacity = Number(
+              settingsData?.maxCapacity || settingsData?.MaxCapacity || 100,
+            );
           }
         }
 
-        // Đảm bảo kiểu số và tránh NaN (nếu lỗi sẽ fallback về 100)
-        this.stats.maxCapacity = (isNaN(capacity) || capacity <= 0) ? 100 : capacity;
-
+        this.stats.maxCapacity =
+          isNaN(capacity) || capacity <= 0 ? 100 : capacity;
         this.loadDataFromDatabase();
       },
       error: (err) => {
-        console.error('Lỗi lấy cấu hình hệ thống (Settings API), dùng dung lượng mặc định:', err);
+        console.error(
+          'Lỗi lấy cấu hình hệ thống (Settings API), dùng dung lượng mặc định:',
+          err,
+        );
         this.loadDataFromDatabase();
-      }
+      },
     });
   }
 
@@ -103,59 +179,75 @@ export class DashboardPage implements OnInit {
     this.api.getParkingHistory().subscribe({
       next: (response: any) => {
         if (response && response.data) {
-          let totalRevenue = 0; 
+          let totalRevenue = 0;
 
           this.allRecords = response.data.map((item: any) => {
             const cost = item.totalCost || item.TotalCost || 0;
             totalRevenue += cost;
 
             return {
-              id: `NFC-${item.cardID || item.CardID}`, 
-              plateNumber: item.licensePlateIn || item.LicensePlateIn || 'N/A', 
-              vehicleType: item.vehicleTypeID === 1 ? 'Xe máy' : 'Ô tô', 
-              timeIn: item.checkInTime || item.CheckInTime, 
-              status: (item.status === "Đang đỗ" || item.status === "In") ? 'In' : 'Out'
+              id: `NFC-${item.cardID || item.CardID}`,
+              plateNumber: item.licensePlateIn || item.LicensePlateIn || 'N/A',
+              vehicleType: item.vehicleTypeID === 1 ? 'Xe máy' : 'Ô tô',
+              timeIn: item.checkInTime || item.CheckInTime,
+              status:
+                item.status === 'Đang đỗ' || item.status === 'In'
+                  ? 'In'
+                  : 'Out',
             };
           });
 
-          const carsInParking = this.allRecords.filter(r => r.status === 'In').length;
+          const carsInParking = this.allRecords.filter(
+            (r) => r.status === 'In',
+          ).length;
           this.stats.totalVehicles = carsInParking;
 
           this.stats.availableSlots = this.stats.maxCapacity - carsInParking;
-          this.stats.fillRate = this.stats.maxCapacity > 0 ? Math.round((carsInParking / this.stats.maxCapacity) * 100) : 0;
-          this.stats.revenueToday = totalRevenue.toLocaleString('vi-VN'); 
+          this.stats.fillRate =
+            this.stats.maxCapacity > 0
+              ? Math.round((carsInParking / this.stats.maxCapacity) * 100)
+              : 0;
+          this.stats.revenueToday = totalRevenue.toLocaleString('vi-VN');
 
           this.applyFilters();
         }
       },
-      error: (err) => console.error('Lỗi API Dashboard:', err)
+      error: (err) => console.error('Lỗi API Dashboard:', err),
     });
   }
 
   applyFilters() {
     let temp = this.allRecords;
-    
+
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
-      temp = temp.filter(r => r.plateNumber.toLowerCase().includes(term) || r.id.toLowerCase().includes(term));
+      temp = temp.filter(
+        (r) =>
+          r.plateNumber.toLowerCase().includes(term) ||
+          r.id.toLowerCase().includes(term),
+      );
     }
-    
+
     if (this.filterStatus !== 'all') {
-      temp = temp.filter(r => r.status === this.filterStatus);
+      temp = temp.filter((r) => r.status === this.filterStatus);
     }
 
     this.filteredRecords = temp;
-    this.totalPages = Math.ceil(this.filteredRecords.length / this.itemsPerPage) || 1;
-    this.currentPage = 1; 
+    this.totalPages =
+      Math.ceil(this.filteredRecords.length / this.itemsPerPage) || 1;
+    this.currentPage = 1;
     this.updatePagination();
     this.generatePages();
   }
 
   updatePagination() {
     const start = (this.currentPage - 1) * this.itemsPerPage;
-    this.paginatedRecords = this.filteredRecords.slice(start, start + this.itemsPerPage);
+    this.paginatedRecords = this.filteredRecords.slice(
+      start,
+      start + this.itemsPerPage,
+    );
   }
-  
+
   generatePages() {
     const current = this.currentPage;
     const total = this.totalPages;
@@ -197,20 +289,20 @@ export class DashboardPage implements OnInit {
     }
   }
 
-  nextPage() { 
-    if (this.currentPage < this.totalPages) { 
-      this.currentPage++; 
-      this.updatePagination(); 
-      this.generatePages(); 
-    } 
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
+      this.generatePages();
+    }
   }
-  
-  prevPage() { 
-    if (this.currentPage > 1) { 
-      this.currentPage--; 
-      this.updatePagination(); 
-      this.generatePages(); 
-    } 
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+      this.generatePages();
+    }
   }
 
   exportReport() {
