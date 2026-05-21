@@ -65,9 +65,9 @@ namespace VisionPark.API.Controllers
             if (isExist) return BadRequest($"Biển số {detectedPlate} đã có vé tháng đang hoạt động!");
 
             // --- 3. CẬP NHẬT LOẠI THẺ (NĂM/QUÝ/THÁNG) ---
-            if (request.DurationMonths >= 12) card.CardType = "Thẻ năm";
-            else if (request.DurationMonths >= 3) card.CardType = "Thẻ quý";
-            else card.CardType = "Thẻ tháng";
+            if (request.DurationMonths >= 12) card.CardType = "Year";
+            else if (request.DurationMonths >= 3) card.CardType = "Quarterly";
+            else card.CardType = "Monthly";
 
             _context.NfcCards.Update(card);
 

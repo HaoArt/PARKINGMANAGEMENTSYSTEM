@@ -1,4 +1,10 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  inject,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -28,8 +34,12 @@ import * as icons from 'ionicons/icons';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { Api } from '../../services/api';
 import { NFC, Ndef } from '@awesome-cordova-plugins/nfc/ngx';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Capacitor } from '@capacitor/core';
+import {
+  CameraPreview,
+  CameraPreviewOptions,
+  CameraPreviewPictureOptions,
+} from '@capacitor-community/camera-preview';
 
 interface MonthlyTicketRecord {
   ticketId: number;
@@ -60,11 +70,12 @@ interface MonthlyTicketRecord {
     IonTitle,
     IonButtons,
     IonHeader,
-    IonButton
-],
+    IonButton,
+    IonSpinner,
+  ],
   providers: [NFC, Ndef],
 })
-export class TicketParkingPage implements OnInit {
+export class TicketParkingPage implements OnInit, OnDestroy {
   private api = inject(Api);
   private platform = inject(Platform);
   private toastCtrl = inject(ToastController);
@@ -88,6 +99,9 @@ export class TicketParkingPage implements OnInit {
   isLoading = false;
   isSubmitting = false;
 
+  // Trạng thái bật/tắt Camera Plugin
+  isCameraActive = false;
+
   regData = {
     cardUID: '',
     customerName: '',
@@ -103,15 +117,21 @@ export class TicketParkingPage implements OnInit {
   constructor(
     private nfc: NFC,
     private ndef: Ndef,
-    private cdr: ChangeDetectorRef, // Ép UI cập nhật mượt mà
+    private cdr: ChangeDetectorRef,
   ) {
     addIcons({ ...icons });
   }
 
   ngOnInit() {
     this.loadTickets();
-    this.startNFC(); // Gọi lắng nghe thẻ ngầm
+    this.startNFC();
     this.loadPricingConfig();
+  }
+
+  ngOnDestroy() {
+    if (this.isCameraActive) {
+      this.stopCamera();
+    }
   }
 
   loadTickets() {
@@ -130,11 +150,11 @@ export class TicketParkingPage implements OnInit {
       },
     });
   }
+
   loadPricingConfig() {
     this.api.getSettings().subscribe({
       next: (res: any) => {
         const data = res?.data || res;
-        // Hứng dữ liệu cấu hình giá từ C# API trả về
         if (data?.pricingRules || data?.PricingRules) {
           this.pricingRules = data.pricingRules || data.PricingRules;
         }
@@ -142,15 +162,14 @@ export class TicketParkingPage implements OnInit {
       error: (err) => console.error('Lỗi tải cấu hình bảng giá:', err),
     });
   }
+
   calculateAmount(vehicleTypeId: number, durationMonths: number): number {
-    // Tìm rule khớp với mã xe (1: Ô tô, 2: Xe máy)
     const rule = this.pricingRules.find(
       (r: any) => r.ruleId == vehicleTypeId || r.RuleId == vehicleTypeId,
     );
 
-    if (!rule) return 0; // Fallback nếu chưa cài đặt giá
+    if (!rule) return 0;
 
-    // Trả về giá tiền ứng với số tháng đăng ký
     if (durationMonths == 12)
       return rule.pricePerYear || rule.PricePerYear || 0;
     if (durationMonths == 3)
@@ -170,43 +189,73 @@ export class TicketParkingPage implements OnInit {
     } else {
       this.monthlyTickets = [...this.allMonthlyTickets];
     }
-    this.currentPage = 1; // Reset về trang 1 khi lọc
+    this.currentPage = 1;
     this.calculatePagination();
   }
 
-  handleImageClick(fileInputElement: HTMLInputElement) {
-    if (Capacitor.isNativePlatform()) {
-      this.takePicture();
-    } else {
-      fileInputElement.click();
-    }
-  }
-
+  // --- LOGIC CAMERA PREVIEW KHUNG ĐỎ ---
   async takePicture() {
+    const cameraPreviewOptions: CameraPreviewOptions = {
+      position: 'rear',
+      parent: 'cameraPreview',
+      className: 'cameraPreview',
+      toBack: true,
+    };
+
     try {
-      const image = await Camera.getPhoto({
-        quality: 80,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-        source: CameraSource.Prompt,
-      });
+      await CameraPreview.start(cameraPreviewOptions);
+      this.isCameraActive = true;
 
-      if (image.webPath) {
-        this.imagePreview = image.webPath;
-
-        const response = await fetch(image.webPath);
-        const blob = await response.blob();
-        const fileName = `xe_${new Date().getTime()}.${image.format}`;
-        this.selectedImageFile = new File([blob], fileName, {
-          type: `image/${image.format}`,
-        });
-        this.cdr.detectChanges(); // Ép UI cập nhật sau khi chọn ảnh
-      }
+      document.body.style.backgroundColor = 'transparent';
+      document.documentElement.style.backgroundColor = 'transparent';
+      this.cdr.detectChanges();
     } catch (error) {
-      console.log('User cancelled or error:', error);
+      console.log('Error opening camera preview:', error);
+      this.showToast('Không thể khởi động camera!', 'danger');
     }
   }
 
+  async captureImage() {
+    const cameraPreviewPictureOptions: CameraPreviewPictureOptions = {
+      quality: 80,
+    };
+
+    try {
+      const result = await CameraPreview.capture(cameraPreviewPictureOptions);
+      const base64PictureData = result.value;
+
+      const response = await fetch(
+        `data:image/jpeg;base64,${base64PictureData}`,
+      );
+      const blob = await response.blob();
+      const fileName = `xe_${new Date().getTime()}.jpg`;
+
+      this.selectedImageFile = new File([blob], fileName, {
+        type: 'image/jpeg',
+      });
+      this.imagePreview = `data:image/jpeg;base64,${base64PictureData}`;
+
+      this.stopCamera();
+    } catch (e) {
+      console.error(e);
+      this.showToast('Lỗi khi chụp ảnh!', 'danger');
+    }
+  }
+
+  async stopCamera() {
+    try {
+      await CameraPreview.stop();
+    } catch (e) {
+      console.error('Lỗi khi đóng camera', e);
+    }
+    this.isCameraActive = false;
+
+    document.body.style.backgroundColor = '';
+    document.documentElement.style.backgroundColor = '';
+    this.cdr.detectChanges();
+  }
+
+  // --- HÀM HỨNG FILE UPLOAD TỪ THƯ VIỆN ---
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
@@ -226,10 +275,7 @@ export class TicketParkingPage implements OnInit {
       return;
     }
     if (!this.selectedImageFile) {
-      this.showToast(
-        'Vui lòng tải lên ảnh chụp xe để AI đọc biển số!',
-        'warning',
-      );
+      this.showToast('Vui lòng tải lên ảnh chụp xe!', 'warning');
       return;
     }
     if (!this.regData.customerName) {
@@ -248,29 +294,55 @@ export class TicketParkingPage implements OnInit {
       formData.append('RegisterPlate', this.regData.registerPlate);
     }
 
-    // Đã tích hợp vehicleTypeID gửi sang Backend
     formData.append('VehicleTypeID', this.regData.vehicleTypeID.toString());
     formData.append('DurationMonths', this.regData.durationMonths.toString());
     formData.append('VehicleImage', this.selectedImageFile);
 
     this.api.registerMonthly(formData).subscribe({
       next: (res: any) => {
+        // FIX LỖI 1: Bắt đúng biến trả về từ C# (Đề phòng viết hoa/viết thường)
+        const plate =
+          res.detectedPlate ||
+          res.DetectedPlate ||
+          res.registerPlate ||
+          this.regData.registerPlate ||
+          'VeThang';
+
         this.showToast(
-          `${res.message}\nBiển số AI đọc được: ${res.detectedPlate}`,
+          `${res.message || res.Message || 'Đăng ký thành công!'}\nBiển số: ${plate}`,
           'success',
         );
+
         this.paymentAmount = this.calculateAmount(
           this.regData.vehicleTypeID,
           this.regData.durationMonths,
         );
-        const bankId = 'MB'; // Thay bằng mã ngân hàng của bạn
-        const accountNo = '0123456789'; // Thay bằng STK của bạn
-        const accountName = 'TEN CHU TAI KHOAN'; // Viết hoa không dấu
-        const description = `Thanh toan the xe ${this.regData.registerPlate}`;
 
-        this.qrUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact.png?amount=${this.paymentAmount}&addInfo=${encodeURI(description)}&accountName=${encodeURI(accountName)}`;
+        // Cấu hình ngân hàng
+        const bankId = 'MB';
+        const accountNo = '3775501172004';
+        const accountName = 'HOANG NHAT HAO'; // In hoa không dấu
+        const description = `Thanh toan the xe ${plate}`;
+
+        // FIX LỖI 2: Mã hóa URL an toàn hơn bằng encodeURIComponent
+        let url = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact.png?accountName=${encodeURIComponent(accountName)}&addInfo=${encodeURIComponent(description)}`;
+
+        // FIX LỖI 3: Chỉ thêm tham số amount nếu giá tiền lớn hơn 0
+        if (this.paymentAmount > 0) {
+          url += `&amount=${this.paymentAmount}`;
+        }
+        console.log('Giá tiền:', this.paymentAmount);
+        console.log('Dữ liệu QR:', {
+          plate: plate,
+          amount: this.paymentAmount,
+          url: url,
+        });
+        this.qrUrl = url;
+
+        // Kích hoạt hiển thị Modal QR
+        this.showQRModal = true;
         this.isSubmitting = false;
-        this.cdr.detectChanges();
+        this.cdr.detectChanges(); // Ép UI cập nhật mượt mà
       },
       error: (err) => {
         this.showToast(
@@ -295,7 +367,7 @@ export class TicketParkingPage implements OnInit {
       customerName: '',
       phoneNumber: '',
       registerPlate: '',
-      vehicleTypeID: 1, // Trả về mặc định là 1 khi reset
+      vehicleTypeID: 1,
       durationMonths: 1,
     };
     this.selectedImageFile = null;
@@ -304,13 +376,11 @@ export class TicketParkingPage implements OnInit {
 
   startNFC() {
     if (this.platform.is('capacitor') || this.platform.is('cordova')) {
-      // 1. Lắng nghe thẻ NFC cơ bản (Thẻ trắng)
       this.nfc.addTagDiscoveredListener().subscribe({
         next: (event: any) => this.handleTagEvent(event),
         error: (err) => console.error('Lỗi NFC Tag:', err),
       });
 
-      // 2. BẮT BUỘC: Lắng nghe thẻ có chứa dữ liệu NDEF để chặn Android tự mở link/app khác
       this.nfc.addNdefListener().subscribe({
         next: (event: any) => this.handleTagEvent(event),
         error: (err) => console.error('Lỗi NFC NDEF:', err),
@@ -322,18 +392,11 @@ export class TicketParkingPage implements OnInit {
     }
   }
 
-  // Tách logic ra một hàm dùng chung cho cả 2 loại thẻ
   handleTagEvent(event: any) {
     if (event && event.tag && event.tag.id) {
       const cardUID = this.nfc.bytesToHexString(event.tag.id).toUpperCase();
-
-      // Gán mã thẻ vào biến của trang Phát hành thẻ (regData)
       this.regData.cardUID = cardUID;
-
-      // Ép màn hình điền mã thẻ ngay lập tức khi quẹt
       this.cdr.detectChanges();
-
-      // Hiện thông báo (Bạn có thể dùng Toast thay cho alert cho đẹp hơn)
       this.showToast('Đã nhận thẻ: ' + cardUID, 'success');
     }
   }
@@ -377,11 +440,10 @@ export class TicketParkingPage implements OnInit {
     this.paginatedTickets = this.monthlyTickets.slice(startIndex, endIndex);
   }
 
-  // Hàm tạo mảng số trang hiển thị (vd: [1, 2, '...', 5])
   generatePages() {
     const current = this.currentPage;
     const total = this.totalPages;
-    const delta = 1; // Số lượng trang hiển thị kề bên trang hiện tại
+    const delta = 1;
     const range = [];
     const rangeWithDots: (number | string)[] = [];
     let l: number | undefined;

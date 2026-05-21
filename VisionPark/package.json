@@ -23,6 +23,7 @@
     "@angular/router": "^20.0.0",
     "@awesome-cordova-plugins/core": "^9.1.4",
     "@awesome-cordova-plugins/nfc": "^9.1.4",
+    "@capacitor-community/camera-preview": "^8.0.1",
     "@capacitor/android": "^8.3.1",
     "@capacitor/app": "8.1.0",
     "@capacitor/camera": "^8.2.0",
