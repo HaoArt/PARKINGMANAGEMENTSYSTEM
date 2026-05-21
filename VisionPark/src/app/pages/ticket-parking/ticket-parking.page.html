@@ -1,7 +1,11 @@
-<ion-content [fullscreen]="true" class="premium-dashboard">
-  <app-navbar></app-navbar>
+<ion-content
+  [fullscreen]="true"
+  class="premium-dashboard"
+  [style.--background]="isCameraActive ? 'transparent' : ''"
+>
+  <app-navbar [hidden]="isCameraActive"></app-navbar>
 
-  <div class="main-wrapper">
+  <div class="main-wrapper" [hidden]="isCameraActive">
     <header class="page-header">
       <div class="header-content">
         <h1>Phát hành Thẻ VisionPark</h1>
@@ -89,13 +93,14 @@
 
           <div class="form-group">
             <label>BIỂN SỐ XE</label>
-            <div class="premium-input">
+            <div class="premium-input" style="gap: 6px">
               <ion-icon name="text-outline" class="input-icon"></ion-icon>
               <input
                 type="text"
                 placeholder="VD: 51H-123.45"
                 [(ngModel)]="regData.registerPlate"
                 class="uppercase font-bold"
+                style="flex: 1"
               />
 
               <input
@@ -108,10 +113,27 @@
 
               <button
                 class="btn-icon-only ai-scan-btn"
-                (click)="handleImageClick(fileInput)"
-                title="Chụp ảnh AI"
+                (click)="takePicture()"
+                title="Chụp ảnh trực tiếp"
+                type="button"
               >
                 <ion-icon name="camera-outline"></ion-icon>
+              </button>
+
+              <button
+                class="btn-icon-only ai-scan-btn"
+                (click)="fileInput.click()"
+                title="Chọn ảnh từ thư viện"
+                type="button"
+                style="
+                  background: rgba(
+                    var(--ion-color-secondary-rgb, 54, 70, 93),
+                    0.1
+                  );
+                  color: var(--ion-color-secondary, #36465d);
+                "
+              >
+                <ion-icon name="image-outline"></ion-icon>
               </button>
             </div>
 
@@ -250,6 +272,7 @@
       </div>
     </div>
   </div>
+
   <ion-modal
     [isOpen]="showQRModal"
     (didDismiss)="closeQRAndReset()"
@@ -265,62 +288,85 @@
         </ion-toolbar>
       </ion-header>
 
-      <ion-content
-        class="ion-padding ion-text-center"
-        style="--background: #f4f6f9"
+      <div
+        style="
+          height: 100%;
+          overflow-y: auto;
+          background: #f4f6f9;
+          padding: 20px;
+          text-align: center;
+        "
       >
         <div
+          *ngIf="qrUrl"
           style="
             background: white;
-            padding: 24px;
+            padding: 20px;
             border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
           "
         >
-          <h2 style="font-weight: 800; color: #003399; margin-top: 0">
-            Quét mã VietQR
-          </h2>
+          <h2 style="color: #003399; margin-top: 0">Quét mã VietQR</h2>
 
-          <p style="font-size: 15px; color: #4b5563; margin-bottom: 8px">
-            Biển số đăng ký:
-            <strong style="color: #111827; font-size: 18px"
-              >{{ regData.registerPlate }}</strong
-            >
-          </p>
-
-          <p style="font-size: 15px; color: #4b5563">
-            Chu kỳ: <strong>{{ regData.durationMonths }} tháng</strong><br />
-            Tổng thanh toán:<br />
-            <strong style="color: #e63946; font-size: 26px"
-              >{{ paymentAmount | number }} VNĐ</strong
-            >
+          <p>Biển số: <strong>{{ regData.registerPlate }}</strong></p>
+          <p>
+            Thanh toán:
+            <strong style="color: red">{{ paymentAmount | number }} VNĐ</strong>
           </p>
 
           <img
             [src]="qrUrl"
             alt="Mã QR"
             style="
-              max-width: 250px;
-              margin: 15px auto;
+              width: 280px;
+              height: 280px;
+              margin: 10px auto;
               display: block;
-              border-radius: 12px;
-              border: 1px solid #e5e7eb;
             "
           />
 
-          <p style="font-size: 13px; color: #9ca3af; font-style: italic">
-            *Sử dụng App Ngân hàng bất kỳ để quét mã.
-          </p>
-
           <button
-            class="btn-primary full-width mt-4"
+            class="btn-primary full-width"
             (click)="closeQRAndReset()"
+            style="padding: 12px; width: 100%; border-radius: 8px"
           >
             Hoàn tất Giao dịch
           </button>
         </div>
-      </ion-content>
+      </div>
     </ng-template>
   </ion-modal>
+
+  <div class="camera-overlay" *ngIf="isCameraActive">
+    <div class="backdrop"></div>
+
+    <div class="red-target-frame">
+      <div class="corner top-left"></div>
+      <div class="corner top-right"></div>
+      <div class="corner bottom-left"></div>
+      <div class="corner bottom-right"></div>
+      <div class="instruction-text">Đưa biển số vào giữa khung đỏ</div>
+    </div>
+
+    <div class="camera-controls">
+      <ion-button
+        color="danger"
+        shape="round"
+        size="large"
+        (click)="stopCamera()"
+      >
+        <ion-icon slot="start" name="close-circle"></ion-icon>
+        Hủy
+      </ion-button>
+      <ion-button
+        color="success"
+        shape="round"
+        size="large"
+        (click)="captureImage()"
+      >
+        <ion-icon slot="start" name="camera"></ion-icon>
+        Chụp ngay
+      </ion-button>
+    </div>
+  </div>
 </ion-content>
