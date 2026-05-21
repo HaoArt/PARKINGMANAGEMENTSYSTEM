@@ -9,19 +9,13 @@ import { environment } from '@environments/environment';
 export class Api {
   private http = inject(HttpClient);
   private baseUrl = environment.apiUrl;
-
-  // Hàm tiện ích để đính kèm Token JWT vào Header
   private getAuthOptions() {
     let headers = new HttpHeaders();
-    const token = localStorage.getItem('token');
-
-    // Bật log để kiểm tra token có tồn tại không
-    console.log(
-      'Token lấy từ Local Storage:',
-      token ? token.substring(0, 20) + '...' : 'NULL',
-    );
+    let token = localStorage.getItem('token');
 
     if (token) {
+      // Tự động gọt bỏ dấu ngoặc kép thừa (nếu có)
+      token = token.replace(/^"(.*)"$/, '$1');
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
     return { headers };
@@ -119,17 +113,25 @@ export class Api {
 
   // Đăng ký khuôn mặt cho User
   registerFace(userId: number, base64Image: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/FaceScan/register`, { userId, base64Image });
+    return this.http.post(`${this.baseUrl}/FaceScan/register`, {
+      userId,
+      base64Image,
+    });
   }
 
   // Nhận diện khuôn mặt để chấm công
   recognizeFace(base64Image: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/FaceScan/recognize`, { base64Image });
+    return this.http.post(
+      `${this.baseUrl}/FaceScan/recognize`,
+      { base64Image },
+      this.getAuthOptions(),
+    );
   }
-
   // Quét khuôn mặt realtime (không lưu vào CSDL)
   detectFaceLive(base64Image: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/FaceScan/detect-live`, { base64Image });
+    return this.http.post(`${this.baseUrl}/FaceScan/detect-live`, {
+      base64Image,
+    });
   }
 
   // Lấy lịch sử quét khuôn mặt (bao gồm ảnh đã được vẽ khung)
@@ -139,10 +141,9 @@ export class Api {
 
   // New method for attendance summary
   getAttendanceSummary(): Observable<any> {
-    // Placeholder for the actual API call
-    // You'll need to implement the backend endpoint for this.
-    // For now, it returns an empty array or a mock observable.
-    // return this.http.get(`${this.baseUrl}/Attendance/summary`);
-    return this.http.get(`${this.baseUrl}/Attendance/summary`); // Assuming a new endpoint
+    return this.http.get(
+      `${this.baseUrl}/Attendance/summary`,
+      this.getAuthOptions(),
+    );
   }
 }

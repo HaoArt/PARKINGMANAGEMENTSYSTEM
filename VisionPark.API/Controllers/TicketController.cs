@@ -27,13 +27,12 @@ namespace VisionPark.API.Controllers
             if (request.VehicleImage == null || request.VehicleImage.Length == 0)
                 return BadRequest("Vui lòng tải lên ảnh chụp xe để AI đọc biển số!");
 
+            // --- 1. GỌI PYTHON ĐỂ NHẬN DIỆN BIỂN SỐ ---
             using (var client = _httpClientFactory.CreateClient())
             {
                 using var content = new MultipartFormDataContent();
                 using var stream = request.VehicleImage.OpenReadStream();
                 content.Add(new StreamContent(stream), "image", request.VehicleImage.FileName);
-
-                // Gửi loại xe sang Python để ép luật đọc biển số
                 content.Add(new StringContent(request.VehicleTypeID.ToString()), "vehicleType");
 
                 var aiResponse = await client.PostAsync("http://localhost:8000/api/recognize-plate", content);
@@ -55,6 +54,7 @@ namespace VisionPark.API.Controllers
             if (string.IsNullOrEmpty(detectedPlate))
                 return BadRequest("AI không thể nhận diện được biển số từ bức ảnh này!");
 
+            // --- 2. KIỂM TRA THẺ VÀ BIỂN SỐ ---
             var card = await _context.NfcCards.FirstOrDefaultAsync(c => c.CardUID == request.CardUID);
             if (card == null) return BadRequest("Thẻ này chưa được khởi tạo trong hệ thống!");
 
@@ -64,6 +64,24 @@ namespace VisionPark.API.Controllers
             var isExist = await _context.MonthlyTickets.AnyAsync(t => t.RegisterPlate == detectedPlate && t.IsActive);
             if (isExist) return BadRequest($"Biển số {detectedPlate} đã có vé tháng đang hoạt động!");
 
+            // --- 3. CẬP NHẬT LOẠI THẺ (NĂM/QUÝ/THÁNG) ---
+            if (request.DurationMonths >= 12) card.CardType = "Thẻ năm";
+            else if (request.DurationMonths >= 3) card.CardType = "Thẻ quý";
+            else card.CardType = "Thẻ tháng";
+
+            _context.NfcCards.Update(card);
+
+            // --- 4. TÍNH TOÁN DOANH THU TỪ BẢNG PRICING RULES ---
+            var rule = await _context.PricingRules.FirstOrDefaultAsync(r => r.VehicleTypeID == request.VehicleTypeID);
+            decimal finalAmount = 0;
+            if (rule != null)
+            {
+                if (request.DurationMonths >= 12) finalAmount = rule.PricePerYear;
+                else if (request.DurationMonths >= 3) finalAmount = rule.PricePerQuarter;
+                else finalAmount = rule.PricePerMonth;
+            }
+
+            // --- 5. LƯU VÉ MỚI VÀ TRẢ KẾT QUẢ VỀ ---
             var newTicket = new MonthlyTicket
             {
                 CardID = card.CardID,
@@ -77,18 +95,16 @@ namespace VisionPark.API.Controllers
             };
 
             _context.MonthlyTickets.Add(newTicket);
-            card.CardType = "Monthly";
-
             await _context.SaveChangesAsync();
 
             return Ok(new
             {
-                Message = "Đăng ký vé tháng thành công!",
+                Message = "Đăng ký vé thành công!",
                 DetectedPlate = detectedPlate,
+                Amount = finalAmount, 
                 Data = newTicket
             });
         }
-
         [HttpGet("monthly-tickets")]
         public async Task<IActionResult> GetAllMonthlyTicket()
         {

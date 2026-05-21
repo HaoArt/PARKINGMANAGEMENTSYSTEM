@@ -250,4 +250,77 @@
       </div>
     </div>
   </div>
+  <ion-modal
+    [isOpen]="showQRModal"
+    (didDismiss)="closeQRAndReset()"
+    class="qr-modal"
+  >
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-title>Thanh toán Thẻ Xe</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeQRAndReset()">Đóng</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content
+        class="ion-padding ion-text-center"
+        style="--background: #f4f6f9"
+      >
+        <div
+          style="
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-top: 10px;
+          "
+        >
+          <h2 style="font-weight: 800; color: #003399; margin-top: 0">
+            Quét mã VietQR
+          </h2>
+
+          <p style="font-size: 15px; color: #4b5563; margin-bottom: 8px">
+            Biển số đăng ký:
+            <strong style="color: #111827; font-size: 18px"
+              >{{ regData.registerPlate }}</strong
+            >
+          </p>
+
+          <p style="font-size: 15px; color: #4b5563">
+            Chu kỳ: <strong>{{ regData.durationMonths }} tháng</strong><br />
+            Tổng thanh toán:<br />
+            <strong style="color: #e63946; font-size: 26px"
+              >{{ paymentAmount | number }} VNĐ</strong
+            >
+          </p>
+
+          <img
+            [src]="qrUrl"
+            alt="Mã QR"
+            style="
+              max-width: 250px;
+              margin: 15px auto;
+              display: block;
+              border-radius: 12px;
+              border: 1px solid #e5e7eb;
+            "
+          />
+
+          <p style="font-size: 13px; color: #9ca3af; font-style: italic">
+            *Sử dụng App Ngân hàng bất kỳ để quét mã.
+          </p>
+
+          <button
+            class="btn-primary full-width mt-4"
+            (click)="closeQRAndReset()"
+          >
+            Hoàn tất Giao dịch
+          </button>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>

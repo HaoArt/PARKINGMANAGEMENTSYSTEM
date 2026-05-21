@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using OpenCvSharp;
-
 using VisionPark.API.Data;
 using VisionPark.API.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace VisionPark.API.Controllers
 {
@@ -159,6 +159,7 @@ namespace VisionPark.API.Controllers
         }
 
         [HttpPost("recognize")]
+        [Authorize]
         public async Task<IActionResult> RecognizeFace([FromBody] ImageData data)
         {
             try
@@ -247,6 +248,23 @@ namespace VisionPark.API.Controllers
 
                 if (recognizedUserId.HasValue)
                 {
+                    var loggedInUserIdStr = User.FindFirst("UserID")?.Value;
+
+                    if (int.TryParse(loggedInUserIdStr, out int loggedInUserId))
+                    {
+                        if (recognizedUserId.Value != loggedInUserId)
+                        {
+                            return Ok(new
+                            {
+                                success = false,
+                                message = "Cảnh báo: Khuôn mặt không khớp với tài khoản đang đăng nhập!"
+                            });
+                        }
+                    }
+                    else
+                    {
+                        return Unauthorized(new { success = false, message = "Không thể xác thực danh tính từ Token!" });
+                    }
                     var recognizedUser = await _context.Users
                         .Where(u => u.UserID == recognizedUserId.Value)
                         .Select(u => new { u.UserID, u.FullName, u.Role, u.FaceImageUrl })
@@ -254,7 +272,7 @@ namespace VisionPark.API.Controllers
 
                     if (recognizedUser != null)
                     {
-                        // --- GHI NHẬN CHẤM CÔNG THẬT ---
+                        // --- GHI NHẬN CHẤM CÔNG CÓ COOLDOWN CHỐNG SPAM ---
                         var today = DateTime.Now.Date;
                         var currentTime = DateTime.Now;
 
@@ -265,42 +283,68 @@ namespace VisionPark.API.Controllers
 
                         var latestAttendance = attendancesToday.FirstOrDefault();
 
+                        // Đặt thời gian chống spam (Ví dụ: 1 phút)
+                        double cooldownMinutes = 1.0;
+                        string actionMessage = "Nhận diện thành công!";
+
                         if (latestAttendance == null)
                         {
                             // Chưa có lần nào -> Check-in ca mới
                             _context.Attendances.Add(new Attendance
                             {
                                 UserId = recognizedUser.UserID,
-                                Date = today, // 👉 Đã sửa: Thêm ngày để không bị lỗi SQL
-                                CheckInTime = currentTime,
-                                Status = "Thành công" // 👉 Bổ sung Status
-                            });
-                        }
-                        else if (latestAttendance.CheckOutTime == null)
-                        {
-                            // Cập nhật Check-out
-                            latestAttendance.CheckOutTime = currentTime;
-                        }
-                        else if (attendancesToday.Count < 3)
-                        {
-                            // Mở ca mới (Ví dụ: đi ăn trưa về)
-                            _context.Attendances.Add(new Attendance
-                            {
-                                UserId = recognizedUser.UserID,
-                                Date = today, // 👉 Đã sửa
+                                Date = today,
                                 CheckInTime = currentTime,
                                 Status = "Thành công"
                             });
+                            actionMessage = "Đã điểm danh VÀO CA thành công!";
                         }
                         else
                         {
-                            // Cập nhật giờ ca cuối
-                            latestAttendance.CheckOutTime = currentTime;
+                            // Tính toán thời gian thao tác gần nhất của nhân viên này
+                            var lastActionTime = latestAttendance.CheckOutTime ?? latestAttendance.CheckInTime;
+                            var timeSinceLastAction = currentTime - lastActionTime;
+
+                            // Chặn spam nếu quét liên tục dưới 1 phút
+                            if (timeSinceLastAction.TotalMinutes < cooldownMinutes)
+                            {
+                                return Ok(new
+                                {
+                                    success = true,
+                                    message = $"Thao tác quá nhanh. Vui lòng thử lại sau {cooldownMinutes} phút!",
+                                    user = recognizedUser
+                                });
+                            }
+
+                            if (latestAttendance.CheckOutTime == null)
+                            {
+                                // Đã hết cooldown và đang trong ca -> Check-out
+                                latestAttendance.CheckOutTime = currentTime;
+                                actionMessage = "Đã điểm danh TAN CA thành công!";
+                            }
+                            else if (attendancesToday.Count < 3)
+                            {
+                                // Đã check-out trước đó -> Mở ca mới (Ví dụ: Nghỉ trưa xong quay lại)
+                                _context.Attendances.Add(new Attendance
+                                {
+                                    UserId = recognizedUser.UserID,
+                                    Date = today,
+                                    CheckInTime = currentTime,
+                                    Status = "Thành công"
+                                });
+                                actionMessage = "Đã điểm danh VÀO CA (Mới) thành công!";
+                            }
+                            else
+                            {
+                                // Đã đạt tối đa ca trong ngày -> Chỉ cập nhật giờ ra của ca cuối
+                                latestAttendance.CheckOutTime = currentTime;
+                                actionMessage = "Đã cập nhật giờ TAN CA thành công!";
+                            }
                         }
 
                         await _context.SaveChangesAsync();
 
-                        return Ok(new { success = true, message = "Nhận diện thành công!", user = recognizedUser });
+                        return Ok(new { success = true, message = actionMessage, user = recognizedUser });
                     }
                 }
 

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -19,14 +20,28 @@ namespace VisionPark.API.Controllers
         }
 
         [HttpGet("summary")]
+        [Authorize]
         public async Task<IActionResult> GetSummary()
         {
             try
             {
+                // BẮT CHÍNH XÁC "UserID" TỪ TOKEN, KHÔNG DÙNG CONTAINS!
+                var loggedInUserIdStr = User.FindFirst("UserID")?.Value;
+
+                if (!int.TryParse(loggedInUserIdStr, out int loggedInUserId))
+                    return Unauthorized(new { Message = "Không thể xác thực Token. Vui lòng đăng nhập lại." });
+
                 var records = await _context.Attendances
                     .Include(a => a.User)
+                    .Where(a => a.UserId == loggedInUserId)
                     .OrderByDescending(a => a.CheckInTime)
                     .ToListAsync();
+
+                var currentMonth = DateTime.Now.Month;
+                var currentYear = DateTime.Now.Year;
+                var recordsThisMonth = records.Where(a => a.CheckInTime.Month == currentMonth && a.CheckInTime.Year == currentYear).ToList();
+                int totalShifts = recordsThisMonth.Count(a => a.CheckOutTime.HasValue);
+                double totalWorkDays = totalShifts / 2.0;
 
                 var groupedData = records
                     .GroupBy(a => a.CheckInTime.Date)
@@ -39,8 +54,8 @@ namespace VisionPark.API.Controllers
                             faceImageUrl = a.User?.FaceImageUrl,
                             checkInTime = a.CheckInTime,
                             checkOutTime = a.CheckOutTime,
-                            workDuration = a.CheckOutTime.HasValue 
-                                ? $"{(a.CheckOutTime.Value - a.CheckInTime).Hours}h {(a.CheckOutTime.Value - a.CheckInTime).Minutes}m" 
+                            workDuration = a.CheckOutTime.HasValue
+                                ? $"{(a.CheckOutTime.Value - a.CheckInTime).Hours}h {(a.CheckOutTime.Value - a.CheckInTime).Minutes}m"
                                 : null
                         }).ToList()
                     })
@@ -49,6 +64,8 @@ namespace VisionPark.API.Controllers
                 return Ok(new
                 {
                     Message = "Lấy dữ liệu chấm công thành công",
+                    TotalShifts = totalShifts,
+                    TotalWorkDays = totalWorkDays,
                     Data = groupedData
                 });
             }

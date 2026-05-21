@@ -32,6 +32,9 @@ import {
   refreshOutline,
   checkmarkCircle,
   fileTrayOutline,
+  alertCircleOutline,
+  warningOutline,
+  checkmarkCircleOutline,
 } from 'ionicons/icons';
 
 // Đăng ký dữ liệu ngôn ngữ tiếng Việt
@@ -60,6 +63,8 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
   imageBase64: string | null = null;
   scanResult: any = null;
   attendanceSummary: any[] = [];
+  totalShifts: number = 0; // Bổ sung
+  totalWorkDays: number = 0; // Bổ sung
   isCameraOn = false;
   stream: MediaStream | null = null;
   trackingInterval: any;
@@ -89,6 +94,9 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
       refreshOutline,
       checkmarkCircle,
       fileTrayOutline,
+      alertCircleOutline,
+      warningOutline,
+      checkmarkCircleOutline,
     });
   }
 
@@ -308,7 +316,9 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
   loadAttendanceSummary() {
     this.api.getAttendanceSummary().subscribe({
       next: (res: any) => {
-        this.attendanceSummary = res.data || res;
+        this.attendanceSummary = res.data || res.Data || [];
+        this.totalShifts = res.totalShifts || res.TotalShifts || 0;
+        this.totalWorkDays = res.totalWorkDays || res.TotalWorkDays || 0;
       },
       error: (err: any) => {
         this.notification.showToast(
