@@ -17,6 +17,11 @@ import {
   IonLabel,
   IonButton,
   IonSpinner,
+  IonModal,
+  IonToolbar,
+  IonTitle,
+  IonButtons,
+  IonHeader,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import * as icons from 'ionicons/icons';
@@ -45,23 +50,18 @@ interface MonthlyTicketRecord {
   styleUrls: ['./ticket-parking.page.scss'],
   standalone: true,
   imports: [
-    IonSpinner,
-    IonButton,
-    IonLabel,
-    IonItem,
-    IonCol,
-    IonCardTitle,
-    IonCard,
-    IonCardHeader,
-    IonCardContent,
-    IonRow,
-    IonGrid,
     IonContent,
     IonIcon,
     CommonModule,
     FormsModule,
     NavbarComponent,
-  ],
+    IonModal,
+    IonToolbar,
+    IonTitle,
+    IonButtons,
+    IonHeader,
+    IonButton
+],
   providers: [NFC, Ndef],
 })
 export class TicketParkingPage implements OnInit {
@@ -78,6 +78,10 @@ export class TicketParkingPage implements OnInit {
   itemsPerPage: number = 5;
   totalPages: number = 1;
   visiblePages: (number | string)[] = [];
+  pricingRules: any[] = [];
+  showQRModal: boolean = false;
+  qrUrl: string = '';
+  paymentAmount: number = 0;
 
   filterStatus: string = 'all';
 
@@ -107,6 +111,7 @@ export class TicketParkingPage implements OnInit {
   ngOnInit() {
     this.loadTickets();
     this.startNFC(); // Gọi lắng nghe thẻ ngầm
+    this.loadPricingConfig();
   }
 
   loadTickets() {
@@ -124,6 +129,33 @@ export class TicketParkingPage implements OnInit {
         this.isLoading = false;
       },
     });
+  }
+  loadPricingConfig() {
+    this.api.getSettings().subscribe({
+      next: (res: any) => {
+        const data = res?.data || res;
+        // Hứng dữ liệu cấu hình giá từ C# API trả về
+        if (data?.pricingRules || data?.PricingRules) {
+          this.pricingRules = data.pricingRules || data.PricingRules;
+        }
+      },
+      error: (err) => console.error('Lỗi tải cấu hình bảng giá:', err),
+    });
+  }
+  calculateAmount(vehicleTypeId: number, durationMonths: number): number {
+    // Tìm rule khớp với mã xe (1: Ô tô, 2: Xe máy)
+    const rule = this.pricingRules.find(
+      (r: any) => r.ruleId == vehicleTypeId || r.RuleId == vehicleTypeId,
+    );
+
+    if (!rule) return 0; // Fallback nếu chưa cài đặt giá
+
+    // Trả về giá tiền ứng với số tháng đăng ký
+    if (durationMonths == 12)
+      return rule.pricePerYear || rule.PricePerYear || 0;
+    if (durationMonths == 3)
+      return rule.pricePerQuarter || rule.PricePerQuarter || 0;
+    return rule.pricePerMonth || rule.PricePerMonth || 0;
   }
 
   applyFilters() {
@@ -227,8 +259,16 @@ export class TicketParkingPage implements OnInit {
           `${res.message}\nBiển số AI đọc được: ${res.detectedPlate}`,
           'success',
         );
-        this.resetForm();
-        this.loadTickets();
+        this.paymentAmount = this.calculateAmount(
+          this.regData.vehicleTypeID,
+          this.regData.durationMonths,
+        );
+        const bankId = 'MB'; // Thay bằng mã ngân hàng của bạn
+        const accountNo = '0123456789'; // Thay bằng STK của bạn
+        const accountName = 'TEN CHU TAI KHOAN'; // Viết hoa không dấu
+        const description = `Thanh toan the xe ${this.regData.registerPlate}`;
+
+        this.qrUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact.png?amount=${this.paymentAmount}&addInfo=${encodeURI(description)}&accountName=${encodeURI(accountName)}`;
         this.isSubmitting = false;
         this.cdr.detectChanges();
       },
@@ -241,6 +281,12 @@ export class TicketParkingPage implements OnInit {
         this.cdr.detectChanges();
       },
     });
+  }
+
+  closeQRAndReset() {
+    this.showQRModal = false;
+    this.resetForm();
+    this.loadTickets();
   }
 
   resetForm() {

@@ -42,10 +42,15 @@
                   {{ stats.fillRate }}% Lấp đầy
                 </span>
               </div>
-              <h2 class="value">{{ stats.availableSlots }} <small>vị trí</small></h2>
+              <h2 class="value">
+                {{ stats.availableSlots }} <small>vị trí</small>
+              </h2>
               <div class="progress-container">
                 <div class="progress-track">
-                  <div class="progress-bar" [style.width.%]="stats.fillRate"></div>
+                  <div
+                    class="progress-bar"
+                    [style.width.%]="stats.fillRate"
+                  ></div>
                 </div>
               </div>
             </div>
@@ -58,7 +63,7 @@
               <ion-icon name="cash-outline"></ion-icon>
             </div>
             <div class="stat-content">
-              <span class="label">Doanh thu hôm nay</span>
+              <span class="label">Tổng doanh thu lũy kế</span>
               <h2 class="value">{{ stats.revenueToday }} <small>VND</small></h2>
               <span class="sub-label">Cập nhật liên tục</span>
             </div>
@@ -72,7 +77,12 @@
           <div class="table-tools">
             <div class="search-input-group">
               <ion-icon name="search-outline"></ion-icon>
-              <input type="text" placeholder="Tìm biển số, mã thẻ..." [(ngModel)]="searchTerm" (input)="applyFilters()" />
+              <input
+                type="text"
+                placeholder="Tìm biển số, mã thẻ..."
+                [(ngModel)]="searchTerm"
+                (input)="applyFilters()"
+              />
             </div>
             <div class="filter-dropdown">
               <ion-icon name="filter-outline"></ion-icon>
@@ -104,13 +114,19 @@
                 </td>
                 <td>
                   <div class="type-badge">
-                    <ion-icon [name]="item.vehicleType === 'Ô tô' ? 'car-sport-outline' : 'bicycle-outline'"></ion-icon>
+                    <ion-icon
+                      [name]="item.vehicleType === 'Ô tô' ? 'car-sport-outline' : 'bicycle-outline'"
+                    ></ion-icon>
                     {{ item.vehicleType }}
                   </div>
                 </td>
                 <td class="text-secondary">{{ item.timeIn }}</td>
                 <td>
-                  <span class="status-pill" [class.in]="item.status === 'In'" [class.out]="item.status === 'Out'">
+                  <span
+                    class="status-pill"
+                    [class.in]="item.status === 'In'"
+                    [class.out]="item.status === 'Out'"
+                  >
                     {{ item.status === 'In' ? 'Trong bãi' : 'Đã ra' }}
                   </span>
                 </td>
@@ -126,22 +142,33 @@
         </div>
 
         <footer class="pagination-footer" *ngIf="totalPages > 0">
-          <span class="page-count">Trang {{ currentPage }} / {{ totalPages }}</span>
+          <span class="page-count"
+            >Trang {{ currentPage }} / {{ totalPages }}</span
+          >
           <div class="page-nav">
-            <button class="nav-btn" (click)="prevPage()" [disabled]="currentPage === 1">
+            <button
+              class="nav-btn"
+              (click)="prevPage()"
+              [disabled]="currentPage === 1"
+            >
               <ion-icon name="chevron-back-outline"></ion-icon>
             </button>
             <div class="page-numbers">
               <ng-container *ngFor="let page of visiblePages">
-                <button 
+                <button
                   [class.active]="page === currentPage"
                   [disabled]="page === '...'"
-                  (click)="goToPage(page)">
+                  (click)="goToPage(page)"
+                >
                   {{ page }}
                 </button>
               </ng-container>
             </div>
-            <button class="nav-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
+            <button
+              class="nav-btn"
+              (click)="nextPage()"
+              [disabled]="currentPage === totalPages"
+            >
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </button>
           </div>

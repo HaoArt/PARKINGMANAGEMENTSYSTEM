@@ -144,6 +144,27 @@
           </button>
         </div>
 
+        <div
+          class="stats-banner flex gap-4 p-4 border-bottom"
+          style="background: rgba(45, 212, 191, 0.05)"
+        >
+          <div class="stat-box flex-1 border-r border-gray-200">
+            <p class="text-sm text-muted m-0 flex items-center gap-1">
+              <ion-icon name="time-outline"></ion-icon> Ca làm (Tháng này)
+            </p>
+            <h2 class="m-0 mt-1" style="color: #0f766e; font-weight: 800">
+              {{ totalShifts }} <span class="text-sm">ca</span>
+            </h2>
+          </div>
+          <div class="stat-box flex-1">
+            <p class="text-sm text-muted m-0 flex items-center gap-1">
+              <ion-icon name="calculator-outline"></ion-icon> Tổng công quy đổi
+            </p>
+            <h2 class="m-0 mt-1" style="color: #003399; font-weight: 800">
+              {{ totalWorkDays }} <span class="text-sm">ngày</span>
+            </h2>
+          </div>
+        </div>
         <div class="card-body overflow-y-auto">
           <div class="attendance-list">
             <div
