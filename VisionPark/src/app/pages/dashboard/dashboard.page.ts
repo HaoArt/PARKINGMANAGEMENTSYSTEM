@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import {
   IonContent,
   IonHeader,
@@ -301,7 +303,6 @@ export class DashboardPage implements OnInit {
     this.stats.revenueToday = grandTotal.toLocaleString('vi-VN');
   }
 
-  // --- CÁC HÀM XỬ LÝ GIAO DIỆN KHÁC GIỮ NGUYÊN ---
   applyFilters() {
     let temp = this.allRecords;
     if (this.searchTerm) {
@@ -381,6 +382,113 @@ export class DashboardPage implements OnInit {
   }
 
   exportReport() {
-    alert('Tính năng Xuất báo cáo Excel đang được phát triển!');
+    console.log('Đang khởi tạo dữ liệu báo cáo PDF...');
+
+    // 1. Khởi tạo đối tượng jsPDF (Khổ A4, đơn vị mm)
+    const doc = new jsPDF('portrait', 'mm', 'a4');
+
+    // 2. Thiết kế Tiêu đề chính của báo cáo
+    doc.setFontSize(20);
+    doc.setTextColor(41, 128, 185);
+    doc.text('BAO CAO THONG KE HE THONG VISIONPARK', 14, 20);
+
+    // Thời gian xuất báo cáo thực tế
+    doc.setFontSize(10);
+    doc.setTextColor(127, 140, 141);
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('vi-VN');
+    const timeStr = today.toLocaleTimeString('vi-VN');
+    doc.text(`Ngay xuat: ${dateStr} - Gio: ${timeStr}`, 14, 27);
+
+    // Dòng kẻ phân cách
+    doc.setDrawColor(220, 220, 220);
+    doc.line(14, 32, 196, 32);
+
+    // 3. TÍNH TOÁN CÁC CHỈ SỐ THỐNG KÊ TỪ DATA THỰC TẾ
+    const doanhThuTong = this.totalHistoryRevenue + this.totalMonthlyRevenue;
+    const xeTrongKho = this.stats.totalVehicles;
+    const xeRaHomNay = this.allRecords.filter((r) => r.status === 'Out').length;
+    const xeVaoHomNay = this.allRecords.length; // Tổng lượt xe đã vào trong ngày
+    const sucChuaToiDa =
+      this.stats.maxCapacity > 0 ? this.stats.maxCapacity : 1500;
+
+    // 4. ĐƯA CÁC CHỈ SỐ YÊU CẦU VÀO FILE PDF
+    doc.setFontSize(12);
+    doc.setTextColor(44, 62, 80);
+
+    doc.text(
+      `1. Tong doanh thu: ${doanhThuTong.toLocaleString('vi-VN')} VND`,
+      14,
+      42,
+    );
+
+    doc.text(`2. Luu luong phuong tien ra vao:`, 14, 50);
+    doc.setFontSize(11);
+    doc.text(`   - Tong so luot xe da vao bai: ${xeVaoHomNay} luot xe`, 14, 57);
+    doc.text(`   - So luot xe da xuat ben (ra): ${xeRaHomNay} luot xe`, 14, 64);
+
+    doc.setFontSize(12);
+    const tileLapDay = ((xeTrongKho / sucChuaToiDa) * 100).toFixed(1);
+    doc.text(
+      `3. Tinh trang hien tai cua kho chua: ${xeTrongKho} / ${sucChuaToiDa} xe (Dat ${tileLapDay}% suc chua)`,
+      14,
+      74,
+    );
+
+    // Dòng kẻ phân cách trước khi vào bảng chi tiết
+    doc.line(14, 80, 196, 80);
+
+    doc.text('DANH SACH CHI TIET CAC PHIEN GIAO DICH', 14, 88);
+
+    // 5. CẤU TRÚC BẢNG CHI TIẾT PHƯƠNG TIỆN
+    const tableColumn = [
+      'Bien so xe',
+      'Loai phuong tien',
+      'Thoi gian vao',
+      'Trang thai hien tai',
+    ];
+    const tableRows: any[] = [];
+
+    // Duyệt danh sách đang hiển thị trên bảng để xuất file
+    if (this.filteredRecords && this.filteredRecords.length > 0) {
+      this.filteredRecords.forEach((record: any) => {
+        const isCar =
+          record.vehicleType === 'Car' || record.vehicleType === 'Ô tô';
+        const rowData = [
+          record.plateNumber || 'Chua nhan dien',
+          isCar ? 'O to' : 'Xe may',
+          record.timeIn || 'N/A',
+          record.status === 'In' ? 'Dang trong kho' : 'Da xuat ben',
+        ];
+        tableRows.push(rowData);
+      });
+    } else {
+      tableRows.push(['Khong co du lieu xe ra vao', '', '', '']);
+    }
+
+    // 6. KẾT XUẤT BẢNG SỬ DỤNG AUTOTABLE
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 94,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: [255, 255, 255],
+        fontSize: 10,
+      },
+      alternateRowStyles: { fillColor: [248, 249, 250] },
+      styles: { fontSize: 9, cellPadding: 3, valign: 'middle' },
+      columnStyles: {
+        0: { fontStyle: 'bold' }, // Biển số in đậm nhìn cho rõ ràng
+      },
+    });
+
+    // 7. TIẾN HÀNH TẢI XUỐNG FILE BÁO CÁO
+    const nameFormat = dateStr.replace(/\//g, '-');
+    const fileName = `Bao_Cao_Du_Lieu_VisionPark_${nameFormat}.pdf`;
+    doc.save(fileName);
+
+    console.log('✅ Chức năng kết xuất dữ liệu PDF hoàn tất thành công!');
   }
 }
