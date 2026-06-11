@@ -86,11 +86,20 @@ export class LoginPage implements OnInit {
         const token =
           res.token || res.Token || res.data?.token || res.data?.Token;
 
+        // Bắt triệt để mọi định dạng cấu trúc trả về của Backend
+        const faceImageUrl = 
+          res.faceImageUrl || 
+          res.FaceImageUrl || 
+          res.data?.faceImageUrl || 
+          res.data?.FaceImageUrl || 
+          '';
+
         this.showToast(`Xin chào ${name}!`, 'success');
 
         // Lưu thông tin vào bộ nhớ trình duyệt
         localStorage.setItem('userRole', role);
         localStorage.setItem('fullName', name);
+        localStorage.setItem('faceImageUrl', faceImageUrl);
         if (token) {
           localStorage.setItem('token', token);
         } else {
