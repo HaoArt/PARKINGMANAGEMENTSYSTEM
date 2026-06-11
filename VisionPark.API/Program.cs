@@ -7,9 +7,11 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(5295);
+    options.ListenAnyIP(int.Parse(port));
 });
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
