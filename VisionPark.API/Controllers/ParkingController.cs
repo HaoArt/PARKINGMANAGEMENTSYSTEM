@@ -116,7 +116,7 @@ namespace VisionPark.API.Controllers
         }
 
         [HttpGet("history")]
-        public async Task<IActionResult> GetParkingHistory(string? searchTerm, string? status)
+        public async Task<IActionResult> GetParkingHistory(string? searchTerm, string? status, int pageNumber = 1, int pageSize = 50)
         {
           
             var query = _context.ParkingSessions.AsQueryable();
@@ -136,9 +136,13 @@ namespace VisionPark.API.Controllers
                                          s.CardID.ToString().Contains(searchTerm));
             }
 
+            int totalCount = await query.CountAsync();
+
           
             var sessions = await query
                 .OrderByDescending(s => s.CheckInTime)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .Select(s => new
                 {
                     SessionID = s.SessionID,
@@ -156,7 +160,7 @@ namespace VisionPark.API.Controllers
             return Ok(new
             {
                 Message = "Lấy lịch sử thành công!",
-                TotalCount = sessions.Count,
+                TotalCount = totalCount,
                 Data = sessions
             });
         }

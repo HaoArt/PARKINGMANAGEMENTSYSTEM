@@ -92,11 +92,30 @@ export class Api {
     });
   }
 
+  // Xuất báo cáo PDF Dashboard (Luồng tải File nhị phân)
+  exportDashboardPdf(): Observable<Blob> {
+    const options = this.getAuthOptions();
+    return this.http.get(`${this.baseUrl}/Report/export-dashboard-pdf`, {
+      headers: options.headers,
+      responseType: 'blob',
+    });
+  }
+
   registerMonthly(formData: FormData): Observable<any> {
     return this.http.post(`${this.baseUrl}/Ticket/register-monthly`, formData);
   }
-  getMonthlyTickets(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/Ticket/monthly-tickets`);
+  getMonthlyTickets(filterParams: any = {}): Observable<any> {
+    let params = new HttpParams();
+    if (filterParams.status) {
+      params = params.set('status', filterParams.status);
+    }
+    if (filterParams.pageNumber) {
+      params = params.set('pageNumber', filterParams.pageNumber);
+    }
+    if (filterParams.pageSize) {
+      params = params.set('pageSize', filterParams.pageSize);
+    }
+    return this.http.get(`${this.baseUrl}/Ticket/monthly-tickets`, { params });
   }
   getVehicleTypes(): Observable<any> {
     return this.http.get(`${this.baseUrl}/VehicleTypes`);
@@ -114,8 +133,24 @@ export class Api {
   }
   
   // Lấy danh sách nhân viên
-  getAllUsers(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/Users`);
+  getAllUsers(filterParams: any = {}): Observable<any> {
+    let params = new HttpParams();
+    if (filterParams.searchTerm) {
+      params = params.set('searchTerm', filterParams.searchTerm);
+    }
+    if (filterParams.role) {
+      params = params.set('role', filterParams.role);
+    }
+    if (filterParams.status) {
+      params = params.set('status', filterParams.status);
+    }
+    if (filterParams.pageNumber) {
+      params = params.set('pageNumber', filterParams.pageNumber);
+    }
+    if (filterParams.pageSize) {
+      params = params.set('pageSize', filterParams.pageSize);
+    }
+    return this.http.get(`${this.baseUrl}/Users`, { params });
   }
 
   // Thêm nhân viên
