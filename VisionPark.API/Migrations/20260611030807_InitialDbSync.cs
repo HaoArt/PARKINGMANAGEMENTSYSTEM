@@ -6,11 +6,26 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace VisionPark.API.Migrations
 {
     /// <inheritdoc />
-    public partial class InitDatabase : Migration
+    public partial class InitialDbSync : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "FaceRecords",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ImageData = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FaceCount = table.Column<int>(type: "int", nullable: false),
+                    ScanTime = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FaceRecords", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "NFCCards",
                 columns: table => new
@@ -18,7 +33,9 @@ namespace VisionPark.API.Migrations
                     CardID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CardUID = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    CardType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CardToken = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -44,22 +61,23 @@ namespace VisionPark.API.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    UsertId = table.Column<int>(type: "int", nullable: false)
+                    UserID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    CreateAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    FaceImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.UsertId);
+                    table.PrimaryKey("PK_Users", x => x.UserID);
                 });
 
             migrationBuilder.CreateTable(
-                name: "VerhicleTypes",
+                name: "VehicleTypes",
                 columns: table => new
                 {
                     TypeID = table.Column<int>(type: "int", nullable: false)
@@ -69,7 +87,31 @@ namespace VisionPark.API.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_VerhicleTypes", x => x.TypeID);
+                    table.PrimaryKey("PK_VehicleTypes", x => x.TypeID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Attendances",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    CheckInTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CheckOutTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Attendances", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Attendances_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserID",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -94,7 +136,7 @@ namespace VisionPark.API.Migrations
                         name: "FK_AuditLogs_Users_UserID",
                         column: x => x.UserID,
                         principalTable: "Users",
-                        principalColumn: "UsertId",
+                        principalColumn: "UserID",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -123,9 +165,9 @@ namespace VisionPark.API.Migrations
                         principalColumn: "CardID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_MonthlyTickets_VerhicleTypes_VehicleTypeID",
+                        name: "FK_MonthlyTickets_VehicleTypes_VehicleTypeID",
                         column: x => x.VehicleTypeID,
-                        principalTable: "VerhicleTypes",
+                        principalTable: "VehicleTypes",
                         principalColumn: "TypeID",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -141,6 +183,9 @@ namespace VisionPark.API.Migrations
                     BasePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     BlockMinutes = table.Column<int>(type: "int", nullable: true),
                     PricePerBlock = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PricePerMonth = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PricePerQuarter = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PricePerYear = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     ApplyFromTime = table.Column<TimeSpan>(type: "time", nullable: true),
                     ApplyToTime = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
@@ -148,9 +193,9 @@ namespace VisionPark.API.Migrations
                 {
                     table.PrimaryKey("PK_PricingRules", x => x.RuleID);
                     table.ForeignKey(
-                        name: "FK_PricingRules_VerhicleTypes_VehicleTypeID",
+                        name: "FK_PricingRules_VehicleTypes_VehicleTypeID",
                         column: x => x.VehicleTypeID,
-                        principalTable: "VerhicleTypes",
+                        principalTable: "VehicleTypes",
                         principalColumn: "TypeID",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -167,8 +212,11 @@ namespace VisionPark.API.Migrations
                     TimeIn = table.Column<DateTime>(type: "datetime2", nullable: false),
                     PlateNumberIn = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ImageInPath = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserInID = table.Column<int>(type: "int", nullable: false),
-                    TimeOut = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UserInID = table.Column<int>(type: "int", nullable: true),
+                    CheckInTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LicensePlateIn = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CheckOutTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LicensePlateOut = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PlateNumberOut = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ImageOutPath = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserOutID = table.Column<int>(type: "int", nullable: true),
@@ -194,20 +242,24 @@ namespace VisionPark.API.Migrations
                         name: "FK_ParkingSessions_Users_UserInID",
                         column: x => x.UserInID,
                         principalTable: "Users",
-                        principalColumn: "UsertId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "UserID");
                     table.ForeignKey(
                         name: "FK_ParkingSessions_Users_UserOutID",
                         column: x => x.UserOutID,
                         principalTable: "Users",
-                        principalColumn: "UsertId");
+                        principalColumn: "UserID");
                     table.ForeignKey(
-                        name: "FK_ParkingSessions_VerhicleTypes_VehicleTypeID",
+                        name: "FK_ParkingSessions_VehicleTypes_VehicleTypeID",
                         column: x => x.VehicleTypeID,
-                        principalTable: "VerhicleTypes",
+                        principalTable: "VehicleTypes",
                         principalColumn: "TypeID",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Attendances_UserId",
+                table: "Attendances",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AuditLogs_UserID",
@@ -259,7 +311,13 @@ namespace VisionPark.API.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Attendances");
+
+            migrationBuilder.DropTable(
                 name: "AuditLogs");
+
+            migrationBuilder.DropTable(
+                name: "FaceRecords");
 
             migrationBuilder.DropTable(
                 name: "ParkingSessions");
@@ -280,7 +338,7 @@ namespace VisionPark.API.Migrations
                 name: "NFCCards");
 
             migrationBuilder.DropTable(
-                name: "VerhicleTypes");
+                name: "VehicleTypes");
         }
     }
 }

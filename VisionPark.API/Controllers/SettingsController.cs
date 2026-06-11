@@ -18,8 +18,29 @@ namespace VisionPark.API.Controllers
             _context = context;
         }
 
+        [HttpGet("public")]
+        [AllowAnonymous] // Chỉ trả về thông tin cơ bản công khai cho các màn hình LED hiển thị ngoài cổng
+        public async Task<IActionResult> GetPublicSettings()
+        {
+            var configs = await _context.SystemConfigs.ToListAsync();
+            string GetValue(string key, string def) => configs.FirstOrDefault(c => c.ConfigKey == key)?.ConfigValue ?? def;
+
+            int.TryParse(GetValue("MaxCapacity", "1500"), out int maxCapacity);
+
+            var sysConfig = new SystemConfigDto
+            {
+                ParkingName = GetValue("ParkingName", "VisionPark Central"),
+                MaxCapacity = maxCapacity > 0 ? maxCapacity : 1500,
+                OpenTime = GetValue("OpenTime", "06:00"),
+                CloseTime = GetValue("CloseTime", "23:30"),
+                Hotline = GetValue("Hotline", "1900 8888")
+            };
+
+            return Ok(new { SystemConfig = sysConfig });
+        }
+
         [HttpGet]
-        [AllowAnonymous] // Cho phép Dashboard và các role khác lấy thông tin cấu hình (Sức chứa, Giờ mở cửa...)
+        [Authorize] // Bảo vệ cấu hình và bảng giá, bắt buộc phải có Token đăng nhập
         public async Task<IActionResult> GetSettings()
         {
             

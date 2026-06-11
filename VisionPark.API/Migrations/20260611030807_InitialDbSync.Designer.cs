@@ -12,8 +12,8 @@ using VisionPark.API.Data;
 namespace VisionPark.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260420033136_UpdateParkingSessionColumns")]
-    partial class UpdateParkingSessionColumns
+    [Migration("20260611030807_InitialDbSync")]
+    partial class InitialDbSync
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,39 @@ namespace VisionPark.API.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("VisionPark.API.Models.Attendance", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CheckInTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("CheckOutTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Attendances");
+                });
 
             modelBuilder.Entity("VisionPark.API.Models.AuditLog", b =>
                 {
@@ -65,6 +98,29 @@ namespace VisionPark.API.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("AuditLogs");
+                });
+
+            modelBuilder.Entity("VisionPark.API.Models.FaceRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("FaceCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ImageData")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ScanTime")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FaceRecords");
                 });
 
             modelBuilder.Entity("VisionPark.API.Models.MonthlyTicket", b =>
@@ -117,6 +173,9 @@ namespace VisionPark.API.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CardID"));
+
+                    b.Property<string>("CardToken")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CardType")
                         .IsRequired()
@@ -187,7 +246,7 @@ namespace VisionPark.API.Migrations
                     b.Property<decimal>("TotalCost")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("UserInID")
+                    b.Property<int?>("UserInID")
                         .HasColumnType("int");
 
                     b.Property<int?>("UserOutID")
@@ -234,6 +293,15 @@ namespace VisionPark.API.Migrations
                     b.Property<decimal>("PricePerBlock")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<decimal>("PricePerMonth")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PricePerQuarter")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PricePerYear")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("RuleType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -275,14 +343,17 @@ namespace VisionPark.API.Migrations
 
             modelBuilder.Entity("VisionPark.API.Models.User", b =>
                 {
-                    b.Property<int>("UsertId")
+                    b.Property<int>("UserID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UsertId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserID"));
 
-                    b.Property<DateTime>("CreateAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("FaceImageUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -303,7 +374,7 @@ namespace VisionPark.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("UsertId");
+                    b.HasKey("UserID");
 
                     b.ToTable("Users");
                 });
@@ -325,7 +396,18 @@ namespace VisionPark.API.Migrations
 
                     b.HasKey("TypeID");
 
-                    b.ToTable("VerhicleTypes");
+                    b.ToTable("VehicleTypes");
+                });
+
+            modelBuilder.Entity("VisionPark.API.Models.Attendance", b =>
+                {
+                    b.HasOne("VisionPark.API.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("VisionPark.API.Models.AuditLog", b =>
@@ -372,9 +454,7 @@ namespace VisionPark.API.Migrations
 
                     b.HasOne("VisionPark.API.Models.User", "UserIn")
                         .WithMany()
-                        .HasForeignKey("UserInID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserInID");
 
                     b.HasOne("VisionPark.API.Models.User", "UserOut")
                         .WithMany()

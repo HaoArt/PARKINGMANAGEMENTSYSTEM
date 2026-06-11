@@ -155,12 +155,12 @@ export class DashboardPage implements OnInit {
 
         // GỌI SONG SONG 2 NGUỒN TIỀN
         this.loadDataFromDatabase(); // Tiền lượt
-        this.loadMonthlyTicketsRevenue(); // Tiền thẻ đăng ký
+        this.loadDashboardSummary(); // Gọi C# Backend lấy Tổng doanh thu All-Time
       },
       error: (err) => {
         console.error('Lỗi API Settings:', err);
         this.loadDataFromDatabase();
-        this.loadMonthlyTicketsRevenue();
+        this.loadDashboardSummary();
       },
     });
   }
@@ -173,21 +173,10 @@ export class DashboardPage implements OnInit {
           response?.data ||
           response?.Data ||
           (Array.isArray(response) ? response : []);
-        this.totalHistoryRevenue = 0; // Reset
 
         if (dataList && dataList.length > 0) {
           this.allRecords = dataList.map((item: any) => {
             const status = item.status || item.Status || '';
-
-            // Cộng tiền vé lượt
-            const cost = Number(
-              item.totalCost ||
-                item.TotalCost ||
-                item.amount ||
-                item.Amount ||
-                0,
-            );
-            this.totalHistoryRevenue += cost;
 
             const rawTimeIn = item.checkInTime || item.CheckInTime;
             let formattedTimeIn = '---';
@@ -236,64 +225,23 @@ export class DashboardPage implements OnInit {
           this.stats.fillRate = 0;
         }
 
-        this.updateTotalRevenueDisplay(); // Cập nhật chữ số lên màn hình
         this.applyFilters();
       },
       error: (err) => console.error('Lỗi API Parking History:', err),
     });
   }
 
-  // 2. TÍNH TIỀN TỪ CÁC THẺ ĐÃ ĐĂNG KÝ (THÁNG/QUÝ/NĂM)
-  loadMonthlyTicketsRevenue() {
-    this.api.getMonthlyTickets().subscribe({
+  // 2. LẤY SỐ LIỆU TỔNG DOANH THU TỪ BACKEND ĐỂ TỐI ƯU HIỆU NĂNG
+  loadDashboardSummary() {
+    // Giả định bạn đã định nghĩa getDashboardSummary() trong file api.ts
+    this.api.getDashboardSummary().subscribe({
       next: (res: any) => {
-        const tickets = res?.data || res?.Data || [];
-        this.totalMonthlyRevenue = 0; // Reset
-
-        tickets.forEach((ticket: any) => {
-          // Bóc tách ngày tháng (Định dạng C# gửi về là "dd/MM/yyyy HH:mm")
-          let months = 1;
-          try {
-            const startParts = (ticket.startDate || ticket.StartDate).split(
-              '/',
-            );
-            const endParts = (ticket.endDate || ticket.EndDate).split('/');
-            const startYear = parseInt(startParts[2].split(' ')[0], 10);
-            const endYear = parseInt(endParts[2].split(' ')[0], 10);
-            const startMonth = parseInt(startParts[1], 10);
-            const endMonth = parseInt(endParts[1], 10);
-
-            months = (endYear - startYear) * 12 + (endMonth - startMonth);
-          } catch (e) {
-            months = 1; // Fallback an toàn
-          }
-          if (months <= 0) months = 1;
-
-          // Đối chiếu với bảng giá
-          const vType = ticket.vehicleType || ticket.VehicleType;
-          const rule = this.pricingRules.find(
-            (r: any) => r.vehicleType === vType || r.VehicleType === vType,
-          );
-
-          if (rule) {
-            if (months >= 12) {
-              this.totalMonthlyRevenue += Number(
-                rule.pricePerYear || rule.PricePerYear || 0,
-              );
-            } else if (months >= 3) {
-              this.totalMonthlyRevenue += Number(
-                rule.pricePerQuarter || rule.PricePerQuarter || 0,
-              );
-            } else {
-              this.totalMonthlyRevenue +=
-                Number(rule.pricePerMonth || rule.PricePerMonth || 0) * months;
-            }
-          }
-        });
-
-        this.updateTotalRevenueDisplay(); // Cập nhật chữ số lên màn hình
+        const data = res?.data || res?.Data || {};
+        this.totalHistoryRevenue = data.totalHistoryRevenue || 0;
+        this.totalMonthlyRevenue = data.totalMonthlyRevenue || 0;
+        this.updateTotalRevenueDisplay();
       },
-      error: (err) => console.error('Lỗi API Monthly Tickets:', err),
+      error: (err) => console.error('Lỗi lấy Summary Dashboard:', err),
     });
   }
 

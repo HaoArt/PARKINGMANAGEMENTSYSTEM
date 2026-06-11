@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 using VisionPark.API.Data;
 using VisionPark.API.DTOs.Requests;
@@ -16,6 +18,8 @@ namespace VisionPark.API.Controllers
     {
         private readonly ApplicationDbContext _context;
 
+        private static readonly ConcurrentDictionary<string, SemaphoreSlim> _cardLocks = new();
+
         public ParkingController(ApplicationDbContext context)
         {
             _context = context;
@@ -24,71 +28,90 @@ namespace VisionPark.API.Controllers
         [HttpPost("scan-card")]
         public async Task<IActionResult> ScanCard([FromBody] ScanCardRequest request)
         {
-            var card = await _context.NfcCards.FirstOrDefaultAsync(c => c.CardUID == request.CardUID);
+            if (string.IsNullOrEmpty(request.CardUID))
+                return BadRequest("Mã thẻ không hợp lệ");
 
-            if (card == null) return BadRequest("Thẻ này chưa được khởi tạo trên hệ thống!");
+            var cardLock = _cardLocks.GetOrAdd(request.CardUID, _ => new SemaphoreSlim(1, 1));
+            await cardLock.WaitAsync();
 
-            var ticket = await _context.MonthlyTickets.Include(t => t.VehicleType).FirstOrDefaultAsync(t => t.CardID == card.CardID);
-            if (ticket == null) return BadRequest(new { Message = "Thẻ này chưa được đăng ký vé tháng!" });
-
-            var isExpired = DateTime.Now > ticket.EndDate;
-            var ticketStatus = isExpired ? "Đã hết hạn" : "Hợp lệ";
-
-            var displayInfo = new
+            try
             {
-                CustomerName = ticket.CustomerName,
-                PlateNumber = ticket.RegisterPlate,
-                VehicleType = ticket.VehicleType,
-                ExpiryDate = ticket.EndDate.ToString("dd/MM/yyyy"),
-                Status = ticketStatus
-            };
+                var card = await _context.NfcCards.FirstOrDefaultAsync(c => c.CardUID == request.CardUID);
 
-            if (isExpired && !ticket.IsActive)
-            {
-                return Ok(new
+                if (card == null) return BadRequest("Thẻ này chưa được khởi tạo trên hệ thống!");
+
+                // --- KIỂM TRA CHỐNG SAO CHÉP THẺ (ANTI-CLONING) ---
+                // Nếu thẻ trong DB có mã bảo mật, nhưng thiết bị quét lên không gửi kèm hoặc không khớp -> Thẻ giả
+                // Yêu cầu: Cập nhật file ScanCardRequest thêm thuộc tính 'CardToken'
+                // if (!string.IsNullOrEmpty(card.CardToken) && request.CardToken != card.CardToken)
+                //     return BadRequest(new { Message = "Cảnh báo: Phát hiện thẻ giả mạo (Cloned Card)!" });
+
+                var ticket = await _context.MonthlyTickets.Include(t => t.VehicleType).FirstOrDefaultAsync(t => t.CardID == card.CardID);
+                if (ticket == null) return BadRequest(new { Message = "Thẻ này chưa được đăng ký vé tháng!" });
+
+                var isExpired = DateTime.Now > ticket.EndDate;
+                var ticketStatus = isExpired ? "Đã hết hạn" : "Hợp lệ";
+
+                var displayInfo = new
                 {
-                    Action = "BLOCK",
-                    Message = "Vé tháng đã hết hạn, vui lòng gia hạn"
-                });
-            }
-
-            var activeSession = await _context.ParkingSessions
-                .FirstOrDefaultAsync(s => s.CardID == card.CardID && s.CheckOutTime == null);
-
-            // XỬ LÝ CHECK-IN (VÀO BÃI)
-            if (activeSession == null)
-            {
-                var newSession = new ParkingSession
-                {
-                    CardID = card.CardID,
-                    LicensePlateIn = ticket.RegisterPlate,
-                    CheckInTime = DateTime.Now,
-                    VehicleTypeID = ticket.VehicleTypeID
+                    CustomerName = ticket.CustomerName,
+                    PlateNumber = ticket.RegisterPlate,
+                    VehicleType = ticket.VehicleType,
+                    ExpiryDate = ticket.EndDate.ToString("dd/MM/yyyy"),
+                    Status = ticketStatus
                 };
 
-                _context.ParkingSessions.Add(newSession);
-                await _context.SaveChangesAsync();
-
-                return Ok(new
+                if (isExpired && !ticket.IsActive)
                 {
-                    Action = "CHECK_IN",
-                    Message = "Xe VÀO bãi thành công. Mở Barie!",
-                    Data = displayInfo
-                });
+                    return Ok(new
+                    {
+                        Action = "BLOCK",
+                        Message = "Vé tháng đã hết hạn, vui lòng gia hạn"
+                    });
+                }
+
+                var activeSession = await _context.ParkingSessions
+                    .FirstOrDefaultAsync(s => s.CardID == card.CardID && s.CheckOutTime == null);
+
+                // XỬ LÝ CHECK-IN (VÀO BÃI)
+                if (activeSession == null)
+                {
+                    var newSession = new ParkingSession
+                    {
+                        CardID = card.CardID,
+                        LicensePlateIn = ticket.RegisterPlate,
+                        CheckInTime = DateTime.Now,
+                        VehicleTypeID = ticket.VehicleTypeID
+                    };
+
+                    _context.ParkingSessions.Add(newSession);
+                    await _context.SaveChangesAsync();
+
+                    return Ok(new
+                    {
+                        Action = "CHECK_IN",
+                        Message = "Xe VÀO bãi thành công. Mở Barie!",
+                        Data = displayInfo
+                    });
+                }
+                else
+                {
+                    activeSession.CheckOutTime = DateTime.Now;
+                    activeSession.LicensePlateOut = ticket.RegisterPlate;
+
+                    await _context.SaveChangesAsync();
+
+                    return Ok(new
+                    {
+                        Action = "CHECK_OUT",
+                        Message = "Xe RA bãi thành công. Mở Barie!",
+                        Data = displayInfo
+                    });
+                }
             }
-            else
+            finally
             {
-                activeSession.CheckOutTime = DateTime.Now;
-                activeSession.LicensePlateOut = ticket.RegisterPlate;
-
-                await _context.SaveChangesAsync();
-
-                return Ok(new
-                {
-                    Action = "CHECK_OUT",
-                    Message = "Xe RA bãi thành công. Mở Barie!",
-                    Data = displayInfo
-                });
+                cardLock.Release();
             }
         }
 

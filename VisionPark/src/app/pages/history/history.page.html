@@ -176,9 +176,15 @@
             />
           </div>
 
-          <button class="btn-primary" (click)="exportReport()">
+          <button
+            class="btn-primary"
+            (click)="exportReport()"
+            [disabled]="isLoading"
+          >
             <ion-icon name="download-outline"></ion-icon>
-            <span class="hidden-mobile">Xuất báo cáo</span>
+            <span class="hidden-mobile"
+              >{{ isLoading ? 'Đang tạo...' : 'Xuất báo cáo' }}</span
+            >
           </button>
         </div>
       </div>

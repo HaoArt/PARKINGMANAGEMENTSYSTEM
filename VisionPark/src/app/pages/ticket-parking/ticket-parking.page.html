@@ -219,10 +219,10 @@
                 <td data-label="Trạng thái" class="text-right">
                   <span
                     class="status-pill"
-                    [class.in]="item.isActive"
-                    [class.out]="!item.isActive"
+                    [class.in]="item.status === 'Đang hoạt động'"
+                    [class.out]="item.status !== 'Đang hoạt động'"
                   >
-                    {{ item.isActive ? 'Hoạt động' : 'Đã khóa' }}
+                    {{ item.status }}
                   </span>
                 </td>
               </tr>

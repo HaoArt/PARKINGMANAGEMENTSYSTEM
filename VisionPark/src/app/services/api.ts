@@ -21,6 +21,17 @@ export class Api {
     return { headers };
   }
 
+  // Chuyển đổi đường dẫn ảnh tương đối thành URL tuyệt đối (trỏ về Server Backend)
+  getFullImageUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http') || path.startsWith('data:image')) return path;
+    const serverUrl = this.baseUrl.endsWith('/api')
+      ? this.baseUrl.slice(0, -4)
+      : this.baseUrl;
+    const cleanPath = path.startsWith('/') ? path : '/' + path;
+    return `${serverUrl}${cleanPath}`;
+  }
+
   getAllCards(): Observable<any> {
     return this.http.get(`${this.baseUrl}/Cards`);
   }
@@ -38,8 +49,11 @@ export class Api {
   deleteCard(cardId: number) {
     return this.http.delete(`${this.baseUrl}/Cards/${cardId}`);
   }
-  scanCard(cardUID: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/Parking/scan-card`, { cardUID });
+  scanCard(cardUID: string, cardToken?: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/Parking/scan-card`, {
+      cardUID,
+      cardToken,
+    });
   }
   getParkingHistory(filterParams: any = {}) {
     let params = new HttpParams();
@@ -59,6 +73,25 @@ export class Api {
     }
     return this.http.get(`${this.baseUrl}/Parking/history`, { params });
   }
+
+  // Xuất báo cáo PDF lịch sử đỗ xe (Luồng tải File nhị phân)
+  exportParkingHistoryPdf(filterParams: any = {}): Observable<Blob> {
+    let params = new HttpParams();
+    if (filterParams.searchTerm) {
+      params = params.set('searchTerm', filterParams.searchTerm);
+    }
+    if (filterParams.status) {
+      params = params.set('status', filterParams.status);
+    }
+
+    const options = this.getAuthOptions();
+    return this.http.get(`${this.baseUrl}/Report/export-pdf`, {
+      headers: options.headers,
+      params: params,
+      responseType: 'blob', // Bắt buộc để tải File
+    });
+  }
+
   registerMonthly(formData: FormData): Observable<any> {
     return this.http.post(`${this.baseUrl}/Ticket/register-monthly`, formData);
   }
@@ -91,7 +124,10 @@ export class Api {
 
   // Xóa nhân viên
   deleteUser(id: number): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/Users/delete/${id}`);
+    return this.http.delete(
+      `${this.baseUrl}/Users/delete/${id}`,
+      this.getAuthOptions(),
+    );
   }
 
   getSettings(): Observable<any> {
@@ -143,6 +179,14 @@ export class Api {
   getAttendanceSummary(): Observable<any> {
     return this.http.get(
       `${this.baseUrl}/Attendance/summary`,
+      this.getAuthOptions(),
+    );
+  }
+
+  // Lấy dữ liệu tổng doanh thu cho Dashboard
+  getDashboardSummary(): Observable<any> {
+    return this.http.get(
+      `${this.baseUrl}/Dashboard/summary`,
       this.getAuthOptions(),
     );
   }

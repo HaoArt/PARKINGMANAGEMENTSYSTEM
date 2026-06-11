@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿﻿using Microsoft.EntityFrameworkCore;
 using VisionPark.API.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -79,6 +79,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Bật tính năng phục vụ file tĩnh (cho phép Frontend tải ảnh từ thư mục wwwroot)
+app.UseStaticFiles();
 
 //app.UseCors("AllowIonicApp");
 app.UseCors("AllowAll");

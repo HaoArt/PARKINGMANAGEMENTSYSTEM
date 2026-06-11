@@ -180,11 +180,11 @@ export class TicketParkingPage implements OnInit, OnDestroy {
   applyFilters() {
     if (this.filterStatus === 'active') {
       this.monthlyTickets = this.allMonthlyTickets.filter(
-        (item) => item.isActive === true,
+        (item) => item.status === 'Đang hoạt động',
       );
     } else if (this.filterStatus === 'inactive') {
       this.monthlyTickets = this.allMonthlyTickets.filter(
-        (item) => item.isActive === false,
+        (item) => item.status === 'Đã khóa' || item.status === 'Đã hết hạn',
       );
     } else {
       this.monthlyTickets = [...this.allMonthlyTickets];

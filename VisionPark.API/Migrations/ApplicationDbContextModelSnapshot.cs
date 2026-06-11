@@ -36,7 +36,13 @@ namespace VisionPark.API.Migrations
                     b.Property<DateTime?>("CheckOutTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("UserId")
@@ -164,6 +170,9 @@ namespace VisionPark.API.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CardID"));
+
+                    b.Property<string>("CardToken")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CardType")
                         .IsRequired()
