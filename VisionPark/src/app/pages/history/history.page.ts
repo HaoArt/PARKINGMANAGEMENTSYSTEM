@@ -201,8 +201,8 @@ export class HistoryPage implements OnInit {
     const params = {
       searchTerm: this.filterConfig.plateNumber,
       status: this.filterConfig.status,
-      pageNumber: 1,
-      pageSize: 1000, // Tăng giới hạn tải để có thể phân trang ở Client
+      pageNumber: this.currentPage,
+      pageSize: this.itemsPerPage, 
     };
 
     this.api.getParkingHistory(params).subscribe({
@@ -215,8 +215,10 @@ export class HistoryPage implements OnInit {
           this.parkingHistory = [];
         }
 
-        this.currentPage = 1;
-        this.calculatePagination();
+        this.paginatedHistory = this.parkingHistory;
+        const totalCount = res?.totalCount || res?.TotalCount || 0;
+        this.totalPages = Math.ceil(totalCount / this.itemsPerPage) || 1;
+        this.generatePages();
 
         this.isLoading = false;
         this.cdr.detectChanges(); // Update UI
@@ -232,6 +234,7 @@ export class HistoryPage implements OnInit {
 
   // Kích hoạt khi gõ tìm kiếm hoặc đổi select box
   applyFilters() {
+    this.currentPage = 1;
     this.fetchData();
   }
 
@@ -320,23 +323,8 @@ export class HistoryPage implements OnInit {
   }
 
   // --- LOGIC PHÂN TRANG ---
-  calculatePagination() {
-    this.totalPages = Math.ceil(this.parkingHistory.length / this.itemsPerPage);
-
-    if (this.currentPage > this.totalPages && this.totalPages > 0) {
-      this.currentPage = this.totalPages;
-    } else if (this.totalPages === 0) {
-      this.currentPage = 1;
-    }
-
-    this.updatePaginatedHistory();
-    this.generatePages();
-  }
-
   updatePaginatedHistory() {
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    this.paginatedHistory = this.parkingHistory.slice(startIndex, endIndex);
+    this.fetchData();
   }
 
   generatePages() {

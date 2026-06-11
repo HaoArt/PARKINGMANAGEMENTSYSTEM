@@ -80,7 +80,6 @@ export class TicketParkingPage implements OnInit, OnDestroy {
   private platform = inject(Platform);
   private toastCtrl = inject(ToastController);
 
-  allMonthlyTickets: MonthlyTicketRecord[] = [];
   monthlyTickets: MonthlyTicketRecord[] = [];
   paginatedTickets: MonthlyTicketRecord[] = [];
 
@@ -136,12 +135,22 @@ export class TicketParkingPage implements OnInit, OnDestroy {
 
   loadTickets() {
     this.isLoading = true;
-    this.api.getMonthlyTickets().subscribe({
+
+    const params = {
+      status: this.filterStatus,
+      pageNumber: this.currentPage,
+      pageSize: this.itemsPerPage
+    };
+
+    this.api.getMonthlyTickets(params).subscribe({
       next: (res: any) => {
         if (res?.data) {
-          this.allMonthlyTickets = res.data;
-          this.applyFilters();
+          this.monthlyTickets = res.data;
         }
+        this.paginatedTickets = this.monthlyTickets;
+        const totalCount = res?.totalCount || res?.TotalCount || 0;
+        this.totalPages = Math.ceil(totalCount / this.itemsPerPage) || 1;
+        this.generatePages();
         this.isLoading = false;
       },
       error: (err) => {
@@ -178,19 +187,8 @@ export class TicketParkingPage implements OnInit, OnDestroy {
   }
 
   applyFilters() {
-    if (this.filterStatus === 'active') {
-      this.monthlyTickets = this.allMonthlyTickets.filter(
-        (item) => item.status === 'Đang hoạt động',
-      );
-    } else if (this.filterStatus === 'inactive') {
-      this.monthlyTickets = this.allMonthlyTickets.filter(
-        (item) => item.status === 'Đã khóa' || item.status === 'Đã hết hạn',
-      );
-    } else {
-      this.monthlyTickets = [...this.allMonthlyTickets];
-    }
     this.currentPage = 1;
-    this.calculatePagination();
+    this.loadTickets();
   }
 
   // --- LOGIC CAMERA PREVIEW KHUNG ĐỎ ---
@@ -421,23 +419,8 @@ export class TicketParkingPage implements OnInit, OnDestroy {
   }
 
   // --- LOGIC PHÂN TRANG ---
-  calculatePagination() {
-    this.totalPages = Math.ceil(this.monthlyTickets.length / this.itemsPerPage);
-
-    if (this.currentPage > this.totalPages && this.totalPages > 0) {
-      this.currentPage = this.totalPages;
-    } else if (this.totalPages === 0) {
-      this.currentPage = 1;
-    }
-
-    this.updatePaginatedTickets();
-    this.generatePages();
-  }
-
   updatePaginatedTickets() {
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    this.paginatedTickets = this.monthlyTickets.slice(startIndex, endIndex);
+    this.loadTickets();
   }
 
   generatePages() {

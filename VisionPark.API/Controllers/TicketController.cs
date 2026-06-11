@@ -113,11 +113,28 @@ namespace VisionPark.API.Controllers
             });
         }
         [HttpGet("monthly-tickets")]
-        public async Task<IActionResult> GetAllMonthlyTicket()
+        public async Task<IActionResult> GetAllMonthlyTicket(string? status, int pageNumber = 1, int pageSize = 5)
         {
-            var tickets = await _context.MonthlyTickets
+            var query = _context.MonthlyTickets
                 .Include(t => t.Card)
                 .Include(t => t.VehicleType)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(status) && status != "all")
+            {
+                var now = DateTime.Now;
+                if (status == "active")
+                    query = query.Where(t => t.IsActive && t.EndDate >= now);
+                else if (status == "inactive")
+                    query = query.Where(t => !t.IsActive || t.EndDate < now);
+            }
+
+            int totalCount = await query.CountAsync();
+
+            var tickets = await query
+                .OrderByDescending(t => t.StartDate)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .Select(t => new
                 {
                     TicketId = t.TicketId,
@@ -133,11 +150,7 @@ namespace VisionPark.API.Controllers
                 })
                 .ToListAsync();
 
-            if (tickets.Count == 0)
-            {
-                return Ok(new { Message = "Chưa có vé tháng nào được đăng ký.", TotalCount = 0, Data = tickets });
-            }
-            return Ok(new { Message = "Lấy danh sách vé tháng thành công!", TotalCount = tickets.Count, Data = tickets });
+            return Ok(new { Message = "Lấy danh sách vé tháng thành công!", TotalCount = totalCount, Data = tickets });
         }
     }
 }

@@ -59,7 +59,6 @@ export class UsersPage implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private navCtrl = inject(NavController);
 
-  allUsers: UserRecord[] = [];
   users: UserRecord[] = [];
   paginatedUsers: UserRecord[] = [];
 
@@ -130,18 +129,29 @@ export class UsersPage implements OnInit, OnDestroy {
 
   loadUsers() {
     this.isLoading = true;
-    this.api.getAllUsers().subscribe({
+    const params = {
+      searchTerm: this.searchTerm,
+      role: this.filterRole,
+      status: this.filterStatus,
+      pageNumber: this.currentPage,
+      pageSize: this.itemsPerPage
+    };
+
+    this.api.getAllUsers(params).subscribe({
       next: (res: any) => {
         if (res?.data) {
-          this.allUsers = res.data.map((item: any) => ({
+          this.users = res.data.map((item: any) => ({
             ...item,
             userID: item.userId || item.UserID || item.userID,
             faceImageUrl: this.api.getFullImageUrl(
               item.faceImageUrl || item.FaceImageUrl,
             ),
           }));
-          this.applyFilters();
         }
+        this.paginatedUsers = this.users;
+        const totalCount = res?.totalCount || res?.TotalCount || 0;
+        this.totalPages = Math.ceil(totalCount / this.itemsPerPage) || 1;
+        this.generatePages();
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -154,25 +164,8 @@ export class UsersPage implements OnInit, OnDestroy {
   }
 
   applyFilters() {
-    let temp = this.allUsers;
-    if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
-      temp = temp.filter(
-        (u) =>
-          u.fullName.toLowerCase().includes(term) ||
-          u.userName.toLowerCase().includes(term),
-      );
-    }
-    if (this.filterRole !== 'all')
-      temp = temp.filter((u) => u.role === this.filterRole);
-    if (this.filterStatus !== 'all')
-      temp = temp.filter(
-        (u) => u.isActive === (this.filterStatus === 'active'),
-      );
-    this.users = temp;
-
     this.currentPage = 1;
-    this.calculatePagination();
+    this.loadUsers();
   }
 
   // --- LOGIC MỞ/ĐÓNG MODAL ---
@@ -392,24 +385,8 @@ export class UsersPage implements OnInit, OnDestroy {
   }
 
   // --- LOGIC PHÂN TRANG ---
-  calculatePagination() {
-    this.totalPages = Math.ceil(this.users.length / this.itemsPerPage);
-
-    if (this.currentPage > this.totalPages && this.totalPages > 0) {
-      this.currentPage = this.totalPages;
-    } else if (this.totalPages === 0) {
-      this.currentPage = 1;
-    }
-
-    this.updatePaginatedUsers();
-    this.generatePages();
-    this.cdr.detectChanges();
-  }
-
   updatePaginatedUsers() {
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    this.paginatedUsers = this.users.slice(startIndex, endIndex);
+    this.loadUsers();
   }
 
   generatePages() {

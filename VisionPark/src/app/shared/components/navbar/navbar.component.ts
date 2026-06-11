@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
@@ -46,6 +46,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private navCtrl = inject(NavController);
   private api = inject(Api);
+  private cdr = inject(ChangeDetectorRef); // Thêm Change Detector
 
   pageTitles: { [key: string]: string } = {
     '/dashboard': 'Tổng quan hệ thống',
@@ -83,6 +84,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.fullName = localStorage.getItem('fullName') || 'Admin Vision';
     this.role = localStorage.getItem('userRole') || 'Quản trị viên';
     
+    // Lấy ảnh từ local để load cực nhanh lúc mở trang
+    const localImg = localStorage.getItem('faceImageUrl');
+    if (localImg && localImg.trim() !== '' && localImg !== 'null' && localImg !== 'undefined') {
+      this.avatarUrl = this.api.getFullImageUrl(localImg);
+    } else {
+      this.avatarUrl = 'https://ionicframework.com/docs/img/demos/avatar.svg';
+    }
+    
     // 2. Gọi thẳng API xuống Database y hệt trang Admin
     this.api.getCurrentUser().subscribe({
       next: (res: any) => {
@@ -96,13 +105,18 @@ export class NavbarComponent implements OnInit, OnDestroy {
         } else {
           this.avatarUrl = 'https://ionicframework.com/docs/img/demos/avatar.svg';
         }
+        
+        // 👉 Ép giao diện Angular cập nhật ảnh lập tức sau khi API trả về
+        this.cdr.detectChanges();
       },
       error: (err) => {
         // Nếu mất kết nối mạng, fallback dùng ảnh dự phòng
-        const localImg = localStorage.getItem('faceImageUrl');
-        if (localImg && localImg.trim() !== '' && localImg !== 'null' && localImg !== 'undefined') {
-          this.avatarUrl = this.api.getFullImageUrl(localImg);
+        const fallbackImg = localStorage.getItem('faceImageUrl');
+        if (fallbackImg && fallbackImg.trim() !== '' && fallbackImg !== 'null' && fallbackImg !== 'undefined') {
+          this.avatarUrl = this.api.getFullImageUrl(fallbackImg);
         }
+        
+        this.cdr.detectChanges();
       }
     });
   }
