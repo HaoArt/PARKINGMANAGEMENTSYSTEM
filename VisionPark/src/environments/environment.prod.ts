@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://192.168.1.14:5295/api',
+  apiUrl: 'https://visionpark-api.onrender.com/api',
 };
