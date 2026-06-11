@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://visionpark-api.onrender.com/api',
+  apiUrl: 'https://parkingmanagementsystem-22f0.onrender.com/api',
 };
