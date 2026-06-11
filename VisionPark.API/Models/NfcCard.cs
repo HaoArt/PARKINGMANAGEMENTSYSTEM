@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace VisionPark.API.Models
@@ -13,5 +13,8 @@ namespace VisionPark.API.Models
         public string CardType { get; set; } = "Guest";
 
         public string Status { get; set; } = "Active";
+
+        // Dữ liệu mã hóa ghi vào phân vùng NDEF để chống copy thẻ giả mạo
+        public string? CardToken { get; set; } 
     }
 }

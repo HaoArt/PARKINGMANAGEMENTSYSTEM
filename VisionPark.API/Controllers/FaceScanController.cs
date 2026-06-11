@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OpenCvSharp;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
 using VisionPark.API.Data;
 using VisionPark.API.Models;
 
@@ -13,15 +15,17 @@ namespace VisionPark.API.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IWebHostEnvironment _env;
 
             // Tối ưu AI: Lưu instance tĩnh để nạp mô hình vào RAM 1 lần duy nhất (Singleton)
             private static FaceRecognitionDotNet.FaceRecognition _fr;
             private static readonly object _aiLock = new object();
 
-        public FaceScanController(ApplicationDbContext context, IHttpClientFactory httpClientFactory)
+        public FaceScanController(ApplicationDbContext context, IHttpClientFactory httpClientFactory, IWebHostEnvironment env)
         {
             _context = context;
             _httpClientFactory = httpClientFactory;
+            _env = env;
         }
 
         public class ImageData
@@ -79,11 +83,23 @@ namespace VisionPark.API.Controllers
 
                     // Chuyển ảnh đã vẽ khung thành Base64
                     byte[] finalImageBytes = mat.ToBytes(".jpg");
-                    string base64WithBox = "data:image/jpeg;base64," + Convert.ToBase64String(finalImageBytes);
+                    string base64WithBox = "data:image/jpeg;base64," + Convert.ToBase64String(finalImageBytes); // Vẫn trả Base64 về cho UI hiển thị
+
+                    // Lưu thành file vật lý
+                    string webRootPath = _env.WebRootPath;
+                    if (string.IsNullOrWhiteSpace(webRootPath))
+                    {
+                        webRootPath = Path.Combine(_env.ContentRootPath, "wwwroot");
+                    }
+                    string recordsFolder = Path.Combine(webRootPath, "images", "records");
+                    if (!Directory.Exists(recordsFolder)) Directory.CreateDirectory(recordsFolder);
+                    
+                    string fileName = $"record_{DateTime.Now.Ticks}.jpg";
+                    System.IO.File.WriteAllBytes(Path.Combine(recordsFolder, fileName), finalImageBytes);
 
                     var record = new FaceRecord
                     {
-                        ImageData = base64WithBox, // Lưu ảnh ĐÃ CÓ KHUNG vào DB
+                        ImageData = $"/images/records/{fileName}", // CHỈ LƯU ĐƯỜNG DẪN URL VÀO DB
                         FaceCount = faces.Length,
                         ScanTime = DateTime.Now
                     };
@@ -118,43 +134,73 @@ namespace VisionPark.API.Controllers
 
                 if (string.IsNullOrEmpty(request.Base64Image)) return BadRequest(new { message = "Dữ liệu ảnh không được để trống." });
 
-                var base64Data = request.Base64Image.Substring(request.Base64Image.IndexOf(",") + 1);
+                var base64Data = request.Base64Image;
+                if (base64Data.Contains(",")) base64Data = base64Data.Substring(base64Data.IndexOf(",") + 1);
+
                 byte[] imageBytes = Convert.FromBase64String(base64Data);
 
                 // Khởi tạo AI nếu chưa có
+                string modelPath = Path.Combine(_env.ContentRootPath, "Models");
                 if (_fr == null)
                 {
+                    if (!Directory.Exists(modelPath))
+                    {
+                        return StatusCode(500, new { message = "Thư mục Models của AI không tồn tại trên Server!" });
+                    }
                     lock (_aiLock)
                     {
-                        if (_fr == null) _fr = FaceRecognitionDotNet.FaceRecognition.Create("Models");
+                        if (_fr == null) _fr = FaceRecognitionDotNet.FaceRecognition.Create(modelPath);
                     }
                 }
 
-                using var ms = new System.IO.MemoryStream(imageBytes);
-                using var bmp = new System.Drawing.Bitmap(ms);
-                using var img = FaceRecognitionDotNet.FaceRecognition.LoadImage(bmp);
-                
-                // Dùng chính Dlib để đếm số lượng khuôn mặt, đảm bảo tính nhất quán dữ liệu lúc recognize
+                // --- TỐI ƯU HÓA: LƯU ẢNH THÀNH FILE VẬT LÝ TRÁNH PHÌNH DATABASE ---
+                string webRootPath = _env.WebRootPath;
+                if (string.IsNullOrWhiteSpace(webRootPath))
+                {
+                    webRootPath = Path.Combine(_env.ContentRootPath, "wwwroot");
+                }
+
+                string uploadsFolder = Path.Combine(webRootPath, "images", "faces");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                string fileName = $"user_{user.UserID}_{DateTime.Now.Ticks}.jpg";
+                string filePath = Path.Combine(uploadsFolder, fileName);
+
+                // 1. Lưu file xuống ổ cứng trước để dùng hàm LoadImageFile cực kỳ an toàn
+                await System.IO.File.WriteAllBytesAsync(filePath, imageBytes);
+
+                // 2. Load ảnh thẳng từ file vật lý (Tránh lỗi Crash Bitmap)
+                using var img = FaceRecognitionDotNet.FaceRecognition.LoadImageFile(filePath);
                 var faceLocations = _fr.FaceLocations(img).ToArray();
 
-                if (faceLocations.Length == 0)
+                if (faceLocations.Length != 1)
                 {
-                    return BadRequest(new { message = "Không tìm thấy khuôn mặt nào trong ảnh. Vui lòng chụp lại." });
-                }
-                if (faceLocations.Length > 1)
-                {
-                    return BadRequest(new { message = "Phát hiện nhiều hơn 1 khuôn mặt. Vui lòng chỉ chụp một người." });
+                    // AI từ chối -> Xóa file rác vừa lưu và báo lỗi
+                    System.IO.File.Delete(filePath);
+                    string msg = faceLocations.Length == 0 ? "Không tìm thấy khuôn mặt nào trong ảnh. Vui lòng chụp lại." : "Phát hiện nhiều hơn 1 khuôn mặt. Vui lòng chỉ chụp một người.";
+                    return BadRequest(new { message = msg });
                 }
 
-                // Lưu ảnh vào cột FaceImageUrl của User
-                user.FaceImageUrl = request.Base64Image;
+                // Chỉ lưu đường dẫn (URL) vào Database
+                user.FaceImageUrl = $"/images/faces/{fileName}";
+                
+                // Ép Entity Framework phải ghi nhận sự thay đổi này xuống CSDL
+                _context.Users.Update(user); 
                 await _context.SaveChangesAsync();
 
-                return Ok(new { message = $"Đã đăng ký khuôn mặt thành công cho {user.FullName}." });
+                return Ok(new 
+                { 
+                    message = $"Đã đăng ký khuôn mặt thành công cho {user.FullName}.",
+                    savedDbUrl = user.FaceImageUrl,
+                    physicalPath = filePath // Trả về đường dẫn thật để bạn dễ dàng tìm ảnh trên máy tính
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Lỗi server: {ex.Message}");
+                return StatusCode(500, new { message = $"Lỗi hệ thống đăng ký: {ex.Message}" });
             }
         }
 
@@ -172,109 +218,96 @@ namespace VisionPark.API.Controllers
                 byte[] imageBytes = Convert.FromBase64String(base64Data);
 
                 // --- NHẬN DIỆN KHUÔN MẶT TRỰC TIẾP BẰNG C# (.NET) ---
-                int? recognizedUserId = null;
+                // 1. Xác thực người dùng từ Token trước để thu hẹp phạm vi
+                var loggedInUserIdStr = User.FindFirst("UserID")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (!int.TryParse(loggedInUserIdStr, out int loggedInUserId))
+                {
+                    return Unauthorized(new { success = false, message = "Không thể xác thực danh tính từ Token!" });
+                }
+
+                // 2. Chỉ tải duy nhất 1 bản ghi của người đang đăng nhập
+                var recognizedUser = await _context.Users
+                    .Where(u => u.UserID == loggedInUserId)
+                    .Select(u => new { u.UserID, u.FullName, u.Role, u.FaceImageUrl })
+                    .FirstOrDefaultAsync();
+
+                if (recognizedUser == null)
+                {
+                    return Ok(new { success = false, message = "Không tìm thấy tài khoản nhân viên đang đăng nhập!" });
+                }
+                if (string.IsNullOrEmpty(recognizedUser.FaceImageUrl))
+                {
+                    return Ok(new { success = false, message = "Tài khoản này chưa được đăng ký khuôn mặt!" });
+                }
+
                 try
                 {
-                    var registeredUsers = await _context.Users
-                        .Where(u => u.FaceImageUrl != null)
-                        .Select(u => new { userId = u.UserID, image = u.FaceImageUrl })
-                        .ToListAsync();
-
                     // Khởi tạo mô hình AI duy nhất 1 lần
                     if (_fr == null)
                     {
+                        string modelPath = Path.Combine(_env.ContentRootPath, "Models");
+                        if (!Directory.Exists(modelPath)) return StatusCode(500, new { message = "Thiếu thư mục Models!" });
+                        
                         lock (_aiLock)
                         {
-                            if (_fr == null) _fr = FaceRecognitionDotNet.FaceRecognition.Create("Models");
+                            if (_fr == null) _fr = FaceRecognitionDotNet.FaceRecognition.Create(modelPath);
                         }
                     }
 
                     // Phân tích ảnh vừa quét
-                    using var scanMs = new System.IO.MemoryStream(imageBytes);
-                    using var scanBmp = new System.Drawing.Bitmap(scanMs);
-                    using var scanImg = FaceRecognitionDotNet.FaceRecognition.LoadImage(scanBmp);
+                    // Tạo một file Temp để AI đọc, xử lý xong sẽ xóa ngay
+                    string tempScanFile = Path.GetTempFileName() + ".jpg";
+                    await System.IO.File.WriteAllBytesAsync(tempScanFile, imageBytes);
+
+                    using var scanImg = FaceRecognitionDotNet.FaceRecognition.LoadImageFile(tempScanFile);
                     var scanEncodings = _fr.FaceEncodings(scanImg).ToArray();
+                    
+                    // Xóa file temp rác
+                    if (System.IO.File.Exists(tempScanFile)) System.IO.File.Delete(tempScanFile);
 
                     if (scanEncodings.Length == 0)
                     {
                         return Ok(new { success = false, message = "Không tìm thấy khuôn mặt rõ nét trong ảnh vừa chụp." });
                     }
 
-                    if (scanEncodings.Length > 0)
+                    var scanEncoding = scanEncodings[0];
+
+                    // Lấy đường dẫn file ảnh trong DB
+                    string webRootPath = _env.WebRootPath;
+                    if (string.IsNullOrWhiteSpace(webRootPath)) webRootPath = Path.Combine(_env.ContentRootPath, "wwwroot");
+
+                    string dbFilePath = Path.Combine(webRootPath, recognizedUser.FaceImageUrl.TrimStart('/'));
+                    
+                    if (!System.IO.File.Exists(dbFilePath))
                     {
-                        var scanEncoding = scanEncodings[0];
-                        double minDistance = 0.5; // Ngưỡng an toàn
-                        double closestDistance = 1.0;
+                        return Ok(new { success = false, message = "Lỗi: Không tìm thấy file gốc của người dùng trên máy chủ." });
+                    }
 
-                        foreach (var user in registeredUsers)
-                        {
-                            try
-                            {
-                                if (string.IsNullOrEmpty(user.image)) continue;
+                    // Đọc trực tiếp từ file vật lý
+                    using var dbImg = FaceRecognitionDotNet.FaceRecognition.LoadImageFile(dbFilePath);
+                    var dbEncodings = _fr.FaceEncodings(dbImg).ToArray();
 
-                                var dbBase64 = user.image;
-                                if (dbBase64.Contains(",")) dbBase64 = dbBase64.Substring(dbBase64.IndexOf(",") + 1);
+                    if (dbEncodings.Length == 0)
+                    {
+                        return Ok(new { success = false, message = "Dữ liệu khuôn mặt trong hệ thống bị lỗi, vui lòng đăng ký lại!" });
+                    }
 
-                                byte[] dbImageBytes = Convert.FromBase64String(dbBase64);
-
-                                using var dbMs = new System.IO.MemoryStream(dbImageBytes);
-                                using var dbBmp = new System.Drawing.Bitmap(dbMs);
-                                using var dbImg = FaceRecognitionDotNet.FaceRecognition.LoadImage(dbBmp);
-                                var dbEncodings = _fr.FaceEncodings(dbImg).ToArray();
-
-                                if (dbEncodings.Length > 0)
-                                {
-                                    double distance = FaceRecognitionDotNet.FaceRecognition.FaceDistance(dbEncodings[0], scanEncoding);
-                                    if (distance < closestDistance) closestDistance = distance;
-
-                                    if (distance < minDistance)
-                                    {
-                                        minDistance = distance;
-                                        recognizedUserId = user.userId;
-                                    }
-                                }
-                            }
-                            catch (Exception)
-                            {
-                                continue;
-                            }
-                        }
+                    // 3. Tiến hành đối chiếu (1 - 1)
+                    double distance = FaceRecognitionDotNet.FaceRecognition.FaceDistance(dbEncodings[0], scanEncoding);
+                    
+                    if (distance >= 0.45) // Ngưỡng an toàn chống False Positive (Lớn hơn 0.45 là không khớp)
+                    {
+                        return Ok(new { success = false, message = "Khuôn mặt không khớp với tài khoản đang đăng nhập!" });
                     }
                 }
                 catch (Exception ex)
                 {
-                    return Ok(new { success = false, message = "Lỗi xử lý thuật toán AI: " + ex.Message });
+                    return Ok(new { success = false, message = "Lỗi xử lý AI C#: " + ex.Message });
                 }
 
-                if (recognizedUserId.HasValue)
-                {
-                    var loggedInUserIdStr = User.FindFirst("UserID")?.Value;
-
-                    if (int.TryParse(loggedInUserIdStr, out int loggedInUserId))
-                    {
-                        if (recognizedUserId.Value != loggedInUserId)
-                        {
-                            return Ok(new
-                            {
-                                success = false,
-                                message = "Cảnh báo: Khuôn mặt không khớp với tài khoản đang đăng nhập!"
-                            });
-                        }
-                    }
-                    else
-                    {
-                        return Unauthorized(new { success = false, message = "Không thể xác thực danh tính từ Token!" });
-                    }
-                    var recognizedUser = await _context.Users
-                        .Where(u => u.UserID == recognizedUserId.Value)
-                        .Select(u => new { u.UserID, u.FullName, u.Role, u.FaceImageUrl })
-                        .FirstOrDefaultAsync();
-
-                    if (recognizedUser != null)
-                    {
-                        // --- GHI NHẬN CHẤM CÔNG CÓ COOLDOWN CHỐNG SPAM ---
-                        var today = DateTime.Now.Date;
-                        var currentTime = DateTime.Now;
+                // --- MATCH THÀNH CÔNG: GHI NHẬN CHẤM CÔNG CÓ COOLDOWN CHỐNG SPAM ---
+                var today = DateTime.Now.Date;
+                var currentTime = DateTime.Now;
 
                         var attendancesToday = await _context.Attendances
                             .Where(a => a.UserId == recognizedUser.UserID && a.Date == today)
@@ -345,10 +378,6 @@ namespace VisionPark.API.Controllers
                         await _context.SaveChangesAsync();
 
                         return Ok(new { success = true, message = actionMessage, user = recognizedUser });
-                    }
-                }
-
-                return Ok(new { success = false, message = "Khuôn mặt lạ, không có trong hệ thống!" });
             }
             catch (Exception ex)
             {

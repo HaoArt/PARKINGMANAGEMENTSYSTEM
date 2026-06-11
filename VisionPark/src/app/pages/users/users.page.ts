@@ -136,7 +136,9 @@ export class UsersPage implements OnInit, OnDestroy {
           this.allUsers = res.data.map((item: any) => ({
             ...item,
             userID: item.userId || item.UserID || item.userID,
-            faceImageUrl: item.faceImageUrl || item.FaceImageUrl,
+            faceImageUrl: this.api.getFullImageUrl(
+              item.faceImageUrl || item.FaceImageUrl,
+            ),
           }));
           this.applyFilters();
         }

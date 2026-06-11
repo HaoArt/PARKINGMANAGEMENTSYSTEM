@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using VisionPark.API.Data;
 using VisionPark.API.Models;
 using VisionPark.API.DTOs.Requests;
+using Microsoft.Extensions.Configuration;
 using System.Text.Json;
 
 namespace VisionPark.API.Controllers
@@ -13,11 +14,13 @@ namespace VisionPark.API.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IConfiguration _configuration;
 
-        public TicketController(ApplicationDbContext context, IHttpClientFactory httpClientFactory)
+        public TicketController(ApplicationDbContext context, IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _context = context;
             _httpClientFactory = httpClientFactory;
+            _configuration = configuration;
         }
 
         [HttpPost("register-monthly")]
@@ -35,7 +38,11 @@ namespace VisionPark.API.Controllers
                 content.Add(new StreamContent(stream), "image", request.VehicleImage.FileName);
                 content.Add(new StringContent(request.VehicleTypeID.ToString()), "vehicleType");
 
-                var aiResponse = await client.PostAsync("http://localhost:8000/api/recognize-plate", content);
+                // Lấy URL từ appsettings.json hoặc Render Environment Variables. Nếu không có thì fallback về localhost
+                string aiBaseUrl = _configuration["AiServiceUrl"] ?? "http://localhost:8000";
+                string endpoint = $"{aiBaseUrl.TrimEnd('/')}/api/recognize-plate";
+
+                var aiResponse = await client.PostAsync(endpoint, content);
                 if (aiResponse.IsSuccessStatusCode)
                 {
                     var resultString = await aiResponse.Content.ReadAsStringAsync();
@@ -58,10 +65,10 @@ namespace VisionPark.API.Controllers
             var card = await _context.NfcCards.FirstOrDefaultAsync(c => c.CardUID == request.CardUID);
             if (card == null) return BadRequest("Thẻ này chưa được khởi tạo trong hệ thống!");
 
-            var cardAlreadyUsed = await _context.MonthlyTickets.AnyAsync(t => t.CardID == card.CardID && t.IsActive);
+            var cardAlreadyUsed = await _context.MonthlyTickets.AnyAsync(t => t.CardID == card.CardID && t.IsActive && t.EndDate >= DateTime.Now);
             if (cardAlreadyUsed) return BadRequest("Thẻ NFC này đang được sử dụng cho một vé tháng khác chưa hết hạn!");
 
-            var isExist = await _context.MonthlyTickets.AnyAsync(t => t.RegisterPlate == detectedPlate && t.IsActive);
+            var isExist = await _context.MonthlyTickets.AnyAsync(t => t.RegisterPlate == detectedPlate && t.IsActive && t.EndDate >= DateTime.Now);
             if (isExist) return BadRequest($"Biển số {detectedPlate} đã có vé tháng đang hoạt động!");
 
             // --- 3. CẬP NHẬT LOẠI THẺ (NĂM/QUÝ/THÁNG) ---

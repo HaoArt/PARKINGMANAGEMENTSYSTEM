@@ -125,11 +125,14 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
       this.isCameraOn = true;
       this.imageBase64 = null; // Xóa ảnh đã chụp trước đó
       this.scanResult = null;
+      this.recognitionResult = null; // Xóa kết quả nhận diện của người trước đó
 
       // Chờ Angular render thẻ video xong mới gán luồng và chạy tracking
       setTimeout(() => {
-        this.videoElement.nativeElement.srcObject = this.stream;
-        this.startFaceTracking();
+        if (this.videoElement && this.videoElement.nativeElement) {
+          this.videoElement.nativeElement.srcObject = this.stream;
+          this.startFaceTracking();
+        }
       }, 100);
     } catch (err: any) {
       console.error('Lỗi truy cập webcam: ', err);
@@ -258,6 +261,7 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       const capturedImage = canvas.toDataURL('image/jpeg');
+      this.imageBase64 = capturedImage; // Gán lại để màn hình hiển thị ảnh Preview tĩnh
       this.stopCamera(); // Tự động tắt camera sau khi chụp
 
       this.handleRecognition(capturedImage);
@@ -272,7 +276,7 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
       reader.onload = (e: any) => {
         const imageBase64 = e.target.result;
         this.imageBase64 = imageBase64; // for preview
-        this.scanResult = null;
+        this.recognitionResult = null; // Xóa kết quả cũ khi vừa chọn file mới
         this.handleRecognition(imageBase64);
       };
       reader.readAsDataURL(file);
@@ -293,6 +297,11 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
         this.isProcessing = false; // Tắt Loading
         if (res.success) {
           this.recognitionResult = res.user;
+          if (this.recognitionResult && this.recognitionResult.faceImageUrl) {
+            this.recognitionResult.faceImageUrl = this.api.getFullImageUrl(
+              this.recognitionResult.faceImageUrl,
+            );
+          }
           this.loadAttendanceSummary(); // Tải lại lịch sử chấm công
           this.notification.showToast(
             `Nhận diện thành công: ${res.user.fullName}`,
@@ -316,7 +325,17 @@ export class TestScanFaceComponent implements OnInit, OnDestroy {
   loadAttendanceSummary() {
     this.api.getAttendanceSummary().subscribe({
       next: (res: any) => {
-        this.attendanceSummary = res.data || res.Data || [];
+        const rawData = res.data || res.Data || [];
+        // Chuyển đổi đường dẫn ảnh cho từng bản ghi trong lịch sử
+        this.attendanceSummary = rawData.map((dayGroup: any) => {
+          return {
+            ...dayGroup,
+            records: dayGroup.records.map((record: any) => ({
+              ...record,
+              faceImageUrl: this.api.getFullImageUrl(record.faceImageUrl),
+            })),
+          };
+        });
         this.totalShifts = res.totalShifts || res.TotalShifts || 0;
         this.totalWorkDays = res.totalWorkDays || res.TotalWorkDays || 0;
       },

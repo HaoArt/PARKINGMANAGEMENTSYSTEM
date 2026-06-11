@@ -178,12 +178,20 @@ export class HistoryPage implements OnInit {
     if (event && event.tag && event.tag.id) {
       const scannedUID = this.nfc.bytesToHexString(event.tag.id).toUpperCase();
 
+      // Giải mã dữ liệu NDEF (Mật khẩu phần mềm) để chống thẻ giả
+      let cardToken = '';
+      if (event.tag.ndefMessage && event.tag.ndefMessage.length > 0) {
+        const payload = event.tag.ndefMessage[0].payload;
+        // Decode payload của chuẩn NDEF Text (Bỏ qua 3 byte đầu chứa độ dài và mã ngôn ngữ 'en')
+        cardToken = this.nfc.bytesToString(payload).substring(3);
+      }
+
       this.inputNfcId = scannedUID;
       this.cdr.detectChanges();
       this.showToast('Đã nhận mã thẻ: ' + scannedUID, 'success');
 
-      // Tự động gọi API
-      this.onProcessCard(scannedUID);
+      // Tự động gọi API và truyền kèm CardToken vừa giải mã được
+      this.onProcessCard(scannedUID, cardToken);
     }
   }
 
@@ -245,14 +253,15 @@ export class HistoryPage implements OnInit {
     };
   }
 
-  onProcessCard(nfcId: string) {
+  // Thêm tham số tùy chọn cardToken (những lúc nhập tay trên màn hình sẽ không có tham số này)
+  onProcessCard(nfcId: string, cardToken?: string) {
     if (!nfcId) {
       this.showToast('Vui lòng nhập hoặc quét mã thẻ!', 'warning');
       return;
     }
 
     this.isLoading = true;
-    this.api.scanCard(nfcId).subscribe({
+    this.api.scanCard(nfcId, cardToken).subscribe({
       next: (res: any) => {
         const data = res.data;
 
@@ -388,9 +397,26 @@ export class HistoryPage implements OnInit {
   }
 
   exportReport() {
-    this.showToast(
-      'Tính năng Xuất báo cáo Excel đang được phát triển!',
-      'warning',
-    );
+    this.isLoading = true;
+    this.showToast('Đang khởi tạo báo cáo PDF từ Server...', 'success');
+
+    this.api.exportParkingHistoryPdf(this.filterConfig).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Bao_Cao_Giao_Dich_${new Date().getTime()}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.showToast('Lỗi khi tải file báo cáo!', 'danger');
+        console.error('Lỗi xuất PDF:', err);
+      },
+    });
   }
 }

@@ -131,6 +131,7 @@ namespace VisionPark.API.Controllers
         }
 
         [HttpDelete("delete/{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
@@ -143,6 +144,16 @@ namespace VisionPark.API.Controllers
             if (user.Role == "Admin")
             {
                 return BadRequest(new { Message = "Không được phép xóa tài khoản Admin!" });
+            }
+
+            // --- BẢO VỆ TÀI KHOẢN ĐANG ĐĂNG NHẬP ---
+            var currentUserIdStr = User.FindFirst("UserID")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(currentUserIdStr, out int currentUserId))
+            {
+                if (currentUserId == id)
+                {
+                    return BadRequest(new { Message = "Không thể tự xóa tài khoản của chính bạn đang đăng nhập!" });
+                }
             }
 
             try
