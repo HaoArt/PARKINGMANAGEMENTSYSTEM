@@ -243,7 +243,7 @@ export class HistoryPage implements OnInit {
 
   private mapBackendToFrontend(item: any): ParkingRecord {
     return {
-      nfcId: item.cardID,
+      nfcId: item.cardUID || item.CardUID || item.cardID || item.CardID || '---',
       plateNumberIn: item.licensePlateIn || '---',
       plateNumberOut: item.licensePlateOut || '---',
       vehicleType: item.vehicleTypeID === 1 ? 'Ô tô' : 'Xe máy',

@@ -276,7 +276,7 @@ export class UsersPage implements OnInit, OnDestroy {
 
     const alert = await this.alertCtrl.create({
       header: 'Xác nhận xóa',
-      message: `Bạn có chắc chắn muốn XÓA VĨNH VIỄN nhân viên <strong>${user.fullName}</strong>?<br><br>Hành động này không thể hoàn tác.`,
+      message: `Bạn có chắc chắn muốn XÓA VĨNH VIỄN nhân viên ${user.fullName}? Hành động này không thể hoàn tác.`,
       buttons: [
         { text: 'Hủy', role: 'cancel' },
         {

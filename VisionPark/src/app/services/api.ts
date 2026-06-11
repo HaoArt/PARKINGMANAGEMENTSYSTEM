@@ -107,6 +107,12 @@ export class Api {
   login(data: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/Auth/login`, data);
   }
+
+  // Lấy thông tin tài khoản đang đăng nhập (kèm ảnh mới nhất)
+  getCurrentUser(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/Auth/me`, this.getAuthOptions());
+  }
+  
   // Lấy danh sách nhân viên
   getAllUsers(): Observable<any> {
     return this.http.get(`${this.baseUrl}/Users`);

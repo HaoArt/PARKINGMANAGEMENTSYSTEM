@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -74,8 +75,30 @@ namespace VisionPark.API.Controllers
             {
                 Message = "Đăng nhập thành công!",
                 FullName = user.FullName,
+                    FaceImageUrl = user.FaceImageUrl,
                 Role = user.Role,
                 Token = tokenString
+            });
+        }
+
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var userIdStr = User.FindFirst("UserID")?.Value ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out int userId))
+            {
+                return Unauthorized(new { Message = "Không thể xác thực danh tính từ Token!" });
+            }
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return NotFound(new { Message = "Không tìm thấy tài khoản!" });
+
+            return Ok(new
+            {
+                FullName = user.FullName,
+                Role = user.Role,
+                FaceImageUrl = user.FaceImageUrl
             });
         }
 

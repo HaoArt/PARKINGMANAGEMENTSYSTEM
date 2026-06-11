@@ -198,6 +198,8 @@ export class DashboardPage implements OnInit {
               id:
                 item.cardUID ||
                 item.CardUID ||
+                item.cardID ||
+                item.CardID ||
                 `ID-${item.parkingID || item.ParkingID || '---'}`,
               plateNumber: item.licensePlateIn || item.LicensePlateIn || '---',
               vehicleType: vTypeName,
