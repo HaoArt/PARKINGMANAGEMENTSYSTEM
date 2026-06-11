@@ -8,7 +8,7 @@ RUN dotnet restore "VisionPark.API.csproj"
 
 # Copy toàn bộ code còn lại và Publish
 COPY . .
-RUN dotnet publish "VisionPark.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "VisionPark.API.csproj" -c Release -o /app/publish /p:UseAppHost=false /p:ErrorOnDuplicatePublishOutputFiles=false
 
 # 2. Môi trường Chạy ứng dụng (.NET 8 Runtime siêu nhẹ)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
