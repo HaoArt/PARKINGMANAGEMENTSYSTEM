@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://192.168.1.14:5295/api',
+  apiUrl: 'https://parkingmanagementsystem-22f0.onrender.com/api',
 };
