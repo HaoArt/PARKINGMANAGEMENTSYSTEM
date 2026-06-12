@@ -53,6 +53,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     '/ticket-parking': 'Quản lý Thẻ & Xe',
     '/history': 'Lịch sử ra vào',
     '/users': 'Quản lý Nhân viên',
+    '/card-registration': 'Quản lý Thẻ NFC',
     '/settings': 'Cài đặt hệ thống'
   };
 
@@ -64,6 +65,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.updateUserInfo();
     this.updateTitle(this.router.url);
     this.startClock(); // Khởi động đồng hồ
+
+    // Lắng nghe sự kiện nếu người dùng vừa đăng ký khuôn mặt thành công thì thay đổi ảnh ngay lập tức
+    this.api.avatarUpdated.subscribe(newUrl => {
+      this.avatarUrl = this.api.getFullImageUrl(newUrl);
+      this.cdr.detectChanges();
+    });
 
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -104,6 +111,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
           localStorage.setItem('faceImageUrl', faceImg); // Sao lưu lại cho lần sau
         } else {
           this.avatarUrl = 'https://ionicframework.com/docs/img/demos/avatar.svg';
+          localStorage.removeItem('faceImageUrl');
         }
         
         // 👉 Ép giao diện Angular cập nhật ảnh lập tức sau khi API trả về

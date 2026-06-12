@@ -50,8 +50,14 @@ export class CardRegistrationPage implements OnInit {
 
   isLoading = false;
   isSubmitting = false;
-  isEditing = false;
-  editingCardId: number | null = null;
+  
+  showEditModal = false;
+  editForm = {
+    cardID: 0,
+    cardUID: '',
+    cardType: 'Monthly',
+    status: 'Active',
+  };
 
   paginatedCards: CardRecord[] = [];
 
@@ -59,6 +65,8 @@ export class CardRegistrationPage implements OnInit {
   itemsPerPage: number = 5;
   totalPages: number = 1;
   visiblePages: (number | string)[] = [];
+
+  searchTerm: string = '';
 
   cardForm = {
     cardUID: '',
@@ -121,6 +129,7 @@ export class CardRegistrationPage implements OnInit {
   loadSystemCards() {
     this.isLoading = true;
     const params = {
+      searchTerm: this.searchTerm,
       pageNumber: this.currentPage,
       pageSize: this.itemsPerPage
     };
@@ -145,21 +154,24 @@ export class CardRegistrationPage implements OnInit {
     });
   }
 
-  editCard(item: CardRecord) {
-    this.isEditing = true;
-    this.editingCardId = item.cardID;
+  onNavbarSearch(searchTerm: string) {
+    this.searchTerm = searchTerm;
+    this.currentPage = 1; // Reset về trang 1 khi tìm kiếm
+    this.loadSystemCards();
+  }
 
-    this.cardForm = {
+  editCard(item: CardRecord) {
+    this.editForm = {
+      cardID: item.cardID,
       cardUID: item.cardUID,
       cardType: item.cardType,
       status: item.status,
     };
+    this.showEditModal = true;
   }
 
-  cancelEdit() {
-    this.isEditing = false;
-    this.editingCardId = null;
-    this.resetForm();
+  closeEditModal() {
+    this.showEditModal = false;
   }
 
   saveCard() {
@@ -170,40 +182,41 @@ export class CardRegistrationPage implements OnInit {
 
     this.isSubmitting = true;
 
-    if (this.isEditing && this.editingCardId) {
-      this.api.updateCard(this.editingCardId, this.cardForm).subscribe({
-        next: (res: any) => {
-          this.showToast('Cập nhật thẻ thành công!', 'success');
-          this.cancelEdit();
-          this.loadSystemCards();
-          this.isSubmitting = false;
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          this.showToast(
-            err.error?.message || 'Lỗi khi cập nhật thẻ!',
-            'danger',
-          );
-          this.isSubmitting = false;
-          this.cdr.detectChanges();
-        },
-      });
-    } else {
-      this.api.createCard(this.cardForm).subscribe({
-        next: (res: any) => {
-          this.showToast('Thêm thẻ thành công!', 'success');
-          this.resetForm();
-          this.loadSystemCards();
-          this.isSubmitting = false;
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          this.showToast(err.error?.message || 'Lỗi khi lưu thẻ!', 'danger');
-          this.isSubmitting = false;
-          this.cdr.detectChanges();
-        },
-      });
-    }
+    this.api.createCard(this.cardForm).subscribe({
+      next: (res: any) => {
+        this.showToast('Thêm thẻ thành công!', 'success');
+        this.resetForm();
+        this.loadSystemCards();
+        this.isSubmitting = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.showToast(err.error?.message || 'Lỗi khi lưu thẻ!', 'danger');
+        this.isSubmitting = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  updateCard() {
+    this.isSubmitting = true;
+    this.api.updateCard(this.editForm.cardID, this.editForm).subscribe({
+      next: (res: any) => {
+        this.showToast('Cập nhật thẻ thành công!', 'success');
+        this.closeEditModal();
+        this.loadSystemCards();
+        this.isSubmitting = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.showToast(
+          err.error?.message || 'Lỗi khi cập nhật thẻ!',
+          'danger',
+        );
+        this.isSubmitting = false;
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   async deleteCard(cardID: number) {
@@ -219,7 +232,6 @@ export class CardRegistrationPage implements OnInit {
             this.api.deleteCard(cardID).subscribe({
               next: () => {
                 this.showToast('Đã xóa thẻ thành công!', 'success');
-                if (this.editingCardId === cardID) this.cancelEdit();
                 this.loadSystemCards();
               },
               error: (err) => {
