@@ -48,15 +48,12 @@
               <label>LOẠI VÉ</label>
               <div class="premium-input select-wrapper">
                 <ion-icon name="calendar-outline" class="input-icon"></ion-icon>
-                <select [(ngModel)]="regData.durationMonths">
-                  <option [value]="1">Vé tháng</option>
-                  <option [value]="3">Vé quý</option>
-                  <option [value]="12">Vé năm</option>
-                </select>
-                <ion-icon
-                  name="chevron-down-outline"
-                  class="dropdown-icon"
-                ></ion-icon>
+              <select [(ngModel)]="regData.durationMonths">
+                <option [value]="1">Vé tháng</option>
+                <option [value]="3">Vé quý</option>
+                <option [value]="12">Vé năm</option>
+              </select>
+              <ion-icon name="chevron-down-outline" class="dropdown-icon"></ion-icon>
               </div>
             </div>
 
@@ -67,14 +64,11 @@
                   name="car-sport-outline"
                   class="input-icon"
                 ></ion-icon>
-                <select [(ngModel)]="regData.vehicleTypeID">
-                  <option [value]="1">Ô tô</option>
-                  <option [value]="2">Xe máy</option>
-                </select>
-                <ion-icon
-                  name="chevron-down-outline"
-                  class="dropdown-icon"
-                ></ion-icon>
+              <select [(ngModel)]="regData.vehicleTypeID">
+                <option [value]="1">Ô tô</option>
+                <option [value]="2">Xe máy</option>
+              </select>
+              <ion-icon name="chevron-down-outline" class="dropdown-icon"></ion-icon>
               </div>
             </div>
           </div>

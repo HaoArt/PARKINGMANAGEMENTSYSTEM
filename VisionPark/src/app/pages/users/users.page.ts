@@ -369,6 +369,13 @@ export class UsersPage implements OnInit, OnDestroy {
           res.message || 'Đăng ký khuôn mặt thành công!',
           'success',
         );
+        
+        // Nếu tài khoản đang được đăng ký trùng với tài khoản đang đăng nhập -> Cập nhật Avatar trên Navbar ngay lập tức
+        if (this.editingUser.fullName === localStorage.getItem('fullName')) {
+          localStorage.setItem('faceImageUrl', res.savedDbUrl);
+          this.api.avatarUpdated.next(res.savedDbUrl);
+        }
+
         this.loadUsers();
       },
       error: (err: any) => {

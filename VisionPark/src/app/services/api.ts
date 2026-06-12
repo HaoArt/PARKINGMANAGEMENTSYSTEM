@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { environment } from '@environments/environment';
 
 @Injectable({
@@ -8,6 +8,8 @@ import { environment } from '@environments/environment';
 })
 export class Api {
   private http = inject(HttpClient);
+  public avatarUpdated = new Subject<string>(); // Phát sự kiện khi ảnh đại diện thay đổi
+
   private baseUrl = environment.apiUrl;
   private getAuthOptions() {
     let headers = new HttpHeaders();
@@ -34,6 +36,12 @@ export class Api {
 
   getAllCards(filterParams: any = {}): Observable<any> {
     let params = new HttpParams();
+    if (filterParams.searchTerm) {
+      params = params.set('searchTerm', filterParams.searchTerm);
+    }
+    if (filterParams.status) {
+      params = params.set('status', filterParams.status);
+    }
     if (filterParams.pageNumber) {
       params = params.set('pageNumber', filterParams.pageNumber);
     }
