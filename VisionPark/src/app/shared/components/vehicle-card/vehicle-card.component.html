@@ -1,3 +1,34 @@
-<p>
-  vehicle-card works!
-</p>
+<div class="card-container">
+  <h2 class="text-xl font-bold mb-4">Quản lý Thẻ NFC</h2>
+
+  <div *ngIf="cards.length === 0" class="text-gray-500">
+    Đang tải dữ liệu thẻ...
+  </div>
+
+  <div
+    *ngFor="let card of cards"
+    class="mb-4 p-4 border rounded-lg shadow-sm bg-white"
+  >
+    <div class="flex justify-between items-center mb-2">
+      <span class="font-semibold text-blue-600">UID: {{ card.cardUID }}</span>
+      <span class="text-sm px-2 py-1 bg-gray-100 rounded">{{
+        card.cardType
+      }}</span>
+    </div>
+    <div class="text-sm text-gray-600">
+      <p>
+        Trạng thái:
+        <span [class.text-green-600]="card.status === 'Active'">{{
+          card.status
+        }}</span>
+      </p>
+      <!-- Hiển thị CardToken -->
+      <p>
+        Token Bảo mật:
+        <span class="font-mono bg-gray-50 px-1">{{
+          card.cardToken || "Chưa có Token"
+        }}</span>
+      </p>
+    </div>
+  </div>
+</div>

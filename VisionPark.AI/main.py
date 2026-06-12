@@ -154,6 +154,10 @@ def process_and_format_plate(raw_text, vehicle_type):
 # API ENDPOINT
 # ==========================================
 
+@app.get("/")
+def read_root():
+    return {"message": "Hệ thống AI nhận diện biển số VisionPark đang hoạt động bình thường!", "status": "Running"}
+
 @app.post("/api/recognize-plate")
 async def recognize_plate(
     image: UploadFile = File(...), 

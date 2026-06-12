@@ -72,9 +72,14 @@ namespace VisionPark.API.Controllers
             if (isExist) return BadRequest($"Biển số {detectedPlate} đã có vé tháng đang hoạt động!");
 
             // --- 3. CẬP NHẬT LOẠI THẺ (NĂM/QUÝ/THÁNG) ---
+            // --- 3. CẬP NHẬT LOẠI THẺ VÀ TẠO TOKEN BẢO MẬT CHỐNG SAO CHÉP ---
             if (request.DurationMonths >= 12) card.CardType = "Year";
             else if (request.DurationMonths >= 3) card.CardType = "Quarterly";
             else card.CardType = "Monthly";
+
+            // Tự động sinh ra một Token bảo mật ngẫu nhiên
+            string secureToken = $"VisionPark_{Guid.NewGuid().ToString("N").Substring(0, 10)}";
+            card.CardToken = secureToken;
 
             _context.NfcCards.Update(card);
 
@@ -109,6 +114,7 @@ namespace VisionPark.API.Controllers
                 Message = "Đăng ký vé thành công!",
                 DetectedPlate = detectedPlate,
                 Amount = finalAmount, 
+                CardToken = secureToken, // Trả Token về cho điện thoại để ghi lên thẻ
                 Data = newTicket
             });
         }
