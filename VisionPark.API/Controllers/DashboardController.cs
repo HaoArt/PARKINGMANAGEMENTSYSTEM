@@ -34,9 +34,23 @@ namespace VisionPark.API.Controllers
 
             decimal tongDoanhThuLuot = await _context.ParkingSessions.SumAsync(x => x.TotalCost);
 
-            // Vé tháng hiện tại chưa lưu trực tiếp cột Giá tiền trong DB. 
-            // Để có tính chính xác cao nhất, sau này bạn nên thêm cột 'Amount' vào bảng MonthlyTickets.
-            decimal tongDoanhThuVeThang = 0; 
+            // TÍNH TOÁN DOANH THU VÉ THÁNG (Phục hồi logic cũ của Frontend)
+            var tickets = await _context.MonthlyTickets.ToListAsync();
+            var pricingRules = await _context.PricingRules.ToListAsync();
+
+            decimal tongDoanhThuVeThang = 0;
+            foreach (var ticket in tickets)
+            {
+                var rule = pricingRules.FirstOrDefault(r => r.VehicleTypeID == ticket.VehicleTypeID);
+                if (rule != null)
+                {
+                    int durationMonths = ((ticket.EndDate.Year - ticket.StartDate.Year) * 12) + ticket.EndDate.Month - ticket.StartDate.Month;
+                    
+                    if (durationMonths >= 12) tongDoanhThuVeThang += rule.PricePerYear;
+                    else if (durationMonths >= 3) tongDoanhThuVeThang += rule.PricePerQuarter;
+                    else tongDoanhThuVeThang += rule.PricePerMonth;
+                }
+            }
 
             // TỐI ƯU HÓA: Đếm số lượng xe đang trong bãi trực tiếp bằng Database thay vì kéo dữ liệu về Frontend
             int xeTrongKho = await _context.ParkingSessions.CountAsync(s => s.CheckOutTime == null);
