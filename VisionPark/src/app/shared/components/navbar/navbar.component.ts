@@ -129,7 +129,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   // LOGIC ĐỒNG HỒ CHẠY TỪNG GIÂY
   startClock() {
-    const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ S��u', 'Thứ Bảy'];
+    const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
     this.updateClock(days);
     this.clockInterval = setInterval(() => {
       this.updateClock(days);
