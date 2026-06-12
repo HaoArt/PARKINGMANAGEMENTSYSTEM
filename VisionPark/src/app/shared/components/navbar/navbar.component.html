@@ -44,7 +44,7 @@
             <span class="text-[11px] font-bold text-[#003399] uppercase tracking-wider">{{ role }}</span>
           </div>
           <div class="w-11 h-11 rounded-full border-2 border-white overflow-hidden shadow-md">
-            <img src="https://i.pravatar.cc/150?img=11" alt="Avatar" class="w-full h-full object-cover">
+            <img [src]="avatarUrl" (error)="onAvatarError($event)" alt="Avatar" class="w-full h-full object-cover bg-white">
           </div>
           <ion-icon name="chevron-down-outline" class="text-gray-400 text-sm hidden sm:block transition-transform" [class.rotate-180]="isProfileMenuOpen"></ion-icon>
         </div>

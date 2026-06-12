@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
@@ -8,12 +8,13 @@ import {
   IonAvatar, IonLabel, IonBadge, IonSearchbar, IonMenuButton,
   IonPopover, IonContent, IonList, IonItem
 } from '@ionic/angular/standalone';
-import { NavController } from '@ionic/angular';
+import { NavController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { 
   searchOutline, notificationsOutline, personCircleOutline, 
   logOutOutline, menuOutline, chevronDownOutline, personOutline, helpCircleOutline
 } from 'ionicons/icons';
+import { Api } from '../../../services/api';
 
 @Component({
   selector: 'app-navbar',
@@ -30,6 +31,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   fullName: string = 'User';
   role: string = 'Security';
   pageTitle: string = 'Tổng quan hệ thống';
+  avatarUrl: string = 'https://ionicframework.com/docs/img/demos/avatar.svg';
   
   // BIẾN CHO ĐỒNG HỒ
   isDashboard: boolean = false;
@@ -43,6 +45,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   private router = inject(Router);
   private navCtrl = inject(NavController);
+  private api = inject(Api);
+  private cdr = inject(ChangeDetectorRef); // Thêm Change Detector
 
   pageTitles: { [key: string]: string } = {
     '/dashboard': 'Tổng quan hệ thống',
@@ -76,8 +80,45 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   updateUserInfo() {
+    // 1. Tạm thời lấy dữ liệu cũ để giao diện khỏi bị trống
     this.fullName = localStorage.getItem('fullName') || 'Admin Vision';
     this.role = localStorage.getItem('userRole') || 'Quản trị viên';
+    
+    // Lấy ảnh từ local để load cực nhanh lúc mở trang
+    const localImg = localStorage.getItem('faceImageUrl');
+    if (localImg && localImg.trim() !== '' && localImg !== 'null' && localImg !== 'undefined') {
+      this.avatarUrl = this.api.getFullImageUrl(localImg);
+    } else {
+      this.avatarUrl = 'https://ionicframework.com/docs/img/demos/avatar.svg';
+    }
+    
+    // 2. Gọi thẳng API xuống Database y hệt trang Admin
+    this.api.getCurrentUser().subscribe({
+      next: (res: any) => {
+        const data = res?.data || res;
+        // Đảm bảo bắt mọi định dạng FaceImageUrl từ Backend trả về
+        const faceImg = data?.faceImageUrl || data?.FaceImageUrl;
+        
+        if (faceImg && faceImg.trim() !== '' && faceImg !== 'null' && faceImg !== 'undefined') {
+          this.avatarUrl = this.api.getFullImageUrl(faceImg);
+          localStorage.setItem('faceImageUrl', faceImg); // Sao lưu lại cho lần sau
+        } else {
+          this.avatarUrl = 'https://ionicframework.com/docs/img/demos/avatar.svg';
+        }
+        
+        // 👉 Ép giao diện Angular cập nhật ảnh lập tức sau khi API trả về
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        // Nếu mất kết nối mạng, fallback dùng ảnh dự phòng
+        const fallbackImg = localStorage.getItem('faceImageUrl');
+        if (fallbackImg && fallbackImg.trim() !== '' && fallbackImg !== 'null' && fallbackImg !== 'undefined') {
+          this.avatarUrl = this.api.getFullImageUrl(fallbackImg);
+        }
+        
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   updateTitle(url: string) {
@@ -88,7 +129,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   // LOGIC ĐỒNG HỒ CHẠY TỪNG GIÂY
   startClock() {
-    const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+    const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ S��u', 'Thứ Bảy'];
     this.updateClock(days);
     this.clockInterval = setInterval(() => {
       this.updateClock(days);
@@ -111,5 +152,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
   logout() {
     localStorage.clear();
     this.navCtrl.navigateRoot('/login');
+  }
+
+  // Xử lý an toàn khi ảnh load bị lỗi (mất mạng, xoá file...)
+  onAvatarError(event: any) {
+    event.target.src = 'https://ionicframework.com/docs/img/demos/avatar.svg';
   }
 }

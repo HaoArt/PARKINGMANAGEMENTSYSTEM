@@ -13,7 +13,6 @@ namespace VisionPark.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class ReportController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -23,87 +22,185 @@ namespace VisionPark.API.Controllers
             _context = context;
         }
 
+        [HttpGet("export-dashboard-pdf")]
+        [Authorize]
+        public async Task<IActionResult> ExportDashboardPdf()
+        {
+            try
+            {
+                // 1. TÍNH TOÁN CÁC CHỈ SỐ THỐNG KÊ (Được thực thi siêu nhanh bằng các lệnh Count của EF Core)
+                int xeTrongKho = await _context.ParkingSessions.CountAsync(x => x.Status == "In" || x.Status == "Đang đỗ");
+                int xeVaoHomNay = await _context.ParkingSessions.CountAsync(x => x.CheckInTime.Date == DateTime.Today);
+                int xeRaHomNay = await _context.ParkingSessions.CountAsync(x => x.CheckOutTime != null && x.CheckOutTime.Value.Date == DateTime.Today);
+                
+                int sucChuaToiDa = 1500; // Bạn có thể truy vấn từ Settings/SystemConfigs nếu có
+                double tileLapDay = sucChuaToiDa > 0 ? Math.Round((double)xeTrongKho / sucChuaToiDa * 100, 1) : 0;
+                decimal doanhThuTong = await _context.ParkingSessions.SumAsync(x => x.TotalCost);
+
+                // 2. LẤY DANH SÁCH CHI TIẾT (Lấy 100 xe mới nhất đang trong bãi để không làm tràn file PDF)
+                var danhSachXe = await _context.ParkingSessions
+                    .Where(x => x.Status == "In" || x.Status == "Đang đỗ")
+                    .OrderByDescending(x => x.CheckInTime)
+                    .Take(100)
+                    .Select(x => new 
+                    {
+                        Plate = string.IsNullOrEmpty(x.LicensePlateIn) ? "Chưa nhận diện" : x.LicensePlateIn,
+                        Type = x.VehicleTypeID == 1 ? "Ô tô" : "Xe máy",
+                        TimeIn = x.CheckInTime.ToString("HH:mm - dd/MM/yyyy"),
+                        Status = "Đang trong bãi"
+                    })
+                    .ToListAsync();
+
+                // 3. TIẾN HÀNH VẼ FILE PDF BẰNG iTextSharp
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    // Cấu hình khổ giấy A4
+                    Document doc = new Document(PageSize.A4, 25, 25, 30, 30);
+                    PdfWriter writer = PdfWriter.GetInstance(doc, ms);
+                    doc.Open();
+
+                    // Tiêu đề
+                    Font titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 18, BaseColor.Blue);
+                    Paragraph title = new Paragraph("BAO CAO THONG KE HE THONG VISIONPARK\n", titleFont);
+                    title.Alignment = Element.ALIGN_CENTER;
+                    doc.Add(title);
+
+                    Font subFont = FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.Gray);
+                    Paragraph subtitle = new Paragraph($"Ngay xuat: {DateTime.Now:dd/MM/yyyy} - Gio: {DateTime.Now:HH:mm:ss}\n\n", subFont);
+                    subtitle.Alignment = Element.ALIGN_CENTER;
+                    doc.Add(subtitle);
+
+                    // Nội dung thống kê tổng quan
+                    Font textFont = FontFactory.GetFont(FontFactory.HELVETICA, 12, BaseColor.Black);
+                    doc.Add(new Paragraph($"1. Tong doanh thu: {doanhThuTong:N0} VND", textFont));
+                    doc.Add(new Paragraph($"2. Luu luong phuong tien ra vao trong ngay:", textFont));
+                    doc.Add(new Paragraph($"   - Tong so luot xe da vao bai: {xeVaoHomNay} luot", textFont));
+                    doc.Add(new Paragraph($"   - So luot xe da xuat ben (ra): {xeRaHomNay} luot", textFont));
+                    doc.Add(new Paragraph($"3. Tinh trang kho chua: {xeTrongKho} / {sucChuaToiDa} xe (Dat {tileLapDay}% suc chua)\n\n", textFont));
+
+                    // Bảng lưới danh sách
+                    doc.Add(new Paragraph("DANH SACH CHI TIET CAC XE DANG TRONG BAI\n\n", FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 12)));
+
+                    PdfPTable table = new PdfPTable(4);
+                    table.WidthPercentage = 100;
+                    table.SetWidths(new float[] { 25f, 20f, 30f, 25f });
+
+                    // Vẽ Tiêu đề bảng
+                    Font headerFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.White);
+                    string[] headers = { "Bien so xe", "Loai xe", "Thoi gian vao", "Trang thai" };
+                    foreach (var head in headers)
+                    {
+                        PdfPCell cell = new PdfPCell(new Phrase(head, headerFont));
+                        cell.BackgroundColor = new BaseColor(41, 128, 185);
+                        cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                        cell.Padding = 6;
+                        table.AddCell(cell);
+                    }
+
+                    // Điền dữ liệu vào bảng
+                    Font rowFont = FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.Black);
+                    foreach (var xe in danhSachXe)
+                    {
+                        table.AddCell(new PdfPCell(new Phrase(xe.Plate, rowFont)) { Padding = 5, HorizontalAlignment = Element.ALIGN_CENTER });
+                        table.AddCell(new PdfPCell(new Phrase(xe.Type, rowFont)) { Padding = 5, HorizontalAlignment = Element.ALIGN_CENTER });
+                        table.AddCell(new PdfPCell(new Phrase(xe.TimeIn, rowFont)) { Padding = 5, HorizontalAlignment = Element.ALIGN_CENTER });
+                        table.AddCell(new PdfPCell(new Phrase(xe.Status, rowFont)) { Padding = 5, HorizontalAlignment = Element.ALIGN_CENTER });
+                    }
+
+                    doc.Add(table);
+                    doc.Close(); // Kết thúc ghi PDF
+
+                    // Trả File MimeType về cho Client
+                    return File(ms.ToArray(), "application/pdf", $"Bao_Cao_Thong_Ke_{DateTime.Now:dd_MM_yyyy}.pdf");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Lỗi server: {ex.Message}");
+            }
+        }
+
         [HttpGet("export-pdf")]
-        public async Task<IActionResult> ExportParkingHistoryPdf([FromQuery] string? searchTerm, [FromQuery] string? status)
+        [Authorize]
+        public async Task<IActionResult> ExportParkingHistoryPdf(string? searchTerm, string? status)
         {
             try
             {
                 var query = _context.ParkingSessions.AsQueryable();
 
-                if (!string.IsNullOrEmpty(searchTerm))
-                {
-                    query = query.Where(p => 
-                        (p.LicensePlateIn != null && p.LicensePlateIn.Contains(searchTerm)) || 
-                        (p.LicensePlateOut != null && p.LicensePlateOut.Contains(searchTerm)));
-                }
-
                 if (!string.IsNullOrEmpty(status) && status != "all")
                 {
-                    if (status == "In")
-                        query = query.Where(p => p.Status == "In" || p.Status == "Đang đỗ");
-                    else if (status == "Out")
-                        query = query.Where(p => p.Status == "Out");
+                    query = query.Where(s => (status == "In" ? s.CheckOutTime == null : s.CheckOutTime != null));
                 }
 
-                // Trích xuất toàn bộ dữ liệu khớp với bộ lọc (Không bị giới hạn)
-                var records = await query.OrderByDescending(p => p.CheckInTime).ToListAsync();
-
-                using (var ms = new MemoryStream())
+                if (!string.IsNullOrEmpty(searchTerm))
                 {
-                    Document document = new Document(PageSize.A4, 25, 25, 30, 30);
-                    PdfWriter writer = PdfWriter.GetInstance(document, ms);
-                    document.Open();
+                    searchTerm = searchTerm.ToLower();
+                    query = query.Where(s => s.LicensePlateIn.Contains(searchTerm) ||
+                                             (s.LicensePlateOut != null && s.LicensePlateOut.Contains(searchTerm)) ||
+                                             s.CardID.ToString().Contains(searchTerm));
+                }
 
-                    var titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 16);
-                    Paragraph title = new Paragraph("BAO CAO LICH SU GIAO DICH - VISIONPARK", titleFont)
+                var danhSachXe = await query
+                    .OrderByDescending(x => x.CheckInTime)
+                    .Take(200) // Giới hạn 200 dòng để tránh file PDF quá nặng
+                    .Select(x => new 
                     {
-                        Alignment = Element.ALIGN_CENTER,
-                        SpacingAfter = 10
-                    };
-                    document.Add(title);
+                        Plate = string.IsNullOrEmpty(x.LicensePlateIn) ? "Chưa nhận diện" : x.LicensePlateIn,
+                        Type = x.VehicleTypeID == 1 ? "Ô tô" : "Xe máy",
+                        TimeIn = x.CheckInTime.ToString("HH:mm - dd/MM/yyyy"),
+                        Status = x.CheckOutTime == null ? "Đang trong bãi" : "Đã xuất bến"
+                    })
+                    .ToListAsync();
 
-                    var normalFont = FontFactory.GetFont(FontFactory.HELVETICA, 11);
-                    document.Add(new Paragraph($"Thoi gian xuat: {DateTime.Now:dd/MM/yyyy HH:mm}", normalFont));
-                    document.Add(new Paragraph($"Tong so giao dich: {records.Count} luot xe", normalFont) { SpacingAfter = 15 });
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    Document doc = new Document(PageSize.A4, 25, 25, 30, 30);
+                    PdfWriter writer = PdfWriter.GetInstance(doc, ms);
+                    doc.Open();
 
-                    PdfPTable table = new PdfPTable(5) { WidthPercentage = 100 };
-                    table.SetWidths(new float[] { 15f, 20f, 25f, 25f, 15f });
+                    Font titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 18, BaseColor.Blue);
+                    Paragraph title = new Paragraph("BAO CAO LICH SU DO XE\n", titleFont);
+                    title.Alignment = Element.ALIGN_CENTER;
+                    doc.Add(title);
 
-                    var headerFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 10, new BaseColor(255, 255, 255));
-                    var headerBgColor = new BaseColor(41, 128, 185); 
+                    Font subFont = FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.Gray);
+                    Paragraph subtitle = new Paragraph($"Ngay xuat: {DateTime.Now:dd/MM/yyyy} - Gio: {DateTime.Now:HH:mm:ss}\n\n", subFont);
+                    subtitle.Alignment = Element.ALIGN_CENTER;
+                    doc.Add(subtitle);
 
-                    string[] headers = { "Loai xe", "Bien so", "Thoi gian Vao", "Thoi gian Ra", "Trang thai" };
-                    foreach (var h in headers)
+                    PdfPTable table = new PdfPTable(4);
+                    table.WidthPercentage = 100;
+                    table.SetWidths(new float[] { 25f, 20f, 30f, 25f });
+
+                    Font headerFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.White);
+                    string[] headers = { "Bien so xe", "Loai xe", "Thoi gian vao", "Trang thai" };
+                    foreach (var head in headers)
                     {
-                        table.AddCell(new PdfPCell(new Phrase(h, headerFont)) { BackgroundColor = headerBgColor, HorizontalAlignment = Element.ALIGN_CENTER, Padding = 6 });
+                        PdfPCell cell = new PdfPCell(new Phrase(head, headerFont));
+                        cell.BackgroundColor = new BaseColor(41, 128, 185);
+                        cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                        cell.Padding = 6;
+                        table.AddCell(cell);
                     }
 
-                    var cellFont = FontFactory.GetFont(FontFactory.HELVETICA, 10);
-                    foreach (var item in records)
+                    Font rowFont = FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.Black);
+                    foreach (var xe in danhSachXe)
                     {
-                        string vType = item.VehicleTypeID == 1 ? "O to" : "Xe may";
-                        string plate = item.LicensePlateIn ?? "---";
-                        string timeIn = item.CheckInTime.ToString("dd/MM/yyyy HH:mm");
-                        string timeOut = item.CheckOutTime?.ToString("dd/MM/yyyy HH:mm") ?? "---";
-                        string stat = (item.Status == "In" || item.Status == "Đang đỗ") ? "Trong bai" : "Da ra";
-
-                        table.AddCell(new PdfPCell(new Phrase(vType, cellFont)) { HorizontalAlignment = Element.ALIGN_CENTER, Padding = 5 });
-                        table.AddCell(new PdfPCell(new Phrase(plate, cellFont)) { HorizontalAlignment = Element.ALIGN_CENTER, Padding = 5 });
-                        table.AddCell(new PdfPCell(new Phrase(timeIn, cellFont)) { HorizontalAlignment = Element.ALIGN_CENTER, Padding = 5 });
-                        table.AddCell(new PdfPCell(new Phrase(timeOut, cellFont)) { HorizontalAlignment = Element.ALIGN_CENTER, Padding = 5 });
-                        table.AddCell(new PdfPCell(new Phrase(stat, cellFont)) { HorizontalAlignment = Element.ALIGN_CENTER, Padding = 5 });
+                        table.AddCell(new PdfPCell(new Phrase(xe.Plate, rowFont)) { Padding = 5, HorizontalAlignment = Element.ALIGN_CENTER });
+                        table.AddCell(new PdfPCell(new Phrase(xe.Type, rowFont)) { Padding = 5, HorizontalAlignment = Element.ALIGN_CENTER });
+                        table.AddCell(new PdfPCell(new Phrase(xe.TimeIn, rowFont)) { Padding = 5, HorizontalAlignment = Element.ALIGN_CENTER });
+                        table.AddCell(new PdfPCell(new Phrase(xe.Status, rowFont)) { Padding = 5, HorizontalAlignment = Element.ALIGN_CENTER });
                     }
 
-                    document.Add(table);
-                    document.Close();
-
-                    // Trả file PDF về dưới dạng mảng byte
-                    return File(ms.ToArray(), "application/pdf", $"Bao_Cao_Lich_Su_{DateTime.Now:yyyyMMddHHmmss}.pdf");
+                    doc.Add(table);
+                    doc.Close();
+                    return File(ms.ToArray(), "application/pdf", $"Lich_Su_Do_Xe_{DateTime.Now:dd_MM_yyyy}.pdf");
                 }
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Message = "Lỗi khi tạo PDF: " + ex.Message });
+                return StatusCode(500, $"Lỗi server: {ex.Message}");
             }
         }
     }

@@ -23,11 +23,31 @@ namespace VisionPark.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<IActionResult> GetAllUsers(string? searchTerm, string? role, string? status, int pageNumber = 1, int pageSize = 5)
         {
-            var users = await _context.Users
-                .Where(u => u.Role != "Admin")
-                .OrderByDescending(u => u.CreatedAt)
+            var query = _context.Users.Where(u => u.Role != "Admin").AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                searchTerm = searchTerm.ToLower();
+                query = query.Where(u => u.FullName.ToLower().Contains(searchTerm) || u.UserName.ToLower().Contains(searchTerm));
+            }
+
+            if (!string.IsNullOrEmpty(role) && role != "all")
+                query = query.Where(u => u.Role == role);
+
+            if (!string.IsNullOrEmpty(status) && status != "all")
+            {
+                bool isActive = status == "active";
+                query = query.Where(u => u.IsActive == isActive);
+            }
+
+            int totalCount = await query.CountAsync();
+
+            var users = await query
+                .OrderByDescending(u => u.CreatedAt) // Hoặc order tuỳ ý
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .Select(u => new
                 {
                     u.UserID,
@@ -43,7 +63,7 @@ namespace VisionPark.API.Controllers
             return Ok(new
             {
                 Message = "Lấy danh sách thành công",
-                TotalCount = users.Count,
+                TotalCount = totalCount,
                 Data = users
             });
         }

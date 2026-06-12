@@ -80,7 +80,6 @@ export class TicketParkingPage implements OnInit, OnDestroy {
   private platform = inject(Platform);
   private toastCtrl = inject(ToastController);
 
-  allMonthlyTickets: MonthlyTicketRecord[] = [];
   monthlyTickets: MonthlyTicketRecord[] = [];
   paginatedTickets: MonthlyTicketRecord[] = [];
 
@@ -89,11 +88,11 @@ export class TicketParkingPage implements OnInit, OnDestroy {
   itemsPerPage: number = 5;
   totalPages: number = 1;
   visiblePages: (number | string)[] = [];
-  pricingRules: any[] = [];
   showQRModal: boolean = false;
   qrUrl: string = '';
   paymentAmount: number = 0;
 
+  searchTerm: string = '';
   filterStatus: string = 'all';
 
   isLoading = false;
@@ -125,7 +124,6 @@ export class TicketParkingPage implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadTickets();
     this.startNFC();
-    this.loadPricingConfig();
   }
 
   ngOnDestroy() {
@@ -136,12 +134,23 @@ export class TicketParkingPage implements OnInit, OnDestroy {
 
   loadTickets() {
     this.isLoading = true;
-    this.api.getMonthlyTickets().subscribe({
+
+    const params = {
+      searchTerm: this.searchTerm,
+      status: this.filterStatus,
+      pageNumber: this.currentPage,
+      pageSize: this.itemsPerPage
+    };
+
+    this.api.getMonthlyTickets(params).subscribe({
       next: (res: any) => {
         if (res?.data) {
-          this.allMonthlyTickets = res.data;
-          this.applyFilters();
+          this.monthlyTickets = res.data;
         }
+        this.paginatedTickets = this.monthlyTickets;
+        const totalCount = res?.totalCount || res?.TotalCount || 0;
+        this.totalPages = Math.ceil(totalCount / this.itemsPerPage) || 1;
+        this.generatePages();
         this.isLoading = false;
       },
       error: (err) => {
@@ -151,46 +160,14 @@ export class TicketParkingPage implements OnInit, OnDestroy {
     });
   }
 
-  loadPricingConfig() {
-    this.api.getSettings().subscribe({
-      next: (res: any) => {
-        const data = res?.data || res;
-        if (data?.pricingRules || data?.PricingRules) {
-          this.pricingRules = data.pricingRules || data.PricingRules;
-        }
-      },
-      error: (err) => console.error('Lỗi tải cấu hình bảng giá:', err),
-    });
-  }
-
-  calculateAmount(vehicleTypeId: number, durationMonths: number): number {
-    const rule = this.pricingRules.find(
-      (r: any) => r.ruleId == vehicleTypeId || r.RuleId == vehicleTypeId,
-    );
-
-    if (!rule) return 0;
-
-    if (durationMonths == 12)
-      return rule.pricePerYear || rule.PricePerYear || 0;
-    if (durationMonths == 3)
-      return rule.pricePerQuarter || rule.PricePerQuarter || 0;
-    return rule.pricePerMonth || rule.PricePerMonth || 0;
-  }
-
   applyFilters() {
-    if (this.filterStatus === 'active') {
-      this.monthlyTickets = this.allMonthlyTickets.filter(
-        (item) => item.status === 'Đang hoạt động',
-      );
-    } else if (this.filterStatus === 'inactive') {
-      this.monthlyTickets = this.allMonthlyTickets.filter(
-        (item) => item.status === 'Đã khóa' || item.status === 'Đã hết hạn',
-      );
-    } else {
-      this.monthlyTickets = [...this.allMonthlyTickets];
-    }
     this.currentPage = 1;
-    this.calculatePagination();
+    this.loadTickets();
+  }
+
+  onNavbarSearch(searchTerm: string) {
+    this.searchTerm = searchTerm;
+    this.applyFilters();
   }
 
   // --- LOGIC CAMERA PREVIEW KHUNG ĐỎ ---
@@ -313,10 +290,8 @@ export class TicketParkingPage implements OnInit, OnDestroy {
           'success',
         );
 
-        this.paymentAmount = this.calculateAmount(
-          this.regData.vehicleTypeID,
-          this.regData.durationMonths,
-        );
+        // Nhận trực tiếp số tiền đã tính toán từ C# Backend trả về
+        this.paymentAmount = res.amount || res.Amount || 0;
 
         // Cấu hình ngân hàng
         const bankId = 'MB';
@@ -421,23 +396,8 @@ export class TicketParkingPage implements OnInit, OnDestroy {
   }
 
   // --- LOGIC PHÂN TRANG ---
-  calculatePagination() {
-    this.totalPages = Math.ceil(this.monthlyTickets.length / this.itemsPerPage);
-
-    if (this.currentPage > this.totalPages && this.totalPages > 0) {
-      this.currentPage = this.totalPages;
-    } else if (this.totalPages === 0) {
-      this.currentPage = 1;
-    }
-
-    this.updatePaginatedTickets();
-    this.generatePages();
-  }
-
   updatePaginatedTickets() {
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    this.paginatedTickets = this.monthlyTickets.slice(startIndex, endIndex);
+    this.loadTickets();
   }
 
   generatePages() {
