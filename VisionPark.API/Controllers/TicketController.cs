@@ -113,7 +113,7 @@ namespace VisionPark.API.Controllers
             });
         }
         [HttpGet("monthly-tickets")]
-        public async Task<IActionResult> GetAllMonthlyTicket(string? status, int pageNumber = 1, int pageSize = 5)
+        public async Task<IActionResult> GetAllMonthlyTicket(string? searchTerm, string? status, int pageNumber = 1, int pageSize = 5)
         {
             var query = _context.MonthlyTickets
                 .Include(t => t.Card)
@@ -127,6 +127,13 @@ namespace VisionPark.API.Controllers
                     query = query.Where(t => t.IsActive && t.EndDate >= now);
                 else if (status == "inactive")
                     query = query.Where(t => !t.IsActive || t.EndDate < now);
+            }
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                searchTerm = searchTerm.ToLower();
+                query = query.Where(t => t.RegisterPlate.ToLower().Contains(searchTerm) || 
+                                         t.CustomerName.ToLower().Contains(searchTerm));
             }
 
             int totalCount = await query.CountAsync();

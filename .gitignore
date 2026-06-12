@@ -29,7 +29,11 @@ android/app/src/main/assets/capacitor.plugins.json
 *.cache
 *.tmp
 
+# Bỏ qua các file cấu hình chứa Secret/Thông tin nhạy cảm của .NET
+appsettings.json
 appsettings.Development.json
+appsettings.*.json
+Properties/launchSettings.json
 
 # =========================
 # PYTHON AI
@@ -52,3 +56,9 @@ __pycache__/
 # =========================
 .DS_Store
 Thumbs.db
+
+# =========================
+# ENVIRONMENT VARIABLES / SECRETS
+# =========================
+.env
+.env.*

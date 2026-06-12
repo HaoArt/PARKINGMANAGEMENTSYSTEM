@@ -32,8 +32,15 @@ export class Api {
     return `${serverUrl}${cleanPath}`;
   }
 
-  getAllCards(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/Cards`);
+  getAllCards(filterParams: any = {}): Observable<any> {
+    let params = new HttpParams();
+    if (filterParams.pageNumber) {
+      params = params.set('pageNumber', filterParams.pageNumber);
+    }
+    if (filterParams.pageSize) {
+      params = params.set('pageSize', filterParams.pageSize);
+    }
+    return this.http.get(`${this.baseUrl}/Cards`, { params });
   }
 
   createCard(cardData: any): Observable<any> {
@@ -92,11 +99,35 @@ export class Api {
     });
   }
 
-  // Xuất báo cáo PDF Dashboard (Luồng tải File nhị phân)
-  exportDashboardPdf(): Observable<Blob> {
+  // Gọi dữ liệu phân trang trực tiếp cho Dashboard
+  getDashboardRecords(filterParams: any = {}): Observable<any> {
+    let params = new HttpParams();
+    if (filterParams.searchTerm) {
+      params = params.set('searchTerm', filterParams.searchTerm);
+    }
+    if (filterParams.status) {
+      params = params.set('status', filterParams.status);
+    }
+    if (filterParams.pageNumber) {
+      params = params.set('pageNumber', filterParams.pageNumber);
+    }
+    if (filterParams.pageSize) {
+      params = params.set('pageSize', filterParams.pageSize);
+    }
     const options = this.getAuthOptions();
-    return this.http.get(`${this.baseUrl}/Report/export-dashboard-pdf`, {
+    return this.http.get(`${this.baseUrl}/Dashboard/records`, { headers: options.headers, params });
+  }
+
+  // Xuất báo cáo CSV Dashboard (Luồng tải File nhị phân)
+  exportDashboardCsv(filterParams: any = {}): Observable<Blob> {
+    let params = new HttpParams();
+    if (filterParams.searchTerm) params = params.set('searchTerm', filterParams.searchTerm);
+    if (filterParams.status) params = params.set('status', filterParams.status);
+
+    const options = this.getAuthOptions();
+    return this.http.get(`${this.baseUrl}/Dashboard/export`, {
       headers: options.headers,
+      params: params,
       responseType: 'blob',
     });
   }
@@ -106,6 +137,9 @@ export class Api {
   }
   getMonthlyTickets(filterParams: any = {}): Observable<any> {
     let params = new HttpParams();
+    if (filterParams.searchTerm) {
+      params = params.set('searchTerm', filterParams.searchTerm);
+    }
     if (filterParams.status) {
       params = params.set('status', filterParams.status);
     }

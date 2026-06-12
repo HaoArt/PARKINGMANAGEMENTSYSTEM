@@ -88,11 +88,11 @@ export class TicketParkingPage implements OnInit, OnDestroy {
   itemsPerPage: number = 5;
   totalPages: number = 1;
   visiblePages: (number | string)[] = [];
-  pricingRules: any[] = [];
   showQRModal: boolean = false;
   qrUrl: string = '';
   paymentAmount: number = 0;
 
+  searchTerm: string = '';
   filterStatus: string = 'all';
 
   isLoading = false;
@@ -124,7 +124,6 @@ export class TicketParkingPage implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadTickets();
     this.startNFC();
-    this.loadPricingConfig();
   }
 
   ngOnDestroy() {
@@ -137,6 +136,7 @@ export class TicketParkingPage implements OnInit, OnDestroy {
     this.isLoading = true;
 
     const params = {
+      searchTerm: this.searchTerm,
       status: this.filterStatus,
       pageNumber: this.currentPage,
       pageSize: this.itemsPerPage
@@ -160,35 +160,14 @@ export class TicketParkingPage implements OnInit, OnDestroy {
     });
   }
 
-  loadPricingConfig() {
-    this.api.getSettings().subscribe({
-      next: (res: any) => {
-        const data = res?.data || res;
-        if (data?.pricingRules || data?.PricingRules) {
-          this.pricingRules = data.pricingRules || data.PricingRules;
-        }
-      },
-      error: (err) => console.error('Lỗi tải cấu hình bảng giá:', err),
-    });
-  }
-
-  calculateAmount(vehicleTypeId: number, durationMonths: number): number {
-    const rule = this.pricingRules.find(
-      (r: any) => r.ruleId == vehicleTypeId || r.RuleId == vehicleTypeId,
-    );
-
-    if (!rule) return 0;
-
-    if (durationMonths == 12)
-      return rule.pricePerYear || rule.PricePerYear || 0;
-    if (durationMonths == 3)
-      return rule.pricePerQuarter || rule.PricePerQuarter || 0;
-    return rule.pricePerMonth || rule.PricePerMonth || 0;
-  }
-
   applyFilters() {
     this.currentPage = 1;
     this.loadTickets();
+  }
+
+  onNavbarSearch(searchTerm: string) {
+    this.searchTerm = searchTerm;
+    this.applyFilters();
   }
 
   // --- LOGIC CAMERA PREVIEW KHUNG ĐỎ ---
@@ -311,10 +290,8 @@ export class TicketParkingPage implements OnInit, OnDestroy {
           'success',
         );
 
-        this.paymentAmount = this.calculateAmount(
-          this.regData.vehicleTypeID,
-          this.regData.durationMonths,
-        );
+        // Nhận trực tiếp số tiền đã tính toán từ C# Backend trả về
+        this.paymentAmount = res.amount || res.Amount || 0;
 
         // Cấu hình ngân hàng
         const bankId = 'MB';

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   IonContent,
@@ -66,8 +66,7 @@ interface ParkingRecord {
     IonButtons,
     IonMenuButton,
     NavbarComponent,
-  ],
-  providers: [DatePipe],
+  ]
 })
 export class DashboardPage implements OnInit {
   stats = {
@@ -91,13 +90,11 @@ export class DashboardPage implements OnInit {
   visiblePages: (number | string)[] = [];
 
   // --- BIẾN MỚI CHO TÍNH DOANH THU ---
-  pricingRules: any[] = [];
   totalHistoryRevenue: number = 0; // Tiền xe vãng lai
   totalMonthlyRevenue: number = 0; // Tiền đăng ký thẻ
 
   constructor(
-    private api: Api,
-    private datePipe: DatePipe,
+    private api: Api
   ) {
     addIcons({
       cameraOutline,
@@ -142,12 +139,6 @@ export class DashboardPage implements OnInit {
           );
         }
 
-        // Lấy bảng giá để làm cơ sở tính tiền thẻ
-        if (settingsData?.pricingRules || settingsData?.PricingRules) {
-          this.pricingRules =
-            settingsData.pricingRules || settingsData.PricingRules;
-        }
-
         this.stats.maxCapacity =
           isNaN(capacity) || capacity <= 0 ? 100 : capacity;
 
@@ -172,7 +163,8 @@ export class DashboardPage implements OnInit {
       pageSize: this.itemsPerPage
     };
 
-    this.api.getParkingHistory(params).subscribe({
+    // Gọi API mới chuyên dụng cho Dashboard thay vì lấy chung từ getParkingHistory
+    this.api.getDashboardRecords(params).subscribe({
       next: (response: any) => {
         const dataList =
           response?.data ||
@@ -180,38 +172,8 @@ export class DashboardPage implements OnInit {
           (Array.isArray(response) ? response : []);
 
         if (dataList && dataList.length > 0) {
-          this.allRecords = dataList.map((item: any) => {
-            const status = item.status || item.Status || '';
-
-            const rawTimeIn = item.checkInTime || item.CheckInTime;
-            let formattedTimeIn = '---';
-            try {
-              if (rawTimeIn)
-                formattedTimeIn =
-                  this.datePipe.transform(rawTimeIn, 'HH:mm - dd/MM/yyyy') ||
-                  '---';
-            } catch (e) {
-              formattedTimeIn = rawTimeIn;
-            }
-
-            const vTypeID = item.vehicleTypeID || item.VehicleTypeID;
-            const vTypeStr = item.vehicleType || item.VehicleType;
-            let vTypeName =
-              vTypeID === 1 || vTypeStr === 'Ô tô' ? 'Ô tô' : 'Xe máy';
-
-            return {
-              id:
-                item.cardUID ||
-                item.CardUID ||
-                item.cardID ||
-                item.CardID ||
-                `ID-${item.parkingID || item.ParkingID || '---'}`,
-              plateNumber: item.licensePlateIn || item.LicensePlateIn || '---',
-              vehicleType: vTypeName,
-              timeIn: formattedTimeIn,
-              status: status === 'Đang đỗ' || status === 'In' ? 'In' : 'Out',
-            };
-          });
+          // Dữ liệu đã được map, format chữ và phân trang hoàn chỉnh từ Backend
+          this.allRecords = dataList;
         } else {
           this.allRecords = [];
         }
@@ -236,6 +198,10 @@ export class DashboardPage implements OnInit {
         this.totalHistoryRevenue = data.totalHistoryRevenue || 0;
         this.totalMonthlyRevenue = data.totalMonthlyRevenue || 0;
         
+        // Hiển thị lại "Tổng doanh thu lũy kế" cho khớp với giao diện HTML
+        const grandTotal = this.totalHistoryRevenue + this.totalMonthlyRevenue;
+        this.stats.revenueToday = grandTotal.toLocaleString('vi-VN');
+
         if (data.vehiclesInParking !== undefined) {
           this.stats.totalVehicles = data.vehiclesInParking;
           this.stats.availableSlots = Math.max(0, this.stats.maxCapacity - data.vehiclesInParking);
@@ -243,17 +209,9 @@ export class DashboardPage implements OnInit {
               ? Math.round((data.vehiclesInParking / this.stats.maxCapacity) * 100) 
               : 0;
         }
-
-        this.updateTotalRevenueDisplay();
       },
       error: (err) => console.error('Lỗi lấy Summary Dashboard:', err),
     });
-  }
-
-  // GỘP 2 NGUỒN TIỀN VÀ HIỂN THỊ
-  updateTotalRevenueDisplay() {
-    const grandTotal = this.totalHistoryRevenue + this.totalMonthlyRevenue;
-    this.stats.revenueToday = grandTotal.toLocaleString('vi-VN');
   }
 
   applyFilters() {
@@ -314,23 +272,28 @@ export class DashboardPage implements OnInit {
   }
 
   exportReport() {
-    console.log('Đang yêu cầu kết xuất dữ liệu báo cáo PDF từ Backend...');
+    console.log('Đang yêu cầu kết xuất dữ liệu báo cáo CSV từ Backend...');
     
-    this.api.exportDashboardPdf().subscribe({
+    const filterParams = {
+      searchTerm: this.searchTerm,
+      status: this.filterStatus
+    };
+
+    this.api.exportDashboardCsv(filterParams).subscribe({
       next: (blob: Blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         const dateStr = new Date().toLocaleDateString('vi-VN').replace(/\//g, '-');
-        a.download = `Bao_Cao_Thong_Ke_VisionPark_${dateStr}.pdf`;
+        a.download = `Bao_Cao_Thong_Ke_VisionPark_${dateStr}.csv`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
-        console.log('✅ Chức năng kết xuất dữ liệu PDF hoàn tất thành công!');
+        console.log('✅ Chức năng kết xuất dữ liệu CSV hoàn tất thành công!');
       },
       error: (err) => {
-        console.error('Lỗi khi kết xuất PDF từ Backend:', err);
+        console.error('Lỗi khi kết xuất CSV từ Backend:', err);
       }
     });
   }

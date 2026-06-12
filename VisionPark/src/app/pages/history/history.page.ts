@@ -208,9 +208,7 @@ export class HistoryPage implements OnInit {
     this.api.getParkingHistory(params).subscribe({
       next: (res: any) => {
         if (res?.data) {
-          this.parkingHistory = res.data.map((item: any) =>
-            this.mapBackendToFrontend(item),
-          );
+          this.parkingHistory = res.data; // Nhận thẳng vì BE đã định dạng chuẩn khớp Interface
         } else {
           this.parkingHistory = [];
         }
@@ -242,18 +240,6 @@ export class HistoryPage implements OnInit {
   onNavbarSearch(searchTerm: string) {
     this.filterConfig.plateNumber = searchTerm;
     this.applyFilters();
-  }
-
-  private mapBackendToFrontend(item: any): ParkingRecord {
-    return {
-      nfcId: item.cardUID || item.CardUID || item.cardID || item.CardID || '---',
-      plateNumberIn: item.licensePlateIn || '---',
-      plateNumberOut: item.licensePlateOut || '---',
-      vehicleType: item.vehicleTypeID === 1 ? 'Ô tô' : 'Xe máy',
-      checkInTime: item.checkInTime,
-      checkOutTime: item.checkOutTime,
-      status: item.status === 'In' || item.status === 'Đang đỗ' ? 'In' : 'Out',
-    };
   }
 
   // Thêm tham số tùy chọn cardToken (những lúc nhập tay trên màn hình sẽ không có tham số này)
