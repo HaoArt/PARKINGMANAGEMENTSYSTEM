@@ -80,19 +80,10 @@ export class LoginPage implements OnInit {
       next: async (res: any) => {
         await loading.dismiss();
 
-        const name = res.fullName || res.FullName || res.username || 'User';
-        const role = res.role || res.Role || 'Security';
-        // Lấy token từ response (Tuỳ thuộc vào backend trả về object như thế nào)
-        const token =
-          res.token || res.Token || res.data?.token || res.data?.Token;
-
-        // Bắt triệt để mọi định dạng cấu trúc trả về của Backend
-        const faceImageUrl = 
-          res.faceImageUrl || 
-          res.FaceImageUrl || 
-          res.data?.faceImageUrl || 
-          res.data?.FaceImageUrl || 
-          '';
+        const name = res.fullName || res.username || 'User';
+        const role = res.role || 'Security';
+        const token = res.token || res.data?.token;
+        const faceImageUrl = res.faceImageUrl || res.data?.faceImageUrl || '';
 
         this.showToast(`Xin chào ${name}!`, 'success');
 

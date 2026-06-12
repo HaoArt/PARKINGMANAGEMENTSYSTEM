@@ -53,7 +53,6 @@ export class CardRegistrationPage implements OnInit {
   isEditing = false;
   editingCardId: number | null = null;
 
-  systemCards: CardRecord[] = [];
   paginatedCards: CardRecord[] = [];
 
   currentPage: number = 1;
@@ -121,26 +120,19 @@ export class CardRegistrationPage implements OnInit {
 
   loadSystemCards() {
     this.isLoading = true;
-    this.api.getAllCards().subscribe({
+    const params = {
+      pageNumber: this.currentPage,
+      pageSize: this.itemsPerPage
+    };
+
+    this.api.getAllCards(params).subscribe({
       next: (res: any) => {
-        let rawData = [];
-        if (res && res.data) {
-          rawData = res.data;
-        } else if (Array.isArray(res)) {
-          rawData = res;
-        }
+        // Dữ liệu đã được chuẩn hóa CamelCase từ Backend
+        this.paginatedCards = res?.data || res || [];
 
-        this.systemCards = rawData.map((item: any) => {
-          return {
-            cardID: item.cardID || item.CardID,
-            cardUID: item.cardUID || item.CardUID,
-            cardType: item.cardType || item.CardType,
-            status: item.status || item.Status,
-          };
-        });
-
-        this.currentPage = 1;
-        this.calculatePagination();
+        const totalCount = res?.totalCount || 0;
+        this.totalPages = Math.ceil(totalCount / this.itemsPerPage) || 1;
+        this.generatePages();
 
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -268,25 +260,6 @@ export class CardRegistrationPage implements OnInit {
     toast.present();
   }
 
-  calculatePagination() {
-    this.totalPages = Math.ceil(this.systemCards.length / this.itemsPerPage);
-
-    if (this.currentPage > this.totalPages && this.totalPages > 0) {
-      this.currentPage = this.totalPages;
-    } else if (this.totalPages === 0) {
-      this.currentPage = 1;
-    }
-
-    this.updatePaginatedCards();
-    this.generatePages();
-  }
-
-  updatePaginatedCards() {
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    this.paginatedCards = this.systemCards.slice(startIndex, endIndex);
-  }
-
   generatePages() {
     const current = this.currentPage;
     const total = this.totalPages;
@@ -323,7 +296,7 @@ export class CardRegistrationPage implements OnInit {
   goToPage(page: number | string) {
     if (typeof page === 'number' && page !== this.currentPage) {
       this.currentPage = page;
-      this.updatePaginatedCards();
+      this.loadSystemCards();
       this.generatePages();
     }
   }
@@ -331,7 +304,7 @@ export class CardRegistrationPage implements OnInit {
   nextPage() {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      this.updatePaginatedCards();
+      this.loadSystemCards();
       this.generatePages();
     }
   }
@@ -339,7 +312,7 @@ export class CardRegistrationPage implements OnInit {
   prevPage() {
     if (this.currentPage > 1) {
       this.currentPage--;
-      this.updatePaginatedCards();
+      this.loadSystemCards();
       this.generatePages();
     }
   }

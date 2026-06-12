@@ -142,10 +142,7 @@ export class UsersPage implements OnInit, OnDestroy {
         if (res?.data) {
           this.users = res.data.map((item: any) => ({
             ...item,
-            userID: item.userId || item.UserID || item.userID,
-            faceImageUrl: this.api.getFullImageUrl(
-              item.faceImageUrl || item.FaceImageUrl,
-            ),
+            faceImageUrl: this.api.getFullImageUrl(item.faceImageUrl),
           }));
         }
         this.paginatedUsers = this.users;
@@ -218,7 +215,7 @@ export class UsersPage implements OnInit, OnDestroy {
         fullName: this.editingUser.fullName,
         userName: this.editingUser.userName,
         password: this.editingUser.password,
-        role: 'Security',
+        role: this.editingUser.role,
       };
 
       this.api.createUser(payload).subscribe({

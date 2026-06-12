@@ -145,15 +145,14 @@ namespace VisionPark.API.Controllers
                 .Take(pageSize)
                 .Select(s => new
                 {
-                    SessionID = s.SessionID,
-                    CardID = s.CardID,
-                    VehicleTypeID = s.VehicleTypeID,
-                    LicensePlateIn = s.LicensePlateIn,
-                    LicensePlateOut = s.LicensePlateOut ?? "N/A",
+                    NfcId = s.Card != null ? s.Card.CardUID : "---",
+                    PlateNumberIn = s.LicensePlateIn ?? "---",
+                    PlateNumberOut = s.LicensePlateOut ?? "---",
+                    VehicleType = s.VehicleType != null ? s.VehicleType.TypeName : (s.VehicleTypeID == 1 ? "Ô tô" : "Xe máy"),
                     CheckInTime = s.CheckInTime.ToString("dd/MM/yyyy HH:mm:ss"),
                     CheckOutTime = s.CheckOutTime.HasValue
                             ? s.CheckOutTime.Value.ToString("dd/MM/yyyy HH:mm:ss")
-                            : "Chưa ra khỏi bãi",
+                            : "---",
                     Status = s.CheckOutTime == null ? "In" : "Out"
                 }).ToListAsync();
 
