@@ -1,5 +1,30 @@
 # PHẦN: BÁO CÁO THỰC TẬP HỆ THỐNG QUẢN LÝ BÃI GIỮ XE VISIONPARK
 
+## TÓM TẮT DỰ ÁN (EXECUTIVE SUMMARY)
+
+Dự án **Hệ thống Quản lý Bãi giữ xe Thông minh (VisionPark)** đã xây dựng thành công một hệ thống Client-Server kết hợp Microservices AI, giải quyết bài toán quản lý bãi xe theo hướng linh hoạt và tiết kiệm chi phí phần cứng.
+
+**1. Dự án đang làm được những gì? (Tổng quan kiến trúc)**
+- **Mobile NFC thay thế máy quét chuyên dụng:** Sử dụng ứng dụng di động (Angular/Ionic kết hợp Capacitor NFC plugin) để biến smartphone của bảo vệ thành máy quét thẻ từ (RFID/NFC) di động.
+- **Kiến trúc Microservices cho AI:** Tách biệt luồng xử lý nặng để hệ thống không bị nghẽn:
+  - **Python FastAPI:** Đảm nhiệm nhận diện biển số xe (YOLO để cắt khung ảnh và EasyOCR để đọc chữ), có tích hợp thuật toán xử lý riêng cho biển số xe máy và ô tô tại Việt Nam.
+  - **C# .NET Core API:** Xử lý logic nghiệp vụ trung tâm, kết nối cơ sở dữ liệu SQL Server (Entity Framework) và tích hợp AI nhận diện khuôn mặt (OpenCV & Dlib) theo cơ chế Singleton để tối ưu RAM.
+- **Bảo mật & Tối ưu:** Áp dụng xác thực JWT Token, băm mật khẩu BCrypt an toàn.
+
+**2. Đầy đủ các chức năng nghiệp vụ cốt lõi:**
+- **Quản lý kiểm soát phương tiện:** Quét thẻ NFC (vãng lai/vé tháng) tự động nhận diện ID thẻ; nhận diện tự động biển số xe từ ảnh chụp; lưu vết lịch sử ra/vào.
+- **Quản lý nhân sự & Chấm công bằng AI:** Quản lý tài khoản, phân quyền (Admin/Staff); đăng ký khuôn mặt nhân viên; chấm công (Check-in/Check-out) bằng Face ID qua Camera điện thoại với cơ chế chống Spam.
+- **Quản lý vé tháng & Cấu hình:** Đăng ký, gia hạn vé tháng; thiết lập bảng giá linh hoạt (Pricing Rules) và cấu hình sức chứa tối đa.
+- **Thống kê, Báo cáo (Dashboard):** Hiển thị Realtime lượng xe, chỗ trống, tỷ lệ lấp đầy, doanh thu; tra cứu lịch sử; tự động kết xuất báo cáo PDF ngay tại thiết bị Client.
+
+**3. Luồng hoạt động cụ thể:**
+- **Luồng Gửi/Lấy xe:** Bảo vệ quét thẻ NFC qua điện thoại (App xử lý chống quét đúp). App gửi NFC ID và ảnh lên C# Backend. Backend nhận diện phiên đỗ xe (In/Out), ghi nhận thời gian và tính phí tự động.
+- **Luồng Nhận diện Biển số:** C# Backend nhận ảnh từ điện thoại, gọi HTTP POST sang Python FastAPI. YOLO cắt chính xác khung chứa biển số, EasyOCR đọc chữ, thuật toán Python định dạng chuẩn biển số VN rồi trả kết quả cho C#.
+- **Luồng Chấm công Face ID:** Nhân viên mở App chụp mặt. Ảnh gửi lên API. AI trích xuất Face Encodings, so sánh 1-1 với ảnh gốc của người dùng đó trong CSDL. Nếu khoảng cách `FaceDistance < 0.45` và vượt qua thời gian chờ (1 phút), hệ thống ghi nhận Điểm danh VÀO/RA ca.
+- **Luồng Báo cáo PDF:** Khi Admin truy cập Dashboard, Frontend gọi API lấy số liệu tổng quát. Khi ấn "Xuất PDF", Frontend lấy dữ liệu đang hiển thị trên thiết bị, sử dụng thư viện `jsPDF` tự động vẽ cấu trúc báo cáo và tải file xuống (giảm tải hoàn toàn cho Server).
+
+---
+
 ## CHƯƠNG 1: PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG
 
 ### 1.1 Tổng quan kiến trúc hệ thống
@@ -100,3 +125,54 @@ Dự án đã hoàn thiện và đáp ứng đúng các yêu cầu nghiệp vụ
 - **Nâng cấp Camera tự động (LPR/ANPR):** Kết nối trực tiếp hệ thống với các IP Camera gắn tại cổng Barie để tự động bắt biển số xe không cần người dùng thao tác chụp ảnh, nâng cao tốc độ lưu thông xe.
 - **Tích hợp thanh toán số:** Bổ sung phương thức hiển thị mã QR Code chuyển khoản tự động hoặc liên kết Ví điện tử vào màn hình Check-out để khách hàng thanh toán linh hoạt hơn.
 - **Tối ưu AI bằng Cloud Computing:** Đẩy các dịch vụ nhận diện khuôn mặt và biển số lên hệ thống Cloud Server hỗ trợ GPU để giảm thời gian trễ xuống mức mili-giây (ms).
+
+### 2.4 Đề xuất giải pháp mở rộng: Tích hợp AI (Khuôn mặt & Biển số) cho Khách vãng lai (Vé lượt)
+
+Dựa trên nền tảng kiến trúc hiện tại, hệ thống hoàn toàn có khả năng mở rộng để đáp ứng yêu cầu kiểm soát an ninh khắt khe hơn: **Bắt buộc quét cả thẻ NFC, biển số xe và khuôn mặt cho khách vãng lai (thẻ lượt)**. Việc đối chiếu kép (Face ID + License Plate) đảm bảo tính an toàn tuyệt đối, chống mất cắp ngay cả khi kẻ gian nhặt được thẻ NFC bị đánh rơi.
+
+**a. Thiết kế Luồng nghiệp vụ (Business Flow):**
+- **Lượt vào (Check-in):**
+  1. Khách chạy xe tới, nhân viên/bảo vệ đưa một thẻ trắng NFC (thẻ lượt) quét qua điện thoại.
+  2. Giao diện ứng dụng kích hoạt Camera, yêu cầu bảo vệ chụp đồng thời (hoặc lần lượt): **Ảnh biển số** và **Ảnh khuôn mặt khách hàng**.
+  3. Frontend gửi mã thẻ UID và 2 tệp hình ảnh (FormData) lên Backend.
+  4. Backend xử lý song song: Gọi Microservice Python để đọc ký tự biển số (OCR) và gọi Module .NET (FaceRecognition) để trích xuất mảng vector đặc trưng (Face Encodings) của khuôn mặt.
+  5. Lưu thông tin (Text Biển số, URL Ảnh xe, URL Ảnh mặt, chuỗi Face Encodings và Thời gian vào) vào bản ghi `ParkingSession`. 
+
+- **Lượt ra (Check-out):**
+  1. Khách đưa lại thẻ NFC, nhân viên quẹt thẻ.
+  2. Frontend kích hoạt Camera quét lại **Khuôn mặt** (và Biển số nếu cần) tại thời điểm ra.
+  3. Backend tìm kiếm phiên đỗ xe (Active Session) tương ứng.
+  4. Backend chạy AI .NET để đối chiếu khuôn mặt vừa chụp với chuỗi `FaceEncodings` đã lưu lúc Check-in.
+  5. Nếu tỷ lệ sai lệch (Face Distance) `< 0.45`: Xác nhận đúng người, tính phí, kết thúc phiên và mở Barie.
+  6. Nếu tỷ lệ sai lệch `>= 0.45`: Cảnh báo đỏ (Còi hú/Alert) trên điện thoại cho bảo vệ kiểm tra sự việc.
+
+**b. Hướng dẫn chỉnh sửa kỹ thuật (Technical Guidelines):**
+Để hiện thực hóa tính năng trên, mã nguồn cần được cấu trúc lại ở các module sau:
+- **Về cơ sở dữ liệu (Database):** Trong `ApplicationDbContext`, bổ sung thêm các trường cho bảng `ParkingSessions` bao gồm: `FaceImageUrlIn`, `VehicleImageUrlIn`, và đặc biệt là `FaceEncodingIn` (chuỗi lưu trữ tọa độ vector khuôn mặt). Lưu vector giúp quá trình Check-out so sánh rất nhanh mà không tốn RAM load lại ảnh cũ. *Tuyệt đối chỉ lưu URL ảnh, không lưu Base64 vào DB.*
+- **Về Backend C# (`ParkingController.cs`):** 
+  - Chuyển Data Binding từ `[FromBody]` (JSON) sang `[FromForm]` (FormData) cho API Check-in/Check-out để hỗ trợ định dạng `IFormFile`.
+  - Sử dụng kỹ thuật bất đồng bộ **`Task.WhenAll`** để chạy đồng thời luồng gọi HTTP qua Python (Biển số) và luồng phân tích Dlib (Khuôn mặt). Việc này giúp giảm một nửa thời gian chờ đợi.
+  - Kế thừa lại Pattern Singleton (`_fr`) của `FaceRecognition` từ luồng Chấm công để tái sử dụng mô hình.
+- **Về Frontend (Angular/Ionic):** 
+  - Nâng cấp UI ở màn hình Check-in/Check-out. Tái sử dụng khối logic `CameraPreview` từ màn hình phát hành thẻ tháng.
+  - Cung cấp Loading Spinner rõ ràng trong lúc gửi Request, do 2 tác vụ AI chạy song song có thể kéo dài 2-4 giây tùy phần cứng Server.
+
+**c. Các biện pháp dự phòng rủi ro (Fallback Mechanisms):**
+Trong quá trình triển khai thực tế, cần lường trước các ngoại lệ:
+- Khách hàng trùm kín mặt (đeo khẩu trang, đội mũ fullface) hoặc trời quá tối gây lóa camera.
+- Máy chủ Backend chạm mốc 100% CPU khi có nhiều xe vào cùng một giây.
+
+*Giải pháp:* Frontend cần được thiết kế thêm quyền Bypass. Nếu AI nhận diện thất bại hoặc Timeout quá 5 giây, màn hình sẽ hiển thị nút **"Xác nhận thủ công"**, cho phép bảo vệ tự đối chiếu bằng mắt thường với hình chụp trên màn hình để quyết định mở cổng, tránh gây ùn tắc giao thông.
+
+**d. Đề xuất mô hình triển khai thực tế (Deployment Models):**
+Do đặc thù ứng dụng sử dụng điện thoại di động làm máy quét NFC, quy trình vận hành quét vé lượt được đề xuất chia thành 2 mô hình tùy theo quy mô và ngân sách của bãi xe:
+- **Mô hình 1 - Thuần Mobile (Dành cho bãi xe nhỏ, quán cafe, bãi dã chiến):** Bảo vệ quẹt thẻ vào mặt lưng điện thoại, sau đó trực tiếp đưa điện thoại lên chụp khuôn mặt và biển số. Nhược điểm là thao tác thủ công (khoảng 3-5 giây/xe), nhưng ưu điểm tuyệt đối là chi phí đầu tư phần cứng bằng 0 (không cần mua PC, Camera IP, hay đầu đọc thẻ từ, không cần thi công kéo cáp).
+- **Mô hình 2 - Trạm kiểm soát thông minh (Dành cho bãi xe tiêu chuẩn, hầm chung cư):** Kết hợp điện thoại và hệ thống Camera IP cố định (RTSP). Điện thoại của nhân viên lúc này đóng vai trò làm **Đầu đọc NFC không dây + Màn hình điều khiển di động**. Khi nhân viên quẹt thẻ, ứng dụng gửi tín hiệu lên Backend; Backend sẽ tự động trích xuất hình ảnh (snapshot) ngay tại mili-giây đó từ luồng RTSP của Camera IP gắn trên cột để AI phân tích. Mô hình này mang lại tốc độ cực nhanh (< 1 giây/xe), và giải phóng người bảo vệ khỏi việc phải ngồi gò bó trước màn hình máy tính như các bãi giữ xe truyền thống.
+
+**e. Đánh giá mức độ khả thi, độ khó và tỷ lệ sai sót thực tế:**
+- **Về độ khó triển khai (Mức độ: Trung bình):** Hệ thống đã có sẵn các vi dịch vụ (Microservices) cốt lõi như AI Python đọc biển số (YOLO/EasyOCR) và AI C# nhận diện khuôn mặt (Dlib). Việc gộp 2 luồng này vào API Check-in/Check-out là hoàn toàn khả thi và không quá khó về mặt kỹ thuật (ước tính cần 3 - 5 ngày để ráp nối các module).
+- **Tỉ lệ sai sót và rủi ro môi trường (Cần đặc biệt lưu tâm):** 
+  - *Sai sót từ AI (False Rejection):* Khách hàng đội mũ bảo hiểm full-face, đeo khẩu trang dày, kính râm, hoặc ảnh chụp ban đêm ngược sáng sẽ khiến AI báo "Không khớp" lúc Check-out dù đúng người.
+  - *Nhận diện biển số sai:* Ảnh chụp vội bị mờ, lóa đèn flash hoặc bùn đất che khuất biển số có thể làm hệ thống OCR đọc nhầm ký tự (VD: 8 thành B, 0 thành D).
+  - *Nút thắt cổ chai hiệu năng (Bottleneck):* Việc xử lý song song cả 2 model AI nặng cho 1 lượt xe tốn khoảng 3-5 giây. Nếu bãi xe có lượng lưu thông lớn giờ cao điểm, việc này sẽ gây nghẽn CPU máy chủ (lên mốc 100%) và dẫn tới ùn tắc giao thông cục bộ tại cổng.
+- **Giải pháp vận hành thực tế:** Bắt buộc thiết kế nút "Bypass" (Xác nhận thủ công) trên App Client. Nếu AI nhận diện sai hoặc xử lý vượt quá thời gian (Timeout > 5s), App sẽ hiển thị song song 2 ảnh (lúc vào - lúc ra) lên màn hình điện thoại. Nhân viên bảo vệ sẽ đối chiếu bằng mắt thường và tự bấm nút mở Barie, đảm bảo luồng giao thông không bao giờ bị tắc nghẽn hoàn toàn do lỗi của máy móc.
