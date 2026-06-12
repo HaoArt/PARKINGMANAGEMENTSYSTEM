@@ -49,10 +49,7 @@
                 <option value="Quarterly">Thẻ Quý</option>
                 <option value="Year">Thẻ Năm</option>
               </select>
-              <ion-icon
-                name="chevron-down-outline"
-                class="dropdown-icon"
-              ></ion-icon>
+              <ion-icon name="chevron-down-outline" class="dropdown-icon"></ion-icon>
             </div>
           </div>
 
@@ -105,8 +102,16 @@
                   <div class="plate-container">{{ item.cardUID }}</div>
                 </td>
 
-                <td data-label="Loại thẻ" class="font-bold text-main">
-                  {{ item.cardType === 'Guest' ? 'Thẻ Lượt' : (item.cardType === 'Monthly' ? 'Thẻ Tháng' : (item.cardType === 'Quarterly' ? 'Thẻ Quý' : 'Thẻ Năm')) }}
+                <td data-label="Loại thẻ" class="font-bold">
+                  <div style="display: flex; align-items: center; gap: 4px;"
+                       [ngStyle]="{
+                         'color': item.cardType === 'Year' ? '#dc2626' : 
+                                  (item.cardType === 'Quarterly' ? '#ea580c' : 
+                                  (item.cardType === 'Guest' ? '#6b7280' : 'var(--ion-color-primary, #003399)'))
+                       }">
+                    <ion-icon [name]="item.cardType === 'Year' ? 'star' : (item.cardType === 'Quarterly' ? 'star-half' : 'card-outline')"></ion-icon>
+                    <span>{{ item.cardType === 'Guest' ? 'Thẻ Lượt' : (item.cardType === 'Monthly' ? 'Thẻ Tháng' : (item.cardType === 'Quarterly' ? 'Thẻ Quý' : 'Thẻ Năm')) }}</span>
+                  </div>
                 </td>
 
                 <td data-label="Trạng thái" class="text-center">

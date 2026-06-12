@@ -22,6 +22,9 @@ import {
   chevronBackOutline,
   chevronForwardOutline,
   informationCircleOutline, // Added for helper text
+  star,
+  starHalf,
+  cardOutline,
 } from 'ionicons/icons';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { Api } from '../../services/api';
@@ -39,7 +42,13 @@ interface CardRecord {
   templateUrl: './card-registration.page.html',
   styleUrls: ['./card-registration.page.scss'],
   standalone: true,
-  imports: [IonContent, IonIcon, CommonModule, FormsModule, NavbarComponent],
+  imports: [
+    IonContent,
+    IonIcon,
+    CommonModule,
+    FormsModule,
+    NavbarComponent,
+  ],
   providers: [NFC, Ndef],
 })
 export class CardRegistrationPage implements OnInit {
@@ -92,6 +101,9 @@ export class CardRegistrationPage implements OnInit {
       chevronBackOutline,
       chevronForwardOutline,
       informationCircleOutline,
+      star,
+      starHalf,
+      cardOutline,
     });
   }
 
