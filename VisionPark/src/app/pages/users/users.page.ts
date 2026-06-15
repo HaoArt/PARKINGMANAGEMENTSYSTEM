@@ -165,6 +165,11 @@ export class UsersPage implements OnInit, OnDestroy {
     this.loadUsers();
   }
 
+  onNavbarSearch(searchTerm: string) {
+    this.searchTerm = searchTerm;
+    this.applyFilters();
+  }
+
   // --- LOGIC MỞ/ĐÓNG MODAL ---
   openAddModal() {
     this.modalMode = 'add';

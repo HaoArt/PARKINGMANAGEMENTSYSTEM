@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -37,7 +37,13 @@ import {
   chevronForwardOutline,
   carSportOutline, // Đã thêm
   bicycleOutline, // Đã thêm
-} from 'ionicons/icons';
+  cameraOutline,
+  apertureOutline,
+  stopCircleOutline,
+  personOutline,
+  videocamOffOutline,
+  imageOutline,
+  trashOutline, closeOutline, warningOutline, filterOutline } from 'ionicons/icons';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { Api } from '../../services/api';
 // 👉 THÊM PLUGIN NFC
@@ -51,6 +57,10 @@ interface ParkingRecord {
   checkInTime: string;
   checkOutTime: string;
   status: 'In' | 'Out';
+  faceImageUrlIn?: string;
+  faceImageUrlOut?: string;
+  vehicleImageUrlIn?: string;
+  vehicleImageUrlOut?: string;
 }
 
 interface ScanResultData {
@@ -91,7 +101,7 @@ interface ScanResultData {
   ],
   providers: [NFC, Ndef], // 👉 CẤP QUYỀN SỬ DỤNG NFC CHO COMPONENT NÀY
 })
-export class HistoryPage implements OnInit {
+export class HistoryPage implements OnInit, OnDestroy {
   private api = inject(Api);
   private toastCtrl = inject(ToastController);
   private platform = inject(Platform);
@@ -114,32 +124,31 @@ export class HistoryPage implements OnInit {
 
   scanResult: ScanResultData | null = null;
 
+  // --- BIẾN CAMERA ---
+  @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
+  @ViewChild('canvasElement') canvasElement!: ElementRef<HTMLCanvasElement>;
+  isCameraOn = false;
+  stream: MediaStream | null = null;
+  plateImageBase64: string | null = null;
+  faceImageBase64: string | null = null;
+  selectedVehicleType: number = 2; // 1: Ô tô, 2: Xe máy mặc định
+  requiresForcePass = false;
+  lastFailedCardInfo: { nfcId: string, cardToken?: string } | null = null;
+
   constructor(
     private nfc: NFC, // Tiêm NFC
     private cdr: ChangeDetectorRef, // Tiêm ChangeDetectorRef để chống đơ màn hình
   ) {
-    addIcons({
-      scanOutline,
-      idCardOutline,
-      radioOutline,
-      checkmarkCircleOutline,
-      closeCircleOutline,
-      informationCircleOutline,
-      cardOutline,
-      chevronDownOutline,
-      searchOutline,
-      downloadOutline,
-      documentTextOutline,
-      chevronBackOutline,
-      chevronForwardOutline,
-      carSportOutline,
-      bicycleOutline,
-    });
+    addIcons({scanOutline,idCardOutline,carSportOutline,bicycleOutline,videocamOffOutline,closeOutline,imageOutline,radioOutline,cardOutline,warningOutline,filterOutline,chevronDownOutline,searchOutline,downloadOutline,documentTextOutline,chevronBackOutline,chevronForwardOutline,cameraOutline,personOutline,stopCircleOutline,checkmarkCircleOutline,closeCircleOutline,informationCircleOutline,apertureOutline,trashOutline,});
   }
 
   ngOnInit() {
     this.fetchData();
     this.startNFC(); // 👉 KÍCH HOẠT LẮNG NGHE QUẸT THẺ TỰ ĐỘNG
+  }
+
+  ngOnDestroy() {
+    this.stopCamera();
   }
 
   // 👉 HÀM LẮNG NGHE THẺ NFC CHẠM VÀO ĐIỆN THOẠI
@@ -204,7 +213,13 @@ export class HistoryPage implements OnInit {
     this.api.getParkingHistory(params).subscribe({
       next: (res: any) => {
         if (res?.data) {
-          this.parkingHistory = res.data; // Nhận thẳng vì BE đã định dạng chuẩn khớp Interface
+          this.parkingHistory = res.data.map((item: any) => ({
+            ...item,
+            faceImageUrlIn: item.faceImageUrlIn || item.FaceImageUrlIn ? this.api.getFullImageUrl(item.faceImageUrlIn || item.FaceImageUrlIn) : undefined,
+            faceImageUrlOut: item.faceImageUrlOut || item.FaceImageUrlOut ? this.api.getFullImageUrl(item.faceImageUrlOut || item.FaceImageUrlOut) : undefined,
+            vehicleImageUrlIn: item.vehicleImageUrlIn || item.VehicleImageUrlIn ? this.api.getFullImageUrl(item.vehicleImageUrlIn || item.VehicleImageUrlIn) : undefined,
+            vehicleImageUrlOut: item.vehicleImageUrlOut || item.VehicleImageUrlOut ? this.api.getFullImageUrl(item.vehicleImageUrlOut || item.VehicleImageUrlOut) : undefined,
+          }));
         } else {
           this.parkingHistory = [];
         }
@@ -239,14 +254,28 @@ export class HistoryPage implements OnInit {
   }
 
   // Thêm tham số tùy chọn cardToken (những lúc nhập tay trên màn hình sẽ không có tham số này)
-  onProcessCard(nfcId: string, cardToken?: string) {
+  onProcessCard(nfcId: string, cardToken?: string, forcePass: boolean = false) {
     if (!nfcId) {
       this.showToast('Vui lòng nhập hoặc quét mã thẻ!', 'warning');
       return;
     }
 
+    if (!this.plateImageBase64) {
+      this.showToast('Bắt buộc phải chụp hoặc tải lên ảnh BIỂN SỐ!', 'warning');
+      return;
+    }
+
+    if (!this.faceImageBase64) {
+      this.showToast('Bắt buộc phải chụp hoặc tải lên ảnh KHUÔN MẶT!', 'warning');
+      return;
+    }
+
+    // Lấy ảnh khuôn mặt nếu có chụp
+    const faceImage = this.faceImageBase64 ? this.faceImageBase64 : undefined;
+    const plateImage = this.plateImageBase64 ? this.plateImageBase64 : undefined;
+
     this.isLoading = true;
-    this.api.scanCard(nfcId, cardToken).subscribe({
+    this.api.scanCard(nfcId, cardToken, faceImage, plateImage, this.selectedVehicleType, forcePass).subscribe({
       next: (res: any) => {
         const data = res.data;
 
@@ -265,13 +294,33 @@ export class HistoryPage implements OnInit {
           isSuccess: res.action === 'CHECK_IN' || res.action === 'CHECK_OUT',
         };
 
+        // Hiển thị Toast thông báo rõ ràng cho bảo vệ
+        if (this.scanResult.isSuccess) {
+          this.showToast(this.scanResult.message, 'success');
+          
+          // Nếu vé sắp hết hạn (dưới 7 ngày), hiển thị thêm cảnh báo màu vàng
+          const currentStatus = this.scanResult.status;
+          if (currentStatus && currentStatus.includes('Sắp hết hạn')) {
+             setTimeout(() => {
+                 this.showToast(`CẢNH BÁO: Thẻ ${currentStatus}`, 'warning');
+             }, 500); // Trễ 0.5s để không đè lên thông báo thành công
+          }
+        } else {
+          // Bị BLOCK (Hết hạn, bị khóa...) - Hiện màu đỏ
+          this.showToast(this.scanResult.message, 'danger');
+        }
+
         this.inputNfcId = ''; // Xoá trắng ô text box
+        this.clearImage(); // Xoá ảnh khuôn mặt để sẵn sàng cho xe tiếp theo
+        this.requiresForcePass = false;
+        this.lastFailedCardInfo = null;
         this.fetchData(); // Quẹt xong thì load lại bảng lịch sử mới nhất
       },
       error: (err) => {
+        const errData = err.error || {};
         this.scanResult = {
           action: 'ERROR',
-          message: err.error?.message || err.error || 'Lỗi xử lý thẻ!',
+          message: errData.message || errData.Message || err.error || 'Lỗi xử lý thẻ!',
           customerName: '---',
           plateNumber: '---',
           vehicleType: '---',
@@ -279,10 +328,26 @@ export class HistoryPage implements OnInit {
           status: '---',
           isSuccess: false,
         };
+
+        const isForcePassReq = errData.requiresForcePass || errData.RequiresForcePass;
+        if (isForcePassReq) {
+          this.requiresForcePass = true;
+          this.lastFailedCardInfo = { nfcId, cardToken };
+        } else {
+          this.requiresForcePass = false;
+          this.lastFailedCardInfo = null;
+        }
+
         this.isLoading = false;
         this.cdr.detectChanges();
       },
     });
+  }
+
+  forcePass() {
+    if (this.lastFailedCardInfo) {
+      this.onProcessCard(this.lastFailedCardInfo.nfcId, this.lastFailedCardInfo.cardToken, true);
+    }
   }
 
   async showToast(
@@ -388,5 +453,79 @@ export class HistoryPage implements OnInit {
         console.error('Lỗi xuất PDF:', err);
       },
     });
+  }
+
+  // --- LOGIC CAMERA ---
+  async startCamera() {
+    if (this.isCameraOn) return;
+    try {
+      this.stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 640, height: 480 },
+      });
+      this.isCameraOn = true;
+      setTimeout(() => {
+        if (this.videoElement) this.videoElement.nativeElement.srcObject = this.stream;
+      }, 100);
+    } catch (err: any) {
+      console.error('Lỗi truy cập webcam: ', err);
+      this.showToast('Không thể truy cập webcam.', 'danger');
+    }
+  }
+
+  stopCamera() {
+    if (this.stream) {
+      this.stream.getTracks().forEach((track) => track.stop());
+      this.isCameraOn = false;
+      this.stream = null;
+    }
+  }
+
+  capturePlate() {
+    this.plateImageBase64 = this.captureFromVideo();
+  }
+
+  captureFace() {
+    this.faceImageBase64 = this.captureFromVideo();
+  }
+
+  captureFromVideo(): string | null {
+    if (!this.isCameraOn || !this.videoElement || !this.canvasElement) return null;
+    const video = this.videoElement.nativeElement;
+    const canvas = this.canvasElement.nativeElement;
+    const context = canvas.getContext('2d');
+    if (context) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL('image/jpeg');
+    }
+    return null;
+  }
+
+  // Hàm tải ảnh từ thiết bị để Test AI
+  onFileSelected(event: any, type: 'plate' | 'face') {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        if (type === 'plate') {
+          this.plateImageBase64 = e.target.result;
+        } else {
+          this.faceImageBase64 = e.target.result;
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+    
+    // Reset lại value của thẻ input để lần sau chọn lại chính ảnh đó vẫn hoạt động bình thường
+    event.target.value = '';
+  }
+
+  clearPlate() { this.plateImageBase64 = null; }
+  clearFace() { this.faceImageBase64 = null; }
+
+  clearImage() {
+    this.clearPlate();
+    this.clearFace();
   }
 }

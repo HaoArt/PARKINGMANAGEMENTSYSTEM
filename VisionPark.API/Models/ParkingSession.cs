@@ -46,5 +46,9 @@ namespace VisionPark.API.Models
 
         public string Status { get; set; } = "In";
         public bool? IsPlateMatch { get; set; }
+        public string? FaceImageUrlIn { get; set; }
+        public string? FaceImageUrlOut { get; set; }
+        public string? VehicleImageUrlIn { get; set; }
+
     }
 }

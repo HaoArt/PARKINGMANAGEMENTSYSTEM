@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VisionPark.API.Data;
 using VisionPark.API.Models;
@@ -139,7 +139,8 @@ namespace VisionPark.API.Controllers
             {
                 searchTerm = searchTerm.ToLower();
                 query = query.Where(t => t.RegisterPlate.ToLower().Contains(searchTerm) || 
-                                         t.CustomerName.ToLower().Contains(searchTerm));
+                                         t.CustomerName.ToLower().Contains(searchTerm) ||
+                                         (t.Card != null && t.Card.CardUID.ToLower().Contains(searchTerm)));
             }
 
             int totalCount = await query.CountAsync();
