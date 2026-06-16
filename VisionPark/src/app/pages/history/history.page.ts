@@ -139,6 +139,8 @@ export class HistoryPage implements OnInit, OnDestroy {
   requiresForcePass = false;
   lastFailedCardInfo: { nfcId: string, cardToken?: string } | null = null;
 
+  fullScreenImage: string | null = null;
+
   constructor(
     private nfc: NFC, // Tiêm NFC
     private cdr: ChangeDetectorRef, // Tiêm ChangeDetectorRef để chống đơ màn hình
@@ -540,5 +542,15 @@ export class HistoryPage implements OnInit, OnDestroy {
   clearImage() {
     this.clearPlate();
     this.clearFace();
+  }
+
+  viewImage(imageUrl?: string) {
+    if (imageUrl) {
+      this.fullScreenImage = imageUrl;
+    }
+  }
+
+  closeFullScreenImage() {
+    this.fullScreenImage = null;
   }
 }

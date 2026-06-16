@@ -71,8 +71,7 @@ namespace VisionPark.API.Controllers
             // --- 2. KIỂM TRA THẺ VÀ BIỂN SỐ ---
             var card = await _context.NfcCards.FirstOrDefaultAsync(c => c.CardUID == request.CardUID);
             if (card == null) return BadRequest("Thẻ này chưa được khởi tạo trong hệ thống!");
-
-            // KIỂM TRA THẺ BỊ KHÓA
+oàn             // KIỂM TRA THẺ BỊ KHÓA
             if (card.Status != "Active") return BadRequest("Thẻ này đã bị KHÓA trong kho, không thể dùng để đăng ký vé tháng!");
 
             var cardAlreadyUsed = await _context.MonthlyTickets.AnyAsync(t => t.CardID == card.CardID && t.IsActive && t.EndDate >= DateTime.Now);
@@ -234,7 +233,7 @@ namespace VisionPark.API.Controllers
 
             int totalCount = await query.CountAsync();
 
-            var tickets = await query
+            var pagedData = await query
                 .OrderByDescending(t => t.StartDate)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
@@ -246,12 +245,25 @@ namespace VisionPark.API.Controllers
                     RegisterPlate = t.RegisterPlate,
                     VehicleType = t.VehicleType != null ? t.VehicleType.TypeName : "Không xác định",
                     CardUID = t.Card != null ? t.Card.CardUID : "Không có thẻ",
-                    StartDate = t.StartDate.ToString("dd/MM/yyyy HH:mm"),
-                    EndDate = t.EndDate.ToString("dd/MM/yyyy HH:mm"),
-                    IsActive = t.IsActive,
-                    Status = DateTime.Now > t.EndDate ? "Đã hết hạn" : (t.IsActive ? "Đang hoạt động" : "Đã khóa")
+                    StartDate = t.StartDate,
+                    EndDate = t.EndDate,
+                    IsActive = t.IsActive
                 })
                 .ToListAsync();
+
+            var tickets = pagedData.Select(t => new
+            {
+                TicketId = t.TicketId,
+                CustomerName = t.CustomerName,
+                PhoneNumber = t.PhoneNumber,
+                RegisterPlate = t.RegisterPlate,
+                VehicleType = t.VehicleType,
+                CardUID = t.CardUID.Contains("_deleted_") ? t.CardUID.Substring(0, t.CardUID.IndexOf("_deleted_")) : t.CardUID,
+                StartDate = t.StartDate.ToString("dd/MM/yyyy HH:mm"),
+                EndDate = t.EndDate.ToString("dd/MM/yyyy HH:mm"),
+                IsActive = t.IsActive,
+                Status = DateTime.Now > t.EndDate ? "Đã hết hạn" : (t.IsActive ? "Đang hoạt động" : "Đã khóa")
+            });
 
             return Ok(new { Message = "Lấy danh sách vé tháng thành công!", TotalCount = totalCount, Data = tickets });
         }

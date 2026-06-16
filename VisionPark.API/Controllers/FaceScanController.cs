@@ -57,8 +57,8 @@ namespace VisionPark.API.Controllers
                 using var mat = Cv2.ImDecode(imageBytes, ImreadModes.Color);
                 if (mat.Empty()) return BadRequest("Không thể đọc ảnh.");
 
-                // Đảm bảo đường dẫn này trỏ tới đúng file XML đã copy
-                string cascadePath = "Models/haarcascade_frontalface_default.xml";
+                // Dùng ContentRootPath để đảm bảo không bao giờ lỗi khi Deploy lên IIS
+                string cascadePath = Path.Combine(_env.ContentRootPath, "Models", "haarcascade_frontalface_default.xml");
                 using var cascade = new CascadeClassifier(cascadePath);
 
                 using var grayMat = new Mat();
@@ -414,7 +414,7 @@ namespace VisionPark.API.Controllers
                 using var mat = Cv2.ImDecode(imageBytes, ImreadModes.Color);
                 if (mat.Empty()) return BadRequest("Không thể đọc ảnh.");
 
-                string cascadePath = "Models/haarcascade_frontalface_default.xml";
+                string cascadePath = Path.Combine(_env.ContentRootPath, "Models", "haarcascade_frontalface_default.xml");
                 using var cascade = new CascadeClassifier(cascadePath);
 
                 using var grayMat = new Mat();

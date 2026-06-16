@@ -20,7 +20,7 @@ namespace VisionPark.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllCards(string? searchTerm, string? status, int pageNumber = 1, int pageSize = 5)
         {
-            var query = _context.NfcCards.AsQueryable();
+            var query = _context.NfcCards.Where(c => c.Status != "Deleted").AsQueryable();
 
             // Lọc theo mã thẻ (UID)
             if (!string.IsNullOrEmpty(searchTerm))
@@ -139,27 +139,14 @@ namespace VisionPark.API.Controllers
                 return BadRequest(new { Message = "Không thể xóa! Thẻ này đang được sử dụng cho một vé tháng còn hiệu lực. Vui lòng khóa thẻ trước khi xóa." });
             }
 
-            // CẢNH BÁO: Thao tác này sẽ xóa vĩnh viễn thẻ và toàn bộ lịch sử liên quan.
-
-            // Xóa các vé tháng đã hết hạn hoặc bị khóa gắn với thẻ này
-            var oldTickets = await _context.MonthlyTickets.Where(t => t.CardID == id).ToListAsync();
-            if (oldTickets.Any())
-            {
-                _context.MonthlyTickets.RemoveRange(oldTickets);
-            }
-
-            // Xóa các phiên đỗ xe của thẻ này để gỡ bỏ ràng buộc khóa ngoại
-            var sessions = await _context.ParkingSessions.Where(s => s.CardID == id).ToListAsync();
-            if (sessions.Any())
-            {
-                _context.ParkingSessions.RemoveRange(sessions);
-            }
-
-            // Cuối cùng, xóa thẻ gốc
-            _context.NfcCards.Remove(card);
+            // GIẢI PHÁP XÓA MỀM (SOFT DELETE) ĐỂ BẢO TOÀN DOANH THU
+            // Đổi trạng thái thành "Deleted" và thêm hậu tố vào CardUID để có thể tái sử dụng mã UID này
+            card.Status = "Deleted";
+            card.CardUID = $"{card.CardUID}_deleted_{DateTime.Now.Ticks}";
+            
             await _context.SaveChangesAsync();
 
-            return Ok(new { Message = "Đã xóa thẻ và toàn bộ dữ liệu liên quan thành công!" });
+            return Ok(new { Message = "Đã xóa thẻ thành công! Toàn bộ lịch sử và doanh thu vẫn được bảo toàn." });
         }
     }
 }
