@@ -198,7 +198,7 @@ export class DashboardPage implements OnInit {
         this.totalHistoryRevenue = data.totalHistoryRevenue || 0;
         this.totalMonthlyRevenue = data.totalMonthlyRevenue || 0;
         
-        // Hiển thị lại "Tổng doanh thu lũy kế" cho khớp với giao diện HTML
+        // Khôi phục lại hiển thị "Tổng doanh thu lũy kế" cho khớp với nhu cầu
         const grandTotal = this.totalHistoryRevenue + this.totalMonthlyRevenue;
         this.stats.revenueToday = grandTotal.toLocaleString('vi-VN');
 
