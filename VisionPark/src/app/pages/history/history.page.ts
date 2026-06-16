@@ -43,7 +43,8 @@ import {
   personOutline,
   videocamOffOutline,
   imageOutline,
-  trashOutline, closeOutline, warningOutline, filterOutline } from 'ionicons/icons';
+  trashOutline, closeOutline, warningOutline, filterOutline,
+  alertCircleOutline } from 'ionicons/icons';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { Api } from '../../services/api';
 // 👉 THÊM PLUGIN NFC
@@ -139,7 +140,7 @@ export class HistoryPage implements OnInit, OnDestroy {
     private nfc: NFC, // Tiêm NFC
     private cdr: ChangeDetectorRef, // Tiêm ChangeDetectorRef để chống đơ màn hình
   ) {
-    addIcons({scanOutline,idCardOutline,carSportOutline,bicycleOutline,videocamOffOutline,closeOutline,imageOutline,radioOutline,cardOutline,warningOutline,filterOutline,chevronDownOutline,searchOutline,downloadOutline,documentTextOutline,chevronBackOutline,chevronForwardOutline,cameraOutline,personOutline,stopCircleOutline,checkmarkCircleOutline,closeCircleOutline,informationCircleOutline,apertureOutline,trashOutline,});
+    addIcons({scanOutline,idCardOutline,carSportOutline,bicycleOutline,videocamOffOutline,closeOutline,imageOutline,radioOutline,cardOutline,warningOutline,filterOutline,chevronDownOutline,searchOutline,downloadOutline,documentTextOutline,chevronBackOutline,chevronForwardOutline,cameraOutline,personOutline,stopCircleOutline,checkmarkCircleOutline,closeCircleOutline,informationCircleOutline,apertureOutline,trashOutline,alertCircleOutline});
   }
 
   ngOnInit() {

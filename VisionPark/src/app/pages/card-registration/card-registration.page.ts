@@ -26,6 +26,9 @@ import {
   star,
   starHalf,
   cardOutline,
+  alertCircleOutline,
+  checkmarkCircleOutline,
+  warningOutline,
 } from 'ionicons/icons';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { Api } from '../../services/api';
@@ -106,6 +109,9 @@ export class CardRegistrationPage implements OnInit {
       star,
       starHalf,
       cardOutline,
+      alertCircleOutline,
+      checkmarkCircleOutline,
+      warningOutline,
     });
   }
 
@@ -254,7 +260,8 @@ export class CardRegistrationPage implements OnInit {
                 this.loadSystemCards();
               },
               error: (err) => {
-                this.showToast('Lỗi khi xóa thẻ!', 'danger');
+                const errorMessage = err.error?.message || err.error?.Message || err.error || 'Lỗi khi xóa thẻ!';
+                this.showToast(errorMessage, 'danger');
               },
             });
           },
