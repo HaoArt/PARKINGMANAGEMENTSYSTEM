@@ -285,39 +285,50 @@ export class TicketParkingPage implements OnInit, OnDestroy {
           this.regData.registerPlate ||
           'VeThang';
 
-        this.showToast(
-          `${res.message || res.Message || 'Đăng ký thành công!'}\nBiển số: ${plate}`,
-          'success',
-        );
-
-        // Nhận trực tiếp số tiền đã tính toán từ C# Backend trả về
+        const newCardToken = res.cardToken || res.CardToken;
         this.paymentAmount = res.amount || res.Amount || 0;
 
-        // Cấu hình ngân hàng
-        const bankId = 'MB';
-        const accountNo = '3775501172004';
-        const accountName = 'HOANG NHAT HAO'; // In hoa không dấu
-        const description = `Thanh toan the xe ${plate}`;
+        const handleSuccessQR = () => {
+          const bankId = 'MB';
+          const accountNo = '3775501172004';
+          const accountName = 'HOANG NHAT HAO';
+          const description = `Thanh toan the xe ${plate}`;
 
-        // FIX LỖI 2: Mã hóa URL an toàn hơn bằng encodeURIComponent
-        let url = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact.png?accountName=${encodeURIComponent(accountName)}&addInfo=${encodeURIComponent(description)}`;
+          let url = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact.png?accountName=${encodeURIComponent(accountName)}&addInfo=${encodeURIComponent(description)}`;
 
-        // FIX LỖI 3: Chỉ thêm tham số amount nếu giá tiền lớn hơn 0
-        if (this.paymentAmount > 0) {
-          url += `&amount=${this.paymentAmount}`;
+          if (this.paymentAmount > 0) {
+            url += `&amount=${this.paymentAmount}`;
+          }
+          this.qrUrl = url;
+          this.showQRModal = true;
+          this.isSubmitting = false;
+          this.cdr.detectChanges();
+        };
+
+        // LOGIC CHỐNG SAO CHÉP THẺ: Ghi Token bảo mật vào chip NFC
+        if (newCardToken && (this.platform.is('capacitor') || this.platform.is('cordova'))) {
+          this.showToast('Vui lòng GIỮ NGUYÊN THẺ ở mặt lưng để ghi dữ liệu bảo mật...', 'warning');
+          
+          const message = [this.ndef.textRecord(newCardToken)];
+          
+          this.nfc.write(message).then(
+            () => {
+              this.showToast(`Đăng ký và ghi dữ liệu thẻ thành công!\nBiển số: ${plate}`, 'success');
+              handleSuccessQR();
+            },
+            (err) => {
+              this.showToast('Lỗi khi ghi thẻ! Thẻ có thể không được hỗ trợ hoặc bị lấy ra quá sớm.', 'danger');
+              this.isSubmitting = false;
+              this.cdr.detectChanges();
+            }
+          );
+        } else {
+          this.showToast(
+            `${res.message || res.Message || 'Đăng ký thành công!'}\nBiển số: ${plate}`,
+            'success',
+          );
+          handleSuccessQR();
         }
-        console.log('Giá tiền:', this.paymentAmount);
-        console.log('Dữ liệu QR:', {
-          plate: plate,
-          amount: this.paymentAmount,
-          url: url,
-        });
-        this.qrUrl = url;
-
-        // Kích hoạt hiển thị Modal QR
-        this.showQRModal = true;
-        this.isSubmitting = false;
-        this.cdr.detectChanges(); // Ép UI cập nhật mượt mà
       },
       error: (err) => {
         this.showToast(

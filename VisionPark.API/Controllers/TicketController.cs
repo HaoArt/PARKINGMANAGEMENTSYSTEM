@@ -1,4 +1,4 @@
-﻿﻿using Microsoft.AspNetCore.Mvc;
+﻿﻿﻿﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VisionPark.API.Data;
 using VisionPark.API.Models;
@@ -104,6 +104,7 @@ namespace VisionPark.API.Controllers
                 StartDate = DateTime.Now,
                 EndDate = DateTime.Now.AddMonths(request.DurationMonths),
                 IsActive = true,
+                TicketPrice = finalAmount
             };
 
             _context.MonthlyTickets.Add(newTicket);

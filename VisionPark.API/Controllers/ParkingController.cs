@@ -54,7 +54,6 @@ namespace VisionPark.API.Controllers
 
                 // --- KIỂM TRA CHỐNG SAO CHÉP THẺ (ANTI-CLONING) ---
                 // Nếu thẻ trong DB có mã bảo mật, nhưng thiết bị quét lên không gửi kèm hoặc không khớp -> Thẻ giả
-                // Yêu cầu: Cập nhật file ScanCardRequest thêm thuộc tính 'CardToken'
                 if (!string.IsNullOrEmpty(card.CardToken) && request.CardToken != card.CardToken)
                     return BadRequest(new { Message = "Cảnh báo: Phát hiện thẻ giả mạo (Cloned Card)!" });
 
