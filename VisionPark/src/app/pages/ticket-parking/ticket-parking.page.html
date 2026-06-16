@@ -3,7 +3,7 @@
   class="premium-dashboard"
   [style.--background]="isCameraActive ? 'transparent' : ''"
 >
-  <app-navbar [hidden]="isCameraActive"></app-navbar>
+  <app-navbar [hidden]="isCameraActive" (searchChange)="onNavbarSearch($event)"></app-navbar>
 
   <div class="main-wrapper" [hidden]="isCameraActive">
     <header class="page-header">
@@ -164,13 +164,23 @@
         <div class="table-header">
           <h3>Danh sách Vé Phát Hành</h3>
           <div class="table-tools">
+            <div class="premium-input" style="margin: 0; min-height: 38px; border-radius: 8px; padding: 0 12px; flex: 1; min-width: 200px; max-width: 300px;">
+              <ion-icon name="search-outline" class="input-icon"></ion-icon>
+              <input
+                type="text"
+                placeholder="Tìm biển số, mã NFC..."
+                [(ngModel)]="searchTerm"
+                (input)="applyFilters()"
+              />
+            </div>
             <div class="filter-dropdown">
+              <ion-icon name="filter-outline"></ion-icon>
               <select [(ngModel)]="filterStatus" (change)="applyFilters()">
                 <option value="all">Tất cả trạng thái</option>
                 <option value="active">Đang hoạt động</option>
                 <option value="inactive">Đã khóa</option>
               </select>
-              <ion-icon name="chevron-down-outline"></ion-icon>
+              <ion-icon name="chevron-down-outline" class="dropdown-icon"></ion-icon>
             </div>
           </div>
         </div>

@@ -22,6 +22,7 @@ import {
   chevronBackOutline,
   chevronForwardOutline,
   informationCircleOutline, // Added for helper text
+  searchOutline,
   star,
   starHalf,
   cardOutline,
@@ -101,6 +102,7 @@ export class CardRegistrationPage implements OnInit {
       chevronBackOutline,
       chevronForwardOutline,
       informationCircleOutline,
+      searchOutline,
       star,
       starHalf,
       cardOutline,
@@ -169,6 +171,11 @@ export class CardRegistrationPage implements OnInit {
   onNavbarSearch(searchTerm: string) {
     this.searchTerm = searchTerm;
     this.currentPage = 1; // Reset về trang 1 khi tìm kiếm
+    this.loadSystemCards();
+  }
+
+  applyFilters() {
+    this.currentPage = 1;
     this.loadSystemCards();
   }
 

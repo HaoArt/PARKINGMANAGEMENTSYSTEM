@@ -219,6 +219,11 @@ export class DashboardPage implements OnInit {
     this.loadDataFromDatabase();
   }
 
+  onNavbarSearch(searchTerm: string) {
+    this.searchTerm = searchTerm;
+    this.applyFilters();
+  }
+
   updatePagination() {
     this.loadDataFromDatabase();
   }

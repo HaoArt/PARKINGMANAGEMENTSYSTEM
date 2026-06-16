@@ -1,5 +1,5 @@
 <ion-content [fullscreen]="true" class="premium-dashboard">
-  <app-navbar></app-navbar>
+  <app-navbar (searchChange)="onNavbarSearch($event)"></app-navbar>
 
   <div class="main-wrapper">
     <header class="page-header">
@@ -69,13 +69,24 @@
       <div class="glass-card table-card">
         <div class="table-header">
           <h3>Kho thẻ hiện tại</h3>
-          <button
-            class="btn-icon-only"
-            (click)="loadSystemCards()"
-            title="Làm mới dữ liệu"
-          >
-            <ion-icon name="refresh-outline"></ion-icon>
-          </button>
+          <div class="table-tools">
+            <div class="premium-input" style="margin: 0; min-height: 38px; border-radius: 8px; padding: 0 12px; flex: 1; min-width: 200px; max-width: 300px;">
+              <ion-icon name="search-outline" class="input-icon"></ion-icon>
+              <input
+                type="text"
+                placeholder="Tìm mã UID (NFC)..."
+                [(ngModel)]="searchTerm"
+                (input)="applyFilters()"
+              />
+            </div>
+            <button
+              class="btn-icon-only"
+              (click)="loadSystemCards()"
+              title="Làm mới dữ liệu"
+            >
+              <ion-icon name="refresh-outline"></ion-icon>
+            </button>
+          </div>
         </div>
 
         <div class="responsive-table-wrapper">

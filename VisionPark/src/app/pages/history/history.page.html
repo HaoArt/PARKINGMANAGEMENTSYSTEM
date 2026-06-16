@@ -51,6 +51,85 @@
             </div>
           </div>
 
+          <div class="form-group mt-4">
+            <label class="flex justify-between items-center mb-2">
+              <span>CAMERA & HÌNH ẢNH</span>
+              <span class="text-xs text-muted font-normal italic">Thu thập dữ liệu</span>
+            </label>
+
+            <!-- Tùy chọn Loại xe -->
+            <div class="vehicle-type-selector mb-3 flex gap-2">
+              <button class="flex-1 text-sm py-2" [ngClass]="selectedVehicleType === 1 ? 'btn-primary' : 'btn-outline'" (click)="selectedVehicleType = 1" style="border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <ion-icon name="car-sport-outline"></ion-icon> Ô tô
+              </button>
+              <button class="flex-1 text-sm py-2" [ngClass]="selectedVehicleType === 2 ? 'btn-primary' : 'btn-outline'" (click)="selectedVehicleType = 2" style="border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <ion-icon name="bicycle-outline"></ion-icon> Xe máy
+              </button>
+            </div>
+
+            <div class="video-container mb-3" [class.camera-off]="!isCameraOn" style="border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.05); position: relative; min-height: 180px; display: flex; align-items: center; justify-content: center; border: 1px dashed var(--ion-color-medium);">
+              <video #videoElement autoplay playsinline *ngIf="isCameraOn" style="width: 100%; height: auto; max-height: 250px; object-fit: cover;"></video>
+              <div class="camera-placeholder text-center text-muted" *ngIf="!isCameraOn">
+                <ion-icon name="videocam-off-outline" style="font-size: 2rem;"></ion-icon>
+                <p class="text-xs mt-1">Camera đang tắt</p>
+              </div>
+              <button *ngIf="isCameraOn" class="btn-danger" style="position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; z-index: 10;" (click)="stopCamera()" title="Tắt Camera">
+                <ion-icon name="close-outline" style="font-size: 1.2rem;"></ion-icon>
+              </button>
+            </div>
+            <canvas #canvasElement class="hidden"></canvas>
+
+            <div class="grid-2-col gap-3">
+              <div class="control-box p-2" style="border: 1px solid var(--ion-color-light); border-radius: 8px; background: rgba(0,0,0,0.02);">
+                <label class="text-xs font-bold text-center block mb-2 text-primary">BIỂN SỐ XE</label>
+                <input type="file" #plateFileInput class="hidden" accept="image/*" (change)="onFileSelected($event, 'plate')" />
+                <div class="flex gap-2">
+                  <button class="btn-primary flex-1 text-xs py-2 px-1" (click)="isCameraOn ? capturePlate() : startCamera()" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 48px; border-radius: 6px;">
+                    <ion-icon [name]="isCameraOn ? 'aperture-outline' : 'camera-outline'" style="font-size: 1.2rem;"></ion-icon>
+                    <span>{{ isCameraOn ? 'Chụp ngay' : 'Mở Camera' }}</span>
+                  </button>
+                  <button class="btn-outline flex-1 text-xs py-2 px-1" (click)="plateFileInput.click()" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: 1px solid var(--ion-color-medium); background: transparent; border-radius: 6px; color: var(--ion-color-medium); min-height: 48px; cursor: pointer;">
+                    <ion-icon name="image-outline" style="font-size: 1.2rem;"></ion-icon>
+                    <span>Tải ảnh lên</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="control-box p-2" style="border: 1px solid var(--ion-color-light); border-radius: 8px; background: rgba(0,0,0,0.02);">
+                <label class="text-xs font-bold text-center block mb-2 text-success">KHUÔN MẶT</label>
+                <input type="file" #faceFileInput class="hidden" accept="image/*" (change)="onFileSelected($event, 'face')" />
+                <div class="flex gap-2">
+                  <button class="btn-success flex-1 text-xs py-2 px-1" (click)="isCameraOn ? captureFace() : startCamera()" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 48px; border-radius: 6px;">
+                    <ion-icon [name]="isCameraOn ? 'aperture-outline' : 'camera-outline'" style="font-size: 1.2rem;"></ion-icon>
+                    <span>{{ isCameraOn ? 'Chụp ngay' : 'Mở Camera' }}</span>
+                  </button>
+                  <button class="btn-outline flex-1 text-xs py-2 px-1" (click)="faceFileInput.click()" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: 1px solid var(--ion-color-medium); background: transparent; border-radius: 6px; color: var(--ion-color-medium); min-height: 48px; cursor: pointer;">
+                    <ion-icon name="image-outline" style="font-size: 1.2rem;"></ion-icon>
+                    <span>Tải ảnh lên</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-2-col gap-3 mt-3" *ngIf="plateImageBase64 || faceImageBase64">
+            <div class="image-preview-modern relative" *ngIf="plateImageBase64">
+              <span class="badge-label" style="position:absolute; top:5px; left:5px; background:var(--ion-color-primary); color:white; padding:2px 8px; border-radius:4px; font-size:10px; z-index:10;">BIỂN SỐ</span>
+              <img [src]="plateImageBase64" alt="Plate" style="width:100%; height:120px; object-fit:cover; border-radius:8px;" />
+              <button class="btn-icon-circular" style="position: absolute; top: 5px; right: 5px; background: var(--ion-color-danger); color: white; border: none; width: 24px; height: 24px;" (click)="clearPlate()">
+                <ion-icon name="close-outline"></ion-icon>
+              </button>
+            </div>
+
+            <div class="image-preview-modern relative" *ngIf="faceImageBase64">
+              <span class="badge-label" style="position:absolute; top:5px; left:5px; background:var(--ion-color-success); color:white; padding:2px 8px; border-radius:4px; font-size:10px; z-index:10;">KHUÔN MẶT</span>
+              <img [src]="faceImageBase64" alt="Face" style="width:100%; height:120px; object-fit:cover; border-radius:8px;" />
+              <button class="btn-icon-circular" style="position: absolute; top: 5px; right: 5px; background: var(--ion-color-danger); color: white; border: none; width: 24px; height: 24px;" (click)="clearFace()">
+                <ion-icon name="close-outline"></ion-icon>
+              </button>
+            </div>
+          </div>
+
           <button
             class="btn-primary full-width mt-4"
             (click)="onProcessCard(inputNfcId)"
@@ -148,6 +227,20 @@
                 </span>
               </div>
             </div>
+
+            <!-- Nút Xác nhận thủ công thiết kế mới -->
+            <div class="force-pass-section mt-4 animate-fade-in" *ngIf="requiresForcePass" style="border: 2px dashed var(--ion-color-warning); border-radius: 12px; padding: 16px; background: rgba(var(--ion-color-warning-rgb, 255, 196, 9), 0.05);">
+              <div class="flex items-center justify-center gap-2 mb-3 text-warning">
+                <ion-icon name="warning-outline" style="font-size: 1.5rem;"></ion-icon>
+                <span class="font-bold text-sm uppercase">Yêu cầu xác nhận bảo vệ</span>
+              </div>
+              <button class="btn-warning full-width" (click)="forcePass()" [disabled]="isLoading" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; border-radius: 8px; font-weight: bold; background: linear-gradient(135deg, var(--ion-color-warning) 0%, #ff9800 100%); color: #000; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(255, 196, 9, 0.3);">
+                <ion-icon name="checkmark-circle-outline" style="font-size: 1.2rem;"></ion-icon> BỎ QUA CẢNH BÁO & MỞ BARIE
+              </button>
+              <p class="text-xs text-muted mt-3 mb-0 text-center italic" style="opacity: 0.8;">
+                *Hành động này sẽ ghi đè cảnh báo AI và ép hệ thống lưu dữ liệu.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -157,23 +250,25 @@
       <div class="table-header">
         <h3>Lịch sử Giao dịch</h3>
         <div class="table-tools">
-          <div class="filter-dropdown">
-            <select [(ngModel)]="filterConfig.status" (change)="applyFilters()">
-              <option value="all">Tất cả trạng thái</option>
-              <option value="In">Trong bãi</option>
-              <option value="Out">Đã ra</option>
-            </select>
-            <ion-icon name="chevron-down-outline"></ion-icon>
-          </div>
 
-          <div class="search-input-group">
-            <ion-icon name="search-outline"></ion-icon>
+          <div class="premium-input" style="margin: 0; min-height: 38px; border-radius: 8px; padding: 0 12px; flex: 1; min-width: 200px; max-width: 300px;">
+            <ion-icon name="search-outline" class="input-icon"></ion-icon>
             <input
               type="text"
               placeholder="Tìm biển số..."
               [(ngModel)]="filterConfig.plateNumber"
               (input)="applyFilters()"
             />
+          </div>
+
+          <div class="filter-dropdown">
+            <ion-icon name="filter-outline"></ion-icon>
+            <select [(ngModel)]="filterConfig.status" (change)="applyFilters()">
+              <option value="all">Tất cả trạng thái</option>
+              <option value="In">Trong bãi</option>
+              <option value="Out">Đã ra</option>
+            </select>
+            <ion-icon name="chevron-down-outline" class="dropdown-icon"></ion-icon>
           </div>
 
           <button
@@ -196,6 +291,7 @@
               <th>Phương tiện & Thẻ</th>
               <th>Lượt VÀO</th>
               <th>Lượt RA</th>
+              <th>Hình ảnh</th>
               <th class="text-right">Trạng thái</th>
             </tr>
           </thead>
@@ -248,6 +344,28 @@
                     [class.italic]="item.checkOutTime === 'Chưa ra khỏi bãi'"
                     >{{ item.checkOutTime }}</span
                   >
+                  <div class="flex items-center gap-1 mt-1" *ngIf="item.checkOutTime !== '---'">
+                    <div class="image-thumb" *ngIf="item.vehicleImageUrlOut" title="Ảnh Biển số lúc ra">
+                      <img [src]="item.vehicleImageUrlOut" style="width: 28px; height: 28px; object-fit: cover; border-radius: 4px; border: 1px solid var(--ion-color-light);" />
+                    </div>
+                    <div class="image-thumb" *ngIf="item.faceImageUrlOut" title="Ảnh Khuôn mặt lúc ra">
+                      <img [src]="item.faceImageUrlOut" style="width: 28px; height: 28px; object-fit: cover; border-radius: 50%; border: 1px solid var(--ion-color-light);" />
+                    </div>
+                  </div>
+                </div>
+              </td>
+
+              <td data-label="Hình ảnh">
+                <div class="flex items-center gap-2">
+                  <div class="image-thumb" *ngIf="item.vehicleImageUrlIn" title="Ảnh Biển số lúc vào">
+                    <img [src]="item.vehicleImageUrlIn" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid var(--ion-color-light);" />
+                  </div>
+                  <div class="image-thumb" *ngIf="item.faceImageUrlIn" title="Ảnh Khuôn mặt lúc vào">
+                    <img [src]="item.faceImageUrlIn" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 1px solid var(--ion-color-light);" />
+                  </div>
+                  <span *ngIf="!item.vehicleImageUrlIn && !item.faceImageUrlIn" class="text-xs text-muted italic">
+                    Không có ảnh
+                  </span>
                 </div>
               </td>
 
@@ -263,7 +381,7 @@
             </tr>
 
             <tr *ngIf="paginatedHistory.length === 0">
-              <td colspan="4" class="empty-state py-12">
+              <td colspan="5" class="empty-state py-12">
                 <ion-icon name="document-text-outline"></ion-icon>
                 <p>Không tìm thấy bản ghi giao dịch nào.</p>
               </td>

@@ -64,10 +64,14 @@ export class Api {
   deleteCard(cardId: number) {
     return this.http.delete(`${this.baseUrl}/Cards/${cardId}`);
   }
-  scanCard(cardUID: string, cardToken?: string): Observable<any> {
+  scanCard(cardUID: string, cardToken?: string, faceImageBase64?: string, plateImageBase64?: string, vehicleTypeID?: number, forcePass: boolean = false): Observable<any> {
     return this.http.post(`${this.baseUrl}/Parking/scan-card`, {
       cardUID,
       cardToken,
+      faceImageBase64,
+      plateImageBase64,
+      vehicleTypeID,
+      forcePass
     });
   }
   getParkingHistory(filterParams: any = {}) {
