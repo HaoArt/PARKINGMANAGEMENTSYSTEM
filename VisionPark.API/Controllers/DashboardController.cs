@@ -64,7 +64,7 @@ namespace VisionPark.API.Controllers
 
             if (!string.IsNullOrEmpty(searchTerm))
             {
-                query = query.Where(p => p.LicensePlateIn.Contains(searchTerm) || p.LicensePlateOut.Contains(searchTerm));
+ ao               query = query.Where(p => p.LicensePlateIn.Contains(searchTerm) || (p.LicensePlateOut != null && p.LicensePlateOut.Contains(searchTerm)));
             }
 
             if (!string.IsNullOrEmpty(status) && status != "all")
@@ -77,7 +77,7 @@ namespace VisionPark.API.Controllers
 
             int totalCount = await query.CountAsync();
 
-            var pagedData = await query
+            var pagedQuery = await query
                 .OrderByDescending(p => p.CheckInTime)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
@@ -91,9 +91,9 @@ namespace VisionPark.API.Controllers
                 })
                 .ToListAsync();
 
-            var records = pagedData.Select(p => new
+            var records = pagedQuery.Select(p => new
             {
-                id = p.id,
+                id = p.id.Contains("_deleted_") ? p.id.Substring(0, p.id.IndexOf("_deleted_")) : p.id,
                 plateNumber = p.plateNumber,
                 vehicleType = p.vehicleType,
                 timeIn = p.checkInTime.ToString("HH:mm - dd/MM/yyyy"),
@@ -118,7 +118,7 @@ namespace VisionPark.API.Controllers
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(searchTerm))
-                query = query.Where(p => p.LicensePlateIn.Contains(searchTerm) || p.LicensePlateOut.Contains(searchTerm));
+                query = query.Where(p => p.LicensePlateIn.Contains(searchTerm) || (p.LicensePlateOut != null && p.LicensePlateOut.Contains(searchTerm)));
 
             if (!string.IsNullOrEmpty(status) && status != "all")
             {
@@ -133,6 +133,8 @@ namespace VisionPark.API.Controllers
             foreach (var item in data)
             {
                 var id = item.Card != null ? item.Card.CardUID : $"ID-{item.SessionID}";
+                if (id.Contains("_deleted_")) id = id.Substring(0, id.IndexOf("_deleted_"));
+
                 var plate = item.LicensePlateIn ?? "---";
                 var type = item.VehicleType != null ? item.VehicleType.TypeName : (item.VehicleTypeID == 1 ? "Ô tô" : "Xe máy");
                 var timeIn = item.CheckInTime.ToString("dd/MM/yyyy HH:mm:ss");

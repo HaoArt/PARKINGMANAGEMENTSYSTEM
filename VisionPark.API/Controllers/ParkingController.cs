@@ -229,7 +229,27 @@ namespace VisionPark.API.Controllers
                     }
 
                     string? faceImageOut = null; // Đã lược bỏ quét khuôn mặt khi ra
-                    string? plateImageOut = await SaveFaceImageAsync(request.PlateImageBase64, "plate_out");
+                    string? plateImageOut = null;
+
+                    // TỐI ƯU HÓA Ổ CỨNG: Nếu là thẻ lượt, xóa ảnh lúc vào và không lưu ảnh lúc ra sau khi Checkout thành công
+                    if (card.CardType == "Guest")
+                    {
+                        if (!string.IsNullOrEmpty(activeSession.VehicleImageUrlIn))
+                        {
+                            string webRootPath = _env.WebRootPath;
+                            if (string.IsNullOrWhiteSpace(webRootPath)) webRootPath = Path.Combine(_env.ContentRootPath, "wwwroot");
+                            string inImagePath = Path.Combine(webRootPath, activeSession.VehicleImageUrlIn.TrimStart('/'));
+                            if (System.IO.File.Exists(inImagePath))
+                            {
+                                System.IO.File.Delete(inImagePath);
+                            }
+                            activeSession.VehicleImageUrlIn = null; // Cập nhật lại CSDL để UI không hiển thị ảnh lỗi
+                        }
+                    }
+                    else
+                    {
+                        plateImageOut = await SaveFaceImageAsync(request.PlateImageBase64, "plate_out");
+                    }
 
                     activeSession.CheckOutTime = DateTime.Now;
                     activeSession.LicensePlateOut = card.CardType == "Guest" ? activeSession.LicensePlateIn : plateNumber;
@@ -328,7 +348,7 @@ namespace VisionPark.API.Controllers
             int totalCount = await query.CountAsync();
 
           
-            var sessions = await query
+            var pagedData = await query
                 .OrderByDescending(s => s.CheckInTime)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
@@ -339,16 +359,31 @@ namespace VisionPark.API.Controllers
                     PlateNumberIn = s.LicensePlateIn ?? "---",
                     PlateNumberOut = s.LicensePlateOut ?? "---",
                     VehicleType = s.VehicleType != null ? s.VehicleType.TypeName : (s.VehicleTypeID == 1 ? "Ô tô" : "Xe máy"),
-                    CheckInTime = s.CheckInTime.ToString("dd/MM/yyyy HH:mm:ss"),
-                    CheckOutTime = s.CheckOutTime.HasValue
-                            ? s.CheckOutTime.Value.ToString("dd/MM/yyyy HH:mm:ss")
-                            : "---",
-                    Status = s.CheckOutTime == null ? "In" : "Out",
+                    CheckInTime = s.CheckInTime,
+                    CheckOutTime = s.CheckOutTime,
                     FaceImageUrlIn = s.FaceImageUrlIn,
                     FaceImageUrlOut = s.FaceImageUrlOut,
                     VehicleImageUrlIn = s.VehicleImageUrlIn,
-                    VehicleImageUrlOut = s.ImageOutPath
+                    ImageOutPath = s.ImageOutPath
                 }).ToListAsync();
+
+            var sessions = pagedData.Select(s => new
+            {
+                NfcId = s.NfcId.Contains("_deleted_") ? s.NfcId.Substring(0, s.NfcId.IndexOf("_deleted_")) : s.NfcId,
+                CardType = s.CardType,
+                PlateNumberIn = s.PlateNumberIn,
+                PlateNumberOut = s.PlateNumberOut,
+                VehicleType = s.VehicleType,
+                CheckInTime = s.CheckInTime.ToString("dd/MM/yyyy HH:mm:ss"),
+                CheckOutTime = s.CheckOutTime.HasValue
+                        ? s.CheckOutTime.Value.ToString("dd/MM/yyyy HH:mm:ss")
+                        : "---",
+                Status = s.CheckOutTime == null ? "In" : "Out",
+                FaceImageUrlIn = s.FaceImageUrlIn,
+                FaceImageUrlOut = s.FaceImageUrlOut,
+                VehicleImageUrlIn = s.VehicleImageUrlIn,
+                VehicleImageUrlOut = s.ImageOutPath
+            });
 
             return Ok(new
             {

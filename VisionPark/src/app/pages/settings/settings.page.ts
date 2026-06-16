@@ -187,17 +187,17 @@ export class SettingsPage implements OnInit {
       },
       pricingRules: this.PricingRules.map((r) => ({
         ruleId: Number(r.RuleId),
-        pricePerEntry: Number(r.PricePerEntry) || 0,
-        pricePerMonth: Number(r.PricePerMonth) || 0,
-        pricePerQuarter: Number(r.PricePerQuarter) || 0,
-        pricePerYear: Number(r.PricePerYear) || 0,
+        pricePerEntry: r.PricePerEntry != null && r.PricePerEntry !== '' ? Number(r.PricePerEntry) : 0,
+        pricePerMonth: r.PricePerMonth != null && r.PricePerMonth !== '' ? Number(r.PricePerMonth) : 0,
+        pricePerQuarter: r.PricePerQuarter != null && r.PricePerQuarter !== '' ? Number(r.PricePerQuarter) : 0,
+        pricePerYear: r.PricePerYear != null && r.PricePerYear !== '' ? Number(r.PricePerYear) : 0,
       })),
       // Gửi cấu hình thẻ lượt xuống Backend
       guestPrices: {
-        carBasePrice: Number(this.GuestPrices.CarBasePrice) || 15000,
-        carExtraPerHour: Number(this.GuestPrices.CarExtraPerHour) || 5000,
-        bikeBasePrice: Number(this.GuestPrices.BikeBasePrice) || 5000,
-        bikeExtraPerHour: Number(this.GuestPrices.BikeExtraPerHour) || 2000,
+        carBasePrice: this.GuestPrices.CarBasePrice != null && this.GuestPrices.CarBasePrice !== '' ? Number(this.GuestPrices.CarBasePrice) : 15000,
+        carExtraPerHour: this.GuestPrices.CarExtraPerHour != null && this.GuestPrices.CarExtraPerHour !== '' ? Number(this.GuestPrices.CarExtraPerHour) : 5000,
+        bikeBasePrice: this.GuestPrices.BikeBasePrice != null && this.GuestPrices.BikeBasePrice !== '' ? Number(this.GuestPrices.BikeBasePrice) : 5000,
+        bikeExtraPerHour: this.GuestPrices.BikeExtraPerHour != null && this.GuestPrices.BikeExtraPerHour !== '' ? Number(this.GuestPrices.BikeExtraPerHour) : 2000,
       }
     };
 

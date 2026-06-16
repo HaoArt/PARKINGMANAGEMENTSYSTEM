@@ -206,7 +206,7 @@ export class DashboardPage implements OnInit {
           this.stats.totalVehicles = data.vehiclesInParking;
           this.stats.availableSlots = Math.max(0, this.stats.maxCapacity - data.vehiclesInParking);
           this.stats.fillRate = this.stats.maxCapacity > 0 
-              ? Math.round((data.vehiclesInParking / this.stats.maxCapacity) * 100) 
+              ? Math.min(100, Math.round((data.vehiclesInParking / this.stats.maxCapacity) * 100))
               : 0;
         }
       },
