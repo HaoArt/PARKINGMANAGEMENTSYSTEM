@@ -4,6 +4,8 @@ import {
   OnDestroy,
   inject,
   ChangeDetectorRef,
+  ViewChild,
+  ElementRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -34,12 +36,6 @@ import * as icons from 'ionicons/icons';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { Api } from '../../services/api';
 import { NFC, Ndef } from '@awesome-cordova-plugins/nfc/ngx';
-import { Capacitor } from '@capacitor/core';
-import {
-  CameraPreview,
-  CameraPreviewOptions,
-  CameraPreviewPictureOptions,
-} from '@capacitor-community/camera-preview';
 
 interface MonthlyTicketRecord {
   ticketId: number;
@@ -100,6 +96,7 @@ export class TicketParkingPage implements OnInit, OnDestroy {
 
   // Trạng thái bật/tắt Camera Plugin
   isCameraActive = false;
+  isFaceCaptureMode = false;
 
   regData = {
     cardUID: '',
@@ -112,6 +109,13 @@ export class TicketParkingPage implements OnInit, OnDestroy {
 
   selectedImageFile: File | null = null;
   imagePreview: string | ArrayBuffer | null = null;
+  
+  faceImageBase64: string | null = null;
+  facePreview: string | ArrayBuffer | null = null;
+
+  @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
+  @ViewChild('canvasElement') canvasElement!: ElementRef<HTMLCanvasElement>;
+  stream: MediaStream | null = null;
 
   constructor(
     private nfc: NFC,
@@ -170,69 +174,89 @@ export class TicketParkingPage implements OnInit, OnDestroy {
     this.applyFilters();
   }
 
-  // --- LOGIC CAMERA PREVIEW KHUNG ĐỎ ---
-  async takePicture() {
-    const cameraPreviewOptions: CameraPreviewOptions = {
-      position: 'rear',
-      parent: 'cameraPreview',
-      className: 'cameraPreview',
-      toBack: true,
-    };
-
-    try {
-      await CameraPreview.start(cameraPreviewOptions);
-      this.isCameraActive = true;
-
-      document.body.style.backgroundColor = 'transparent';
-      document.documentElement.style.backgroundColor = 'transparent';
-      this.cdr.detectChanges();
-    } catch (error) {
-      console.log('Error opening camera preview:', error);
-      this.showToast('Không thể khởi động camera!', 'danger');
+  // --- LOGIC CAMERA HTML5 (Hỗ trợ tốt trên Web & Mobile) ---
+  async takePicture(isFace: boolean = false) {
+    if (this.isCameraActive) {
+      if (this.isFaceCaptureMode === isFace) return; // Nếu bấm trùng nút đang mở thì bỏ qua
+      this.stopCamera(); // Đóng camera cũ để chuyển đổi camera khác
     }
+    try {
+      this.stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: isFace ? 'user' : 'environment' }
+      });
+      this.isCameraActive = true;
+      this.isFaceCaptureMode = isFace;
+
+      setTimeout(() => {
+        if (this.videoElement) {
+          this.videoElement.nativeElement.srcObject = this.stream;
+        }
+      }, 100);
+    } catch (err: any) {
+      console.error('Lỗi truy cập webcam: ', err);
+      this.showToast('Không thể truy cập camera! Vui lòng kiểm tra quyền.', 'danger');
+    }
+  }
+
+  async takeFacePicture() {
+    await this.takePicture(true);
   }
 
   async captureImage() {
-    const cameraPreviewPictureOptions: CameraPreviewPictureOptions = {
-      quality: 80,
-    };
+    if (!this.isCameraActive || !this.videoElement || !this.canvasElement) return;
 
-    try {
-      const result = await CameraPreview.capture(cameraPreviewPictureOptions);
-      const base64PictureData = result.value;
+    const video = this.videoElement.nativeElement;
+    const canvas = this.canvasElement.nativeElement;
+    const context = canvas.getContext('2d');
 
-      const response = await fetch(
-        `data:image/jpeg;base64,${base64PictureData}`,
-      );
+    if (context) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const base64PictureData = canvas.toDataURL('image/jpeg');
+      const fileName = `${this.isFaceCaptureMode ? 'face' : 'xe'}_${new Date().getTime()}.jpg`;
+
+      const response = await fetch(base64PictureData);
       const blob = await response.blob();
-      const fileName = `xe_${new Date().getTime()}.jpg`;
 
-      this.selectedImageFile = new File([blob], fileName, {
-        type: 'image/jpeg',
-      });
-      this.imagePreview = `data:image/jpeg;base64,${base64PictureData}`;
+      if (this.isFaceCaptureMode) {
+        this.faceImageBase64 = base64PictureData;
+        this.facePreview = this.faceImageBase64;
+      } else {
+        this.selectedImageFile = new File([blob], fileName, {
+          type: 'image/jpeg',
+        });
+        this.imagePreview = base64PictureData;
+      }
 
       this.stopCamera();
-    } catch (e) {
-      console.error(e);
-      this.showToast('Lỗi khi chụp ảnh!', 'danger');
     }
   }
 
-  async stopCamera() {
-    try {
-      await CameraPreview.stop();
-    } catch (e) {
-      console.error('Lỗi khi đóng camera', e);
+  stopCamera() {
+    if (this.stream) {
+      this.stream.getTracks().forEach((track) => track.stop());
+      this.stream = null;
     }
     this.isCameraActive = false;
-
-    document.body.style.backgroundColor = '';
-    document.documentElement.style.backgroundColor = '';
     this.cdr.detectChanges();
   }
 
   // --- HÀM HỨNG FILE UPLOAD TỪ THƯ VIỆN ---
+  onFaceSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.facePreview = reader.result;
+        this.faceImageBase64 = reader.result as string;
+        this.cdr.detectChanges();
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
@@ -255,6 +279,10 @@ export class TicketParkingPage implements OnInit, OnDestroy {
       this.showToast('Vui lòng tải lên ảnh chụp xe!', 'warning');
       return;
     }
+    if (!this.faceImageBase64) {
+      this.showToast('Vui lòng chụp khuôn mặt để dự phòng quên thẻ!', 'warning');
+      return;
+    }
     if (!this.regData.customerName) {
       this.showToast('Vui lòng nhập tên khách hàng!', 'warning');
       return;
@@ -274,6 +302,9 @@ export class TicketParkingPage implements OnInit, OnDestroy {
     formData.append('VehicleTypeID', this.regData.vehicleTypeID.toString());
     formData.append('DurationMonths', this.regData.durationMonths.toString());
     formData.append('VehicleImage', this.selectedImageFile);
+    if (this.faceImageBase64) {
+      formData.append('FaceImageBase64', this.faceImageBase64);
+    }
 
     this.api.registerMonthly(formData).subscribe({
       next: (res: any) => {
@@ -358,6 +389,8 @@ export class TicketParkingPage implements OnInit, OnDestroy {
     };
     this.selectedImageFile = null;
     this.imagePreview = null;
+    this.faceImageBase64 = null;
+    this.facePreview = null;
   }
 
   startNFC() {

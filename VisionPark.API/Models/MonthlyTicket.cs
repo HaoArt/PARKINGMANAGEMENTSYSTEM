@@ -31,6 +31,6 @@ namespace VisionPark.API.Models
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal TicketPrice { get; set; }
-
+        public string? FaceImageUrl { get; set; }
     }
 }

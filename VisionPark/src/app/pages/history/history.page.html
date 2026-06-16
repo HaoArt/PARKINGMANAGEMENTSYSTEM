@@ -81,7 +81,9 @@
 
             <div class="grid-2-col gap-3">
               <div class="control-box p-2" style="border: 1px solid var(--ion-color-light); border-radius: 8px; background: rgba(0,0,0,0.02);">
-                <label class="text-xs font-bold text-center block mb-2 text-primary">BIỂN SỐ XE</label>
+                <label class="text-xs font-bold text-center block mb-2 text-primary">
+                  BIỂN SỐ XE <span class="text-muted font-normal lowercase" style="font-size: 10px;">(Bắt buộc với thẻ lượt)</span>
+                </label>
                 <input type="file" #plateFileInput class="hidden" accept="image/*" (change)="onFileSelected($event, 'plate')" />
                 <div class="flex gap-2">
                   <button class="btn-primary flex-1 text-xs py-2 px-1" (click)="isCameraOn ? capturePlate() : startCamera()" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 48px; border-radius: 6px;">
@@ -95,36 +97,22 @@
                 </div>
               </div>
 
-              <div class="control-box p-2" style="border: 1px solid var(--ion-color-light); border-radius: 8px; background: rgba(0,0,0,0.02);">
-                <label class="text-xs font-bold text-center block mb-2 text-success">KHUÔN MẶT</label>
-                <input type="file" #faceFileInput class="hidden" accept="image/*" (change)="onFileSelected($event, 'face')" />
-                <div class="flex gap-2">
-                  <button class="btn-success flex-1 text-xs py-2 px-1" (click)="isCameraOn ? captureFace() : startCamera()" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 48px; border-radius: 6px;">
-                    <ion-icon [name]="isCameraOn ? 'aperture-outline' : 'camera-outline'" style="font-size: 1.2rem;"></ion-icon>
-                    <span>{{ isCameraOn ? 'Chụp ngay' : 'Mở Camera' }}</span>
-                  </button>
-                  <button class="btn-outline flex-1 text-xs py-2 px-1" (click)="faceFileInput.click()" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: 1px solid var(--ion-color-medium); background: transparent; border-radius: 6px; color: var(--ion-color-medium); min-height: 48px; cursor: pointer;">
-                    <ion-icon name="image-outline" style="font-size: 1.2rem;"></ion-icon>
-                    <span>Tải ảnh lên</span>
-                  </button>
-                </div>
+              <!-- Nút dự phòng FaceID thay thế cho Form khuôn mặt cũ -->
+              <div class="control-box p-2" style="border: 1px solid var(--ion-color-warning); border-radius: 8px; background: rgba(var(--ion-color-warning-rgb, 255, 196, 9), 0.05); display: flex; flex-direction: column; justify-content: center;">
+                <label class="text-xs font-bold text-center block mb-2 text-warning">QUÊN THẺ (VÉ THÁNG)?</label>
+                <button class="btn-warning full-width text-xs py-2 px-1" (click)="isCameraOn ? captureFaceAndSearch() : startCamera()" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 48px; border-radius: 6px; border: none; font-weight: bold;">
+                  <ion-icon [name]="isCameraOn ? 'search-outline' : 'person-outline'" style="font-size: 1.2rem;"></ion-icon>
+                  <span>{{ isCameraOn ? 'Quét tìm thẻ' : 'Mở Camera' }}</span>
+                </button>
               </div>
             </div>
           </div>
 
-          <div class="grid-2-col gap-3 mt-3" *ngIf="plateImageBase64 || faceImageBase64">
+          <div class="grid-2-col gap-3 mt-3" *ngIf="plateImageBase64">
             <div class="image-preview-modern relative" *ngIf="plateImageBase64">
               <span class="badge-label" style="position:absolute; top:5px; left:5px; background:var(--ion-color-primary); color:white; padding:2px 8px; border-radius:4px; font-size:10px; z-index:10;">BIỂN SỐ</span>
               <img [src]="plateImageBase64" alt="Plate" style="width:100%; height:120px; object-fit:cover; border-radius:8px;" />
               <button class="btn-icon-circular" style="position: absolute; top: 5px; right: 5px; background: var(--ion-color-danger); color: white; border: none; width: 24px; height: 24px;" (click)="clearPlate()">
-                <ion-icon name="close-outline"></ion-icon>
-              </button>
-            </div>
-
-            <div class="image-preview-modern relative" *ngIf="faceImageBase64">
-              <span class="badge-label" style="position:absolute; top:5px; left:5px; background:var(--ion-color-success); color:white; padding:2px 8px; border-radius:4px; font-size:10px; z-index:10;">KHUÔN MẶT</span>
-              <img [src]="faceImageBase64" alt="Face" style="width:100%; height:120px; object-fit:cover; border-radius:8px;" />
-              <button class="btn-icon-circular" style="position: absolute; top: 5px; right: 5px; background: var(--ion-color-danger); color: white; border: none; width: 24px; height: 24px;" (click)="clearFace()">
                 <ion-icon name="close-outline"></ion-icon>
               </button>
             </div>
@@ -181,9 +169,12 @@
             <div class="customer-box">
               <div class="flex-justify border-bottom pb-2 mb-3">
                 <span class="label">Chủ thẻ</span>
-                <span class="value highlight text-lg"
-                  >{{ scanResult.customerName }}</span
-                >
+                <div class="text-right">
+                  <span class="value highlight text-lg block">{{ scanResult.customerName }}</span>
+                  <span class="text-xs font-bold mt-1 inline-block" [ngStyle]="{'color': scanResult.cardType === 'Year' ? '#dc2626' : (scanResult.cardType === 'Quarterly' ? '#ea580c' : (scanResult.cardType === 'Guest' ? '#6b7280' : 'var(--ion-color-primary, #003399)'))}">
+                    {{ scanResult.cardType === 'Guest' ? 'Thẻ Lượt' : (scanResult.cardType === 'Monthly' ? 'Thẻ Tháng' : (scanResult.cardType === 'Quarterly' ? 'Thẻ Quý' : 'Thẻ Năm')) }}
+                  </span>
+                </div>
               </div>
               <div class="grid-2-col">
                 <div>
@@ -207,7 +198,7 @@
               </div>
             </div>
 
-            <div class="grid-2-col gap-4 mt-4">
+            <div class="gap-4 mt-4" style="display: grid;" [style.grid-template-columns]="(scanResult.totalCost && scanResult.totalCost > 0) ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)'">
               <div class="info-card text-center">
                 <span class="label block mb-1">Hạn sử dụng</span>
                 <span
@@ -224,6 +215,12 @@
                   [ngClass]="scanResult.status === 'Hợp lệ' ? 'text-success' : 'text-danger'"
                 >
                   {{ scanResult.status }}
+                </span>
+              </div>
+              <div class="info-card text-center" *ngIf="scanResult.totalCost && scanResult.totalCost > 0" style="background: rgba(var(--ion-color-danger-rgb, 235, 68, 90), 0.1); border-color: rgba(var(--ion-color-danger-rgb, 235, 68, 90), 0.3);">
+                <span class="label block mb-1 text-danger font-bold">Cước phí</span>
+                <span class="value font-extrabold text-danger text-lg">
+                  {{ scanResult.totalCost | number }}đ
                 </span>
               </div>
             </div>
@@ -309,6 +306,9 @@
                   <span class="text-xs font-mono text-muted tracking-wide"
                     >{{ item.nfcId }}</span
                   >
+                  <span class="text-xs font-bold mt-1" [ngStyle]="{'color': item.cardType === 'Year' ? '#dc2626' : (item.cardType === 'Quarterly' ? '#ea580c' : (item.cardType === 'Guest' ? '#6b7280' : 'var(--ion-color-primary, #003399)'))}">
+                    {{ item.cardType === 'Guest' ? 'Thẻ Lượt' : (item.cardType === 'Monthly' ? 'Thẻ Tháng' : (item.cardType === 'Quarterly' ? 'Thẻ Quý' : 'Thẻ Năm')) }}
+                  </span>
                 </div>
               </td>
 

@@ -1,4 +1,4 @@
-﻿﻿using Microsoft.AspNetCore.Authorization;
+﻿﻿﻿﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OpenCvSharp;
@@ -172,14 +172,23 @@ namespace VisionPark.API.Controllers
                 // 1. Lưu file xuống ổ cứng trước để dùng hàm LoadImageFile cực kỳ an toàn
                 await System.IO.File.WriteAllBytesAsync(filePath, imageBytes);
 
-                // 2. Load ảnh thẳng từ file vật lý (Tránh lỗi Crash Bitmap)
-                using var img = FaceRecognitionDotNet.FaceRecognition.LoadImageFile(filePath);
-                var faceLocations = _fr.FaceLocations(img).ToArray();
+                FaceRecognitionDotNet.Location[] faceLocations;
+                try
+                {
+                    // 2. Load ảnh thẳng từ file vật lý (Tránh lỗi Crash Bitmap)
+                    using var img = FaceRecognitionDotNet.FaceRecognition.LoadImageFile(filePath);
+                    faceLocations = _fr.FaceLocations(img).ToArray();
+                }
+                catch
+                {
+                    if (System.IO.File.Exists(filePath)) System.IO.File.Delete(filePath);
+                    throw;
+                }
 
                 if (faceLocations.Length != 1)
                 {
                     // AI từ chối -> Xóa file rác vừa lưu và báo lỗi
-                    System.IO.File.Delete(filePath);
+                    if (System.IO.File.Exists(filePath)) System.IO.File.Delete(filePath);
                     string msg = faceLocations.Length == 0 ? "Không tìm thấy khuôn mặt nào trong ảnh. Vui lòng chụp lại." : "Phát hiện nhiều hơn 1 khuôn mặt. Vui lòng chỉ chụp một người.";
                     return BadRequest(new { message = msg });
                 }
@@ -257,13 +266,19 @@ namespace VisionPark.API.Controllers
                     // Phân tích ảnh vừa quét
                     // Tạo một file Temp để AI đọc, xử lý xong sẽ xóa ngay
                     string tempScanFile = Path.GetTempFileName() + ".jpg";
-                    await System.IO.File.WriteAllBytesAsync(tempScanFile, imageBytes);
-
-                    using var scanImg = FaceRecognitionDotNet.FaceRecognition.LoadImageFile(tempScanFile);
-                    var scanEncodings = _fr.FaceEncodings(scanImg).ToArray();
+                    FaceRecognitionDotNet.FaceEncoding[] scanEncodings;
                     
-                    // Xóa file temp rác
-                    if (System.IO.File.Exists(tempScanFile)) System.IO.File.Delete(tempScanFile);
+                    try
+                    {
+                        await System.IO.File.WriteAllBytesAsync(tempScanFile, imageBytes);
+                        using var scanImg = FaceRecognitionDotNet.FaceRecognition.LoadImageFile(tempScanFile);
+                        scanEncodings = _fr.FaceEncodings(scanImg).ToArray();
+                    }
+                    finally
+                    {
+                        // Đảm bảo file rác luôn bị xóa dù quá trình đọc ảnh có quăng exception
+                        if (System.IO.File.Exists(tempScanFile)) System.IO.File.Delete(tempScanFile);
+                    }
 
                     if (scanEncodings.Length == 0)
                     {

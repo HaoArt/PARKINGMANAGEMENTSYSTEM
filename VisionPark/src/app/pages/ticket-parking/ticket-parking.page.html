@@ -1,11 +1,10 @@
 <ion-content
   [fullscreen]="true"
   class="premium-dashboard"
-  [style.--background]="isCameraActive ? 'transparent' : ''"
 >
-  <app-navbar [hidden]="isCameraActive" (searchChange)="onNavbarSearch($event)"></app-navbar>
+  <app-navbar (searchChange)="onNavbarSearch($event)"></app-navbar>
 
-  <div class="main-wrapper" [hidden]="isCameraActive">
+  <div class="main-wrapper">
     <header class="page-header">
       <div class="header-content">
         <h1>Phát hành Thẻ VisionPark</h1>
@@ -85,6 +84,24 @@
             </div>
           </div>
 
+          <div class="form-group mt-4">
+            <label class="flex justify-between items-center mb-2">
+              <span>CAMERA & HÌNH ẢNH</span>
+              <span class="text-xs text-muted font-normal italic">Thu thập dữ liệu</span>
+            </label>
+            <div class="video-container mb-3" [class.camera-off]="!isCameraActive" style="border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.05); position: relative; min-height: 180px; display: flex; align-items: center; justify-content: center; border: 1px dashed var(--ion-color-medium);">
+              <video #videoElement autoplay playsinline *ngIf="isCameraActive" style="width: 100%; height: auto; max-height: 250px; object-fit: cover;"></video>
+              <div class="camera-placeholder text-center text-muted" *ngIf="!isCameraActive">
+                <ion-icon name="videocam-off-outline" style="font-size: 2rem;"></ion-icon>
+                <p class="text-xs mt-1">Camera đang tắt</p>
+              </div>
+              <button *ngIf="isCameraActive" class="btn-danger" style="position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; z-index: 10;" (click)="stopCamera()" title="Tắt Camera">
+                <ion-icon name="close-outline" style="font-size: 1.2rem;"></ion-icon>
+              </button>
+            </div>
+            <canvas #canvasElement class="hidden"></canvas>
+          </div>
+
           <div class="form-group">
             <label>BIỂN SỐ XE</label>
             <div class="premium-input" style="gap: 6px">
@@ -107,11 +124,13 @@
 
               <button
                 class="btn-icon-only ai-scan-btn"
-                (click)="takePicture()"
-                title="Chụp ảnh trực tiếp"
+                (click)="(isCameraActive && !isFaceCaptureMode) ? captureImage() : takePicture(false)"
+                [title]="(isCameraActive && !isFaceCaptureMode) ? 'Chụp ngay' : 'Mở Camera'"
                 type="button"
+                [style.background]="(isCameraActive && !isFaceCaptureMode) ? 'var(--ion-color-success)' : ''"
+                [style.color]="(isCameraActive && !isFaceCaptureMode) ? 'white' : ''"
               >
-                <ion-icon name="camera-outline"></ion-icon>
+                <ion-icon [name]="(isCameraActive && !isFaceCaptureMode) ? 'aperture-outline' : 'camera-outline'"></ion-icon>
               </button>
 
               <button
@@ -140,6 +159,38 @@
                 >
                   <ion-icon name="trash-outline"></ion-icon> Xóa ảnh
                 </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group mt-3">
+            <label>KHUÔN MẶT CHỦ THẺ (BẮT BUỘC ĐỂ DỰ PHÒNG)</label>
+            <div class="premium-input" style="gap: 6px">
+              <ion-icon name="person-outline" class="input-icon"></ion-icon>
+              <input type="text" placeholder="Chụp ảnh khuôn mặt khách hàng..." readonly style="flex: 1" />
+
+              <input type="file" #faceFileInput class="hidden" accept="image/*" (change)="onFaceSelected($event)" />
+
+              <button 
+                class="btn-icon-only ai-scan-btn" 
+                (click)="(isCameraActive && isFaceCaptureMode) ? captureImage() : takeFacePicture()" 
+                type="button" 
+                [title]="(isCameraActive && isFaceCaptureMode) ? 'Chụp ngay' : 'Mở Camera'"
+                [style.background]="(isCameraActive && isFaceCaptureMode) ? 'var(--ion-color-success)' : ''"
+                [style.color]="(isCameraActive && isFaceCaptureMode) ? 'white' : ''"
+              >
+                <ion-icon [name]="(isCameraActive && isFaceCaptureMode) ? 'aperture-outline' : 'camera-outline'"></ion-icon>
+              </button>
+
+              <button class="btn-icon-only ai-scan-btn" (click)="faceFileInput.click()" type="button" title="Chọn ảnh từ thư viện" style="background: rgba(var(--ion-color-secondary-rgb, 54, 70, 93), 0.1); color: var(--ion-color-secondary, #36465d);">
+                <ion-icon name="image-outline"></ion-icon>
+              </button>
+            </div>
+
+            <div class="image-preview-modern mt-3" *ngIf="facePreview">
+              <img [src]="facePreview" alt="Face Preview" />
+              <div class="preview-overlay">
+                <button class="btn-delete-img" (click)="facePreview = null; faceImageBase64 = null"><ion-icon name="trash-outline"></ion-icon> Xóa ảnh</button>
               </div>
             </div>
           </div>
@@ -341,36 +392,4 @@
     </ng-template>
   </ion-modal>
 
-  <div class="camera-overlay" *ngIf="isCameraActive">
-    <div class="backdrop"></div>
-
-    <div class="red-target-frame">
-      <div class="corner top-left"></div>
-      <div class="corner top-right"></div>
-      <div class="corner bottom-left"></div>
-      <div class="corner bottom-right"></div>
-      <div class="instruction-text">Đưa biển số vào giữa khung đỏ</div>
-    </div>
-
-    <div class="camera-controls">
-      <ion-button
-        color="danger"
-        shape="round"
-        size="large"
-        (click)="stopCamera()"
-      >
-        <ion-icon slot="start" name="close-circle"></ion-icon>
-        Hủy
-      </ion-button>
-      <ion-button
-        color="success"
-        shape="round"
-        size="large"
-        (click)="captureImage()"
-      >
-        <ion-icon slot="start" name="camera"></ion-icon>
-        Chụp ngay
-      </ion-button>
-    </div>
-  </div>
 </ion-content>
