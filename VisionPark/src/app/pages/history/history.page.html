@@ -344,26 +344,24 @@
                     [class.italic]="item.checkOutTime === 'Chưa ra khỏi bãi'"
                     >{{ item.checkOutTime }}</span
                   >
-                  <div class="flex items-center gap-1 mt-1" *ngIf="item.checkOutTime !== '---'">
-                    <div class="image-thumb" *ngIf="item.vehicleImageUrlOut" title="Ảnh Biển số lúc ra">
-                      <img [src]="item.vehicleImageUrlOut" style="width: 28px; height: 28px; object-fit: cover; border-radius: 4px; border: 1px solid var(--ion-color-light);" />
-                    </div>
-                    <div class="image-thumb" *ngIf="item.faceImageUrlOut" title="Ảnh Khuôn mặt lúc ra">
-                      <img [src]="item.faceImageUrlOut" style="width: 28px; height: 28px; object-fit: cover; border-radius: 50%; border: 1px solid var(--ion-color-light);" />
-                    </div>
-                  </div>
                 </div>
               </td>
 
               <td data-label="Hình ảnh">
-                <div class="flex items-center gap-2">
-                  <div class="image-thumb" *ngIf="item.vehicleImageUrlIn" title="Ảnh Biển số lúc vào">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <div class="image-thumb" *ngIf="item.vehicleImageUrlIn" title="Ảnh Biển số lúc VÀO" (click)="viewImage(item.vehicleImageUrlIn)" style="cursor: pointer;">
                     <img [src]="item.vehicleImageUrlIn" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid var(--ion-color-light);" />
                   </div>
-                  <div class="image-thumb" *ngIf="item.faceImageUrlIn" title="Ảnh Khuôn mặt lúc vào">
+                  <div class="image-thumb" *ngIf="item.faceImageUrlIn" title="Ảnh Khuôn mặt lúc VÀO" (click)="viewImage(item.faceImageUrlIn)" style="cursor: pointer;">
                     <img [src]="item.faceImageUrlIn" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 1px solid var(--ion-color-light);" />
                   </div>
-                  <span *ngIf="!item.vehicleImageUrlIn && !item.faceImageUrlIn" class="text-xs text-muted italic">
+                  <div class="image-thumb" *ngIf="item.vehicleImageUrlOut" title="Ảnh Biển số lúc RA" (click)="viewImage(item.vehicleImageUrlOut)" style="cursor: pointer;">
+                    <img [src]="item.vehicleImageUrlOut" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid var(--ion-color-danger);" />
+                  </div>
+                  <div class="image-thumb" *ngIf="item.faceImageUrlOut" title="Ảnh Khuôn mặt lúc RA" (click)="viewImage(item.faceImageUrlOut)" style="cursor: pointer;">
+                    <img [src]="item.faceImageUrlOut" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 1px solid var(--ion-color-danger);" />
+                  </div>
+                  <span *ngIf="!item.vehicleImageUrlIn && !item.faceImageUrlIn && !item.vehicleImageUrlOut && !item.faceImageUrlOut" class="text-xs text-muted italic">
                     Không có ảnh
                   </span>
                 </div>
@@ -423,5 +421,13 @@
         </div>
       </footer>
     </div>
+  </div>
+
+  <!-- Modal Xem ảnh phóng to -->
+  <div class="custom-modal-overlay" *ngIf="fullScreenImage" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px);" (click)="closeFullScreenImage()">
+    <button class="btn-icon-only" (click)="closeFullScreenImage()" style="position: absolute; top: 20px; right: 20px; z-index: 10001; background: rgba(255,255,255,0.2); border: none; font-size: 2rem; cursor: pointer; color: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+      <ion-icon name="close-outline"></ion-icon>
+    </button>
+    <img [src]="fullScreenImage" style="max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);" (click)="$event.stopPropagation()" />
   </div>
 </ion-content>
