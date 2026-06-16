@@ -52,10 +52,18 @@ namespace VisionPark.API.Controllers
 
                 if (card == null) return BadRequest("Thẻ này chưa được khởi tạo trên hệ thống!");
 
+                // KIỂM TRA THẺ BỊ KHÓA TỪ KHO THẺ
+                if (card.Status != "Active")
+                {
+                    return BadRequest(new { Message = "Thẻ này đã bị KHÓA trên hệ thống, không thể sử dụng!" });
+                }
+
                 // --- KIỂM TRA CHỐNG SAO CHÉP THẺ (ANTI-CLONING) ---
                 // Nếu thẻ trong DB có mã bảo mật, nhưng thiết bị quét lên không gửi kèm hoặc không khớp -> Thẻ giả
-                if (!string.IsNullOrEmpty(card.CardToken) && request.CardToken != card.CardToken)
-                    return BadRequest(new { Message = "Cảnh báo: Phát hiện thẻ giả mạo (Cloned Card)!" });
+                // if (!string.IsNullOrEmpty(card.CardToken) && request.CardToken != card.CardToken && !request.ForcePass)
+                // {
+                //     return BadRequest(new { Message = "Cảnh báo: Phát hiện thẻ giả mạo (Không có Token ẩn)!", RequiresForcePass = true });
+                // }
 
                 string plateNumber = "N/A";
                 string customerName = "Khách vãng lai";
@@ -100,7 +108,8 @@ namespace VisionPark.API.Controllers
                                     PlateNumber = plateNumber,
                                     VehicleType = vehicleType,
                                     ExpiryDate = expiryDate,
-                                    Status = ticketStatus
+                                    Status = ticketStatus,
+                                    CardType = card.CardType
                                 }
                             });
                         }
@@ -117,11 +126,17 @@ namespace VisionPark.API.Controllers
                                     PlateNumber = plateNumber,
                                     VehicleType = vehicleType,
                                     ExpiryDate = expiryDate,
-                                    Status = ticketStatus
+                                    Status = ticketStatus,
+                                    CardType = card.CardType
                                 }
                             });
                         }
                     }
+                }
+
+                if (card.CardType == "Guest" && string.IsNullOrEmpty(request.PlateImageBase64))
+                {
+                    return BadRequest(new { Message = "Thẻ vãng lai (vé lượt) bắt buộc phải có ảnh chụp BIỂN SỐ xe!" });
                 }
 
                 string recognizedPlate = string.Empty;
@@ -132,13 +147,15 @@ namespace VisionPark.API.Controllers
                         return BadRequest(new { Message = "AI không đọc được biển số, vui lòng chụp lại cho rõ nét!" });
                 }
 
-                var displayInfo = new
+                object displayInfo = new
                 {
                     CustomerName = customerName,
                     PlateNumber = plateNumber,
                     VehicleType = vehicleType,
                     ExpiryDate = expiryDate,
-                    Status = ticketStatus
+                    Status = ticketStatus,
+                    TotalCost = 0m,
+                    CardType = card.CardType
                 };
 
                 // XỬ LÝ CHECK-IN (VÀO BÃI)
@@ -146,9 +163,6 @@ namespace VisionPark.API.Controllers
                 {
                     if (card.CardType == "Guest")
                     {
-                        if (string.IsNullOrEmpty(recognizedPlate))
-                            return BadRequest(new { Message = "Thẻ vãng lai yêu cầu chụp ảnh BIỂN SỐ xe để nhận diện vào bãi!" });
-
                         plateNumber = recognizedPlate;
                         
                         displayInfo = new
@@ -157,7 +171,9 @@ namespace VisionPark.API.Controllers
                             PlateNumber = plateNumber,
                             VehicleType = vehicleType,
                             ExpiryDate = expiryDate,
-                            Status = ticketStatus
+                            Status = ticketStatus,
+                            TotalCost = 0m,
+                            CardType = card.CardType
                         };
                     }
                     else // Vé tháng
@@ -174,7 +190,7 @@ namespace VisionPark.API.Controllers
                         }
                     }
 
-                    string? faceImageIn = await SaveFaceImageAsync(request.FaceImageBase64, "face_in");
+                    string? faceImageIn = null; // Đã lược bỏ quét khuôn mặt khi vào
                     string? plateImageIn = await SaveFaceImageAsync(request.PlateImageBase64, "plate_in");
 
                     var newSession = new ParkingSession
@@ -212,23 +228,49 @@ namespace VisionPark.API.Controllers
                         }
                     }
 
-                    // KIỂM TRA KHUÔN MẶT ĐỐI CHIẾU LÚC RA
-                    if (!string.IsNullOrEmpty(request.FaceImageBase64) && !string.IsNullOrEmpty(activeSession.FaceImageUrlIn) && !request.ForcePass)
-                    {
-                        bool isMatch = VerifyFaceMatch(activeSession.FaceImageUrlIn, request.FaceImageBase64);
-                        if (!isMatch)
-                        {
-                            return BadRequest(new { Message = "CẢNH BÁO AN NINH: Khuôn mặt lấy xe KHÔNG KHỚP với người lúc gửi!", RequiresForcePass = true });
-                        }
-                    }
-
-                    string? faceImageOut = await SaveFaceImageAsync(request.FaceImageBase64, "face_out");
+                    string? faceImageOut = null; // Đã lược bỏ quét khuôn mặt khi ra
                     string? plateImageOut = await SaveFaceImageAsync(request.PlateImageBase64, "plate_out");
 
                     activeSession.CheckOutTime = DateTime.Now;
                     activeSession.LicensePlateOut = card.CardType == "Guest" ? activeSession.LicensePlateIn : plateNumber;
                     activeSession.FaceImageUrlOut = faceImageOut;
                     activeSession.ImageOutPath = plateImageOut; // Lưu tạm ảnh biển số ra vào ImageOutPath
+
+                    decimal cost = 0;
+                    if (card.CardType == "Guest")
+                    {
+                        var duration = activeSession.CheckOutTime.Value - activeSession.CheckInTime;
+                        int totalHours = (int)Math.Ceiling(duration.TotalHours);
+                        if (totalHours <= 0) totalHours = 1;
+
+                        // LOGIC TÍNH GIÁ VÉ THEO GIỜ LŨY TIẾN
+                        // Lấy cấu hình từ Database (Bảng SystemConfigs) để đảm bảo đồng bộ Real-time
+                        var sysConfigs = await _context.SystemConfigs.Where(c => c.ConfigKey.StartsWith("GuestPrice_")).ToListAsync();
+                        string GetConfig(string key, string def) => sysConfigs.FirstOrDefault(c => c.ConfigKey == key)?.ConfigValue ?? def;
+
+                        decimal basePriceCar = decimal.TryParse(GetConfig("GuestPrice_CarBasePrice", "15000"), out var cbp) ? cbp : 15000m;
+                        decimal extraPerHourCar = decimal.TryParse(GetConfig("GuestPrice_CarExtraPerHour", "5000"), out var ceph) ? ceph : 5000m;
+                        decimal basePriceBike = decimal.TryParse(GetConfig("GuestPrice_BikeBasePrice", "5000"), out var bbp) ? bbp : 5000m;
+                        decimal extraPerHourBike = decimal.TryParse(GetConfig("GuestPrice_BikeExtraPerHour", "2000"), out var beph) ? beph : 2000m;
+
+                        decimal basePrice = activeSession.VehicleTypeID == 1 ? basePriceCar : basePriceBike;
+                        decimal extraPerHour = activeSession.VehicleTypeID == 1 ? extraPerHourCar : extraPerHourBike;
+
+                        if (totalHours <= 4)
+                        {
+                            cost = basePrice;
+                        }
+                        else
+                        {
+                            cost = basePrice + (totalHours - 4) * extraPerHour;
+                        }
+                        
+                        activeSession.TotalCost = cost;
+                    }
+                    else
+                    {
+                        activeSession.TotalCost = 0;
+                    }
 
                     await _context.SaveChangesAsync();
 
@@ -238,13 +280,15 @@ namespace VisionPark.API.Controllers
                         PlateNumber = activeSession.LicensePlateOut,
                         VehicleType = vehicleType,
                         ExpiryDate = expiryDate,
-                        Status = ticketStatus
+                        Status = ticketStatus,
+                        TotalCost = cost,
+                        CardType = card.CardType
                     };
 
                     return Ok(new
                     {
                         Action = "CHECK_OUT",
-                        Message = isCurrentlyExpired ? "Xe RA bãi thành công. LƯU Ý: Vé tháng đã hết hạn!" : "Xe RA bãi thành công. Mở Barie!",
+                        Message = isCurrentlyExpired ? "Xe RA bãi thành công. LƯU Ý: Vé tháng đã hết hạn!" : (card.CardType == "Guest" ? $"Thu tiền vé: {cost:N0} VNĐ. Mở Barie!" : "Xe RA bãi thành công. Mở Barie!"),
                         Data = displayInfo
                     });
                 }
@@ -252,6 +296,11 @@ namespace VisionPark.API.Controllers
             finally
             {
                 cardLock.Release();
+                // Dọn dẹp RAM: Nếu không còn request nào đang chờ quẹt thẻ này, hãy xóa Lock khỏi Dictionary
+                if (cardLock.CurrentCount == 1)
+                {
+                    _cardLocks.TryRemove(request.CardUID, out _);
+                }
             }
         }
 
@@ -286,6 +335,7 @@ namespace VisionPark.API.Controllers
                 .Select(s => new
                 {
                     NfcId = s.Card != null ? s.Card.CardUID : "---",
+                    CardType = s.Card != null ? s.Card.CardType : "Guest",
                     PlateNumberIn = s.LicensePlateIn ?? "---",
                     PlateNumberOut = s.LicensePlateOut ?? "---",
                     VehicleType = s.VehicleType != null ? s.VehicleType.TypeName : (s.VehicleTypeID == 1 ? "Ô tô" : "Xe máy"),
@@ -383,6 +433,76 @@ namespace VisionPark.API.Controllers
             {
                 Console.WriteLine($"Lỗi Face Match: {ex.Message}");
                 return false;
+            }
+        }
+
+        [HttpPost("find-by-face")]
+        public async Task<IActionResult> FindTicketByFace([FromBody] ScanCardRequest request)
+        {
+            if (string.IsNullOrEmpty(request.FaceImageBase64)) return BadRequest(new { Message = "Vui lòng cung cấp ảnh khuôn mặt!" });
+
+            try
+            {
+                if (_fr == null)
+                {
+                    string modelPath = Path.Combine(_env.ContentRootPath, "Models");
+                    lock (_aiLock) { if (_fr == null) _fr = FaceRecognitionDotNet.FaceRecognition.Create(modelPath); }
+                }
+
+                var base64Data = request.FaceImageBase64.Contains(",") ? request.FaceImageBase64.Substring(request.FaceImageBase64.IndexOf(",") + 1) : request.FaceImageBase64;
+                byte[] imageBytes = Convert.FromBase64String(base64Data);
+                string tempScanFile = Path.GetTempFileName() + ".jpg";
+                FaceRecognitionDotNet.FaceEncoding[] scanEncodings;
+
+                try
+                {
+                    await System.IO.File.WriteAllBytesAsync(tempScanFile, imageBytes);
+                    using var scanImg = FaceRecognitionDotNet.FaceRecognition.LoadImageFile(tempScanFile);
+                    scanEncodings = _fr.FaceEncodings(scanImg).ToArray();
+                }
+                finally
+                {
+                    if (System.IO.File.Exists(tempScanFile)) System.IO.File.Delete(tempScanFile);
+                }
+
+                if (scanEncodings.Length == 0) return BadRequest(new { Message = "Không nhận diện được khuôn mặt trong ảnh!" });
+
+                var scanEncoding = scanEncodings[0];
+
+                var tickets = await _context.MonthlyTickets.Include(t => t.Card).Where(t => t.IsActive).ToListAsync();
+                string webRootPath = _env.WebRootPath;
+                if (string.IsNullOrWhiteSpace(webRootPath)) webRootPath = Path.Combine(_env.ContentRootPath, "wwwroot");
+
+                foreach (var ticket in tickets)
+                {
+                    // Bỏ qua không quét khuôn mặt nếu thẻ NFC gốc đã bị khóa
+                    if (ticket.Card == null || ticket.Card.Status != "Active") continue;
+
+                    var prop = ticket.GetType().GetProperty("FaceImageUrl");
+                    if (prop != null)
+                    {
+                        string faceUrl = prop.GetValue(ticket) as string;
+                        if (!string.IsNullOrEmpty(faceUrl))
+                        {
+                            string dbFilePath = Path.Combine(webRootPath, faceUrl.TrimStart('/'));
+                            if (System.IO.File.Exists(dbFilePath))
+                            {
+                                using var dbImg = FaceRecognitionDotNet.FaceRecognition.LoadImageFile(dbFilePath);
+                                var dbEncodings = _fr.FaceEncodings(dbImg).ToArray();
+                                if (dbEncodings.Length > 0 && FaceRecognitionDotNet.FaceRecognition.FaceDistance(dbEncodings[0], scanEncoding) < 0.45)
+                                {
+                                    return Ok(new { CardUID = ticket.Card?.CardUID, CustomerName = ticket.CustomerName });
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return BadRequest(new { Message = "Khuôn mặt này chưa được đăng ký vé tháng!" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Lỗi hệ thống: " + ex.Message });
             }
         }
 

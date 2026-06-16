@@ -1,4 +1,4 @@
-﻿﻿using Microsoft.AspNetCore.Mvc;
+﻿﻿﻿﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VisionPark.API.Data;
 using VisionPark.API.DTOs.Requests;
@@ -134,22 +134,32 @@ namespace VisionPark.API.Controllers
 
             // 1. NGĂN CHẶN XÓA NẾU THẺ ĐANG GẮN VỚI VÉ THÁNG CÒN HẠN
             var isCardInUse = await _context.MonthlyTickets.AnyAsync(t => t.CardID == id && t.IsActive && t.EndDate >= DateTime.Now);
-            if (isCardInUse)
+            if (isCardInUse && card.Status != "Inactive")
             {
-                return BadRequest(new { Message = "Không thể xóa! Thẻ này đang được sử dụng cho một vé tháng còn hiệu lực." });
+                return BadRequest(new { Message = "Không thể xóa! Thẻ này đang được sử dụng cho một vé tháng còn hiệu lực. Vui lòng khóa thẻ trước khi xóa." });
             }
 
-            try
+            // CẢNH BÁO: Thao tác này sẽ xóa vĩnh viễn thẻ và toàn bộ lịch sử liên quan.
+
+            // Xóa các vé tháng đã hết hạn hoặc bị khóa gắn với thẻ này
+            var oldTickets = await _context.MonthlyTickets.Where(t => t.CardID == id).ToListAsync();
+            if (oldTickets.Any())
             {
-                _context.NfcCards.Remove(card);
-                await _context.SaveChangesAsync();
-                return Ok(new { Message = "Đã xóa thẻ khỏi hệ thống!" });
+                _context.MonthlyTickets.RemoveRange(oldTickets);
             }
-            catch (DbUpdateException)
+
+            // Xóa các phiên đỗ xe của thẻ này để gỡ bỏ ràng buộc khóa ngoại
+            var sessions = await _context.ParkingSessions.Where(s => s.CardID == id).ToListAsync();
+            if (sessions.Any())
             {
-                // 2. NGĂN CHẶN XÓA NẾU THẺ ĐÃ TỪNG QUẸT VÀO BÃI (CÓ LỊCH SỬ PARKING SESSIONS)
-                return BadRequest(new { Message = "Không thể xóa vì thẻ này đã có lịch sử đỗ xe! Vui lòng Dùng tính năng Chỉnh sửa để khóa thẻ (Inactive) thay vì xóa." });
+                _context.ParkingSessions.RemoveRange(sessions);
             }
+
+            // Cuối cùng, xóa thẻ gốc
+            _context.NfcCards.Remove(card);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "Đã xóa thẻ và toàn bộ dữ liệu liên quan thành công!" });
         }
     }
 }

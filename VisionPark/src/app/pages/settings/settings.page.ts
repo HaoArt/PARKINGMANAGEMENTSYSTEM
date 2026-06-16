@@ -85,6 +85,14 @@ export class SettingsPage implements OnInit {
   isLoading: boolean = false;
   isSaving: boolean = false;
 
+  // Dữ liệu mặc định cho thẻ lượt
+  GuestPrices: any = {
+    CarBasePrice: 15000,
+    CarExtraPerHour: 5000,
+    BikeBasePrice: 5000,
+    BikeExtraPerHour: 2000
+  };
+
   private api = inject(Api);
   private toastCtrl = inject(ToastController);
   private cdr = inject(ChangeDetectorRef);
@@ -139,6 +147,18 @@ export class SettingsPage implements OnInit {
             PricePerYear: r.pricePerYear ?? r.PricePerYear ?? 0,
           }));
         }
+        
+        // Hứng dữ liệu Bảng giá thẻ lượt (GuestPrices)
+        if (data?.guestPrices || data?.GuestPrices) {
+          const guest = data.guestPrices || data.GuestPrices;
+          this.GuestPrices = {
+            CarBasePrice: guest.carBasePrice ?? guest.CarBasePrice ?? 15000,
+            CarExtraPerHour: guest.carExtraPerHour ?? guest.CarExtraPerHour ?? 5000,
+            BikeBasePrice: guest.bikeBasePrice ?? guest.BikeBasePrice ?? 5000,
+            BikeExtraPerHour: guest.bikeExtraPerHour ?? guest.BikeExtraPerHour ?? 2000,
+          };
+        }
+        
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -172,6 +192,13 @@ export class SettingsPage implements OnInit {
         pricePerQuarter: Number(r.PricePerQuarter) || 0,
         pricePerYear: Number(r.PricePerYear) || 0,
       })),
+      // Gửi cấu hình thẻ lượt xuống Backend
+      guestPrices: {
+        carBasePrice: Number(this.GuestPrices.CarBasePrice) || 15000,
+        carExtraPerHour: Number(this.GuestPrices.CarExtraPerHour) || 5000,
+        bikeBasePrice: Number(this.GuestPrices.BikeBasePrice) || 5000,
+        bikeExtraPerHour: Number(this.GuestPrices.BikeExtraPerHour) || 2000,
+      }
     };
 
     this.api.saveSettings(payload).subscribe({

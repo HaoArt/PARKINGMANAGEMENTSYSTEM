@@ -52,6 +52,7 @@ import { NFC, Ndef } from '@awesome-cordova-plugins/nfc/ngx';
 
 interface ParkingRecord {
   nfcId: string;
+  cardType?: string;
   plateNumberIn: string;
   plateNumberOut: string;
   vehicleType: string;
@@ -73,6 +74,8 @@ interface ScanResultData {
   expiryDate: string;
   status: string;
   isSuccess: boolean;
+  totalCost?: number;
+  cardType?: string;
 }
 
 @Component({
@@ -216,6 +219,7 @@ export class HistoryPage implements OnInit, OnDestroy {
         if (res?.data) {
           this.parkingHistory = res.data.map((item: any) => ({
             ...item,
+            cardType: item.cardType || item.CardType || 'Guest',
             faceImageUrlIn: item.faceImageUrlIn || item.FaceImageUrlIn ? this.api.getFullImageUrl(item.faceImageUrlIn || item.FaceImageUrlIn) : undefined,
             faceImageUrlOut: item.faceImageUrlOut || item.FaceImageUrlOut ? this.api.getFullImageUrl(item.faceImageUrlOut || item.FaceImageUrlOut) : undefined,
             vehicleImageUrlIn: item.vehicleImageUrlIn || item.VehicleImageUrlIn ? this.api.getFullImageUrl(item.vehicleImageUrlIn || item.VehicleImageUrlIn) : undefined,
@@ -261,18 +265,8 @@ export class HistoryPage implements OnInit, OnDestroy {
       return;
     }
 
-    if (!this.plateImageBase64) {
-      this.showToast('Bắt buộc phải chụp hoặc tải lên ảnh BIỂN SỐ!', 'warning');
-      return;
-    }
-
-    if (!this.faceImageBase64) {
-      this.showToast('Bắt buộc phải chụp hoặc tải lên ảnh KHUÔN MẶT!', 'warning');
-      return;
-    }
-
-    // Lấy ảnh khuôn mặt nếu có chụp
-    const faceImage = this.faceImageBase64 ? this.faceImageBase64 : undefined;
+    // Đã lược bỏ quét khuôn mặt khi ra/vào để giảm tải
+    const faceImage = undefined;
     const plateImage = this.plateImageBase64 ? this.plateImageBase64 : undefined;
 
     this.isLoading = true;
@@ -292,7 +286,9 @@ export class HistoryPage implements OnInit, OnDestroy {
             '---',
           expiryDate: data?.expiryDate || '---',
           status: data?.status || '---',
+          cardType: data?.cardType || data?.CardType || 'Guest',
           isSuccess: res.action === 'CHECK_IN' || res.action === 'CHECK_OUT',
+          totalCost: data?.totalCost || data?.TotalCost || 0,
         };
 
         // Hiển thị Toast thông báo rõ ràng cho bảo vệ
@@ -485,8 +481,26 @@ export class HistoryPage implements OnInit, OnDestroy {
     this.plateImageBase64 = this.captureFromVideo();
   }
 
-  captureFace() {
-    this.faceImageBase64 = this.captureFromVideo();
+  captureFaceAndSearch() {
+    const faceBase64 = this.captureFromVideo();
+    if (!faceBase64) return;
+    
+    this.isLoading = true;
+    this.showToast('Đang tìm kiếm khuôn mặt trong hệ thống...', 'warning');
+    this.api.findCardByFace(faceBase64).subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+        if (res.cardUID) {
+          this.inputNfcId = res.cardUID;
+          this.showToast(`Tìm thấy thẻ của: ${res.customerName}`, 'success');
+          this.onProcessCard(res.cardUID);
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.showToast(err.error?.message || err.error?.Message || 'Không tìm thấy thẻ phù hợp!', 'danger');
+      }
+    });
   }
 
   captureFromVideo(): string | null {
@@ -511,8 +525,6 @@ export class HistoryPage implements OnInit, OnDestroy {
       reader.onload = (e: any) => {
         if (type === 'plate') {
           this.plateImageBase64 = e.target.result;
-        } else {
-          this.faceImageBase64 = e.target.result;
         }
       };
       reader.readAsDataURL(file);

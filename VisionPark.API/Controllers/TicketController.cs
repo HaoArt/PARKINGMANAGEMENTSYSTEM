@@ -1,9 +1,11 @@
-﻿﻿﻿﻿using Microsoft.AspNetCore.Mvc;
+﻿﻿﻿﻿﻿﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VisionPark.API.Data;
 using VisionPark.API.Models;
 using VisionPark.API.DTOs.Requests;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
 using System.Text.Json;
 
 namespace VisionPark.API.Controllers
@@ -15,12 +17,17 @@ namespace VisionPark.API.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _env;
 
-        public TicketController(ApplicationDbContext context, IHttpClientFactory httpClientFactory, IConfiguration configuration)
+        private static FaceRecognitionDotNet.FaceRecognition? _fr;
+        private static readonly object _aiLock = new object();
+
+        public TicketController(ApplicationDbContext context, IHttpClientFactory httpClientFactory, IConfiguration configuration, IWebHostEnvironment env)
         {
             _context = context;
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;
+            _env = env;
         }
 
         [HttpPost("register-monthly")]
@@ -65,6 +72,9 @@ namespace VisionPark.API.Controllers
             var card = await _context.NfcCards.FirstOrDefaultAsync(c => c.CardUID == request.CardUID);
             if (card == null) return BadRequest("Thẻ này chưa được khởi tạo trong hệ thống!");
 
+            // KIỂM TRA THẺ BỊ KHÓA
+            if (card.Status != "Active") return BadRequest("Thẻ này đã bị KHÓA trong kho, không thể dùng để đăng ký vé tháng!");
+
             var cardAlreadyUsed = await _context.MonthlyTickets.AnyAsync(t => t.CardID == card.CardID && t.IsActive && t.EndDate >= DateTime.Now);
             if (cardAlreadyUsed) return BadRequest("Thẻ NFC này đang được sử dụng cho một vé tháng khác chưa hết hạn!");
 
@@ -93,6 +103,75 @@ namespace VisionPark.API.Controllers
                 else finalAmount = rule.PricePerMonth;
             }
 
+            // --- 4.5. LƯU KHUÔN MẶT NẾU CÓ ---
+            string faceImageUrl = "";
+            if (Request.Form.ContainsKey("FaceImageBase64"))
+            {
+                string base64 = Request.Form["FaceImageBase64"];
+                if (!string.IsNullOrEmpty(base64))
+                {
+                    var base64Data = base64.Contains(",") ? base64.Substring(base64.IndexOf(",") + 1) : base64;
+                    byte[] imageBytes = Convert.FromBase64String(base64Data);
+                    string webRootPath = _configuration.GetValue<string>("WebRootPath") ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
+                    // --- KIỂM TRA KHUÔN MẶT ĐÃ TỒN TẠI TRONG HỆ THỐNG HAY CHƯA ---
+                    if (_fr == null)
+                    {
+                        string modelPath = Path.Combine(_env.ContentRootPath, "Models");
+                        lock (_aiLock) { if (_fr == null) _fr = FaceRecognitionDotNet.FaceRecognition.Create(modelPath); }
+                    }
+
+                    string tempScanFile = Path.GetTempFileName() + ".jpg";
+                    FaceRecognitionDotNet.FaceEncoding[] scanEncodings;
+
+                    try
+                    {
+                        await System.IO.File.WriteAllBytesAsync(tempScanFile, imageBytes);
+                        using var scanImg = FaceRecognitionDotNet.FaceRecognition.LoadImageFile(tempScanFile);
+                        scanEncodings = _fr.FaceEncodings(scanImg).ToArray();
+                    }
+                    finally
+                    {
+                        if (System.IO.File.Exists(tempScanFile)) System.IO.File.Delete(tempScanFile);
+                    }
+
+                    if (scanEncodings.Length == 0) return BadRequest("Không nhận diện được khuôn mặt trong ảnh dự phòng!");
+
+                    var scanEncoding = scanEncodings[0];
+                    var activeTickets = await _context.MonthlyTickets.Where(t => t.IsActive).ToListAsync();
+
+                    foreach (var t in activeTickets)
+                    {
+                        var p = t.GetType().GetProperty("FaceImageUrl");
+                        if (p != null)
+                        {
+                            string existingFaceUrl = p.GetValue(t) as string;
+                            if (!string.IsNullOrEmpty(existingFaceUrl))
+                            {
+                                string dbFilePath = Path.Combine(webRootPath, existingFaceUrl.TrimStart('/'));
+                                if (System.IO.File.Exists(dbFilePath))
+                                {
+                                    using var dbImg = FaceRecognitionDotNet.FaceRecognition.LoadImageFile(dbFilePath);
+                                    var dbEncodings = _fr.FaceEncodings(dbImg).ToArray();
+                                    if (dbEncodings.Length > 0 && FaceRecognitionDotNet.FaceRecognition.FaceDistance(dbEncodings[0], scanEncoding) < 0.45)
+                                    {
+                                        return BadRequest($"Khuôn mặt này đã được đăng ký cho vé tháng của khách hàng: {t.CustomerName}!");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    // --- END KIỂM TRA ---
+
+                    string recordsFolder = Path.Combine(webRootPath, "images", "faces");
+                    if (!Directory.Exists(recordsFolder)) Directory.CreateDirectory(recordsFolder);
+                    string fileName = $"customer_{DateTime.Now.Ticks}.jpg";
+                    string filePath = Path.Combine(recordsFolder, fileName);
+                    await System.IO.File.WriteAllBytesAsync(filePath, imageBytes);
+                    faceImageUrl = $"/images/faces/{fileName}";
+                }
+            }
+
             // --- 5. LƯU VÉ MỚI VÀ TRẢ KẾT QUẢ VỀ ---
             var newTicket = new MonthlyTicket
             {
@@ -106,6 +185,15 @@ namespace VisionPark.API.Controllers
                 IsActive = true,
                 TicketPrice = finalAmount
             };
+
+            // Gán FaceImageUrl nếu Model có hỗ trợ. 
+            // YÊU CẦU: Thêm thuộc tính `public string? FaceImageUrl { get; set; }` vào class MonthlyTicket trong CSDL.
+            var ticketType = newTicket.GetType();
+            var prop = ticketType.GetProperty("FaceImageUrl");
+            if (prop != null && !string.IsNullOrEmpty(faceImageUrl))
+            {
+                prop.SetValue(newTicket, faceImageUrl);
+            }
 
             _context.MonthlyTickets.Add(newTicket);
             await _context.SaveChangesAsync();

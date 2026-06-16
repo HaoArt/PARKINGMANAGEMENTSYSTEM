@@ -74,6 +74,13 @@ export class Api {
       forcePass
     });
   }
+
+  findCardByFace(faceImageBase64: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/Parking/find-by-face`, {
+      FaceImageBase64: faceImageBase64
+    });
+  }
+  
   getParkingHistory(filterParams: any = {}) {
     let params = new HttpParams();
 
@@ -218,7 +225,14 @@ export class Api {
   }
 
   getSettings(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/Settings`, this.getAuthOptions());
+    // THÊM HEADER CHỐNG CACHE: Đảm bảo trình duyệt luôn lấy dữ liệu mới nhất từ Server
+    const options = this.getAuthOptions();
+    const headers = (options.headers || new HttpHeaders())
+      .set('Cache-Control', 'no-cache, no-store, must-revalidate, post-check=0, pre-check=0')
+      .set('Pragma', 'no-cache')
+      .set('Expires', '0');
+
+    return this.http.get(`${this.baseUrl}/Settings`, { ...options, headers });
   }
 
   saveSettings(payload: any): Observable<any> {
