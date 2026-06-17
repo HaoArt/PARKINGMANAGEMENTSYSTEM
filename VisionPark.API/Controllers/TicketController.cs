@@ -71,7 +71,7 @@ namespace VisionPark.API.Controllers
             // --- 2. KIỂM TRA THẺ VÀ BIỂN SỐ ---
             var card = await _context.NfcCards.FirstOrDefaultAsync(c => c.CardUID == request.CardUID);
             if (card == null) return BadRequest("Thẻ này chưa được khởi tạo trong hệ thống!");
-oàn             // KIỂM TRA THẺ BỊ KHÓA
+            // KIỂM TRA THẺ BỊ KHÓA
             if (card.Status != "Active") return BadRequest("Thẻ này đã bị KHÓA trong kho, không thể dùng để đăng ký vé tháng!");
 
             var cardAlreadyUsed = await _context.MonthlyTickets.AnyAsync(t => t.CardID == card.CardID && t.IsActive && t.EndDate >= DateTime.Now);
