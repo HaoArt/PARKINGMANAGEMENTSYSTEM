@@ -23,12 +23,11 @@
         <div class="card-body">
           <div class="form-group mt-2">
             <label>MÃ THẺ UID (NFC)</label>
-            <div class="premium-input readonly-input">
+            <div class="premium-input">
               <input
                 type="text"
-                placeholder="Chạm thẻ vào mặt lưng..."
+                placeholder="Chạm thẻ vào mặt lưng hoặc nhập mã..."
                 [(ngModel)]="cardForm.cardUID"
-                readonly
               />
               <div class="scan-indicator" title="Đang chờ quét thẻ...">
                 <ion-icon name="wifi-outline" class="pulse-anim"></ion-icon>

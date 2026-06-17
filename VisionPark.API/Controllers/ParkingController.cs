@@ -89,7 +89,7 @@ namespace VisionPark.API.Controllers
                     ticketStatus = isCurrentlyExpired ? "Đã hết hạn" : (daysRemaining <= 7 ? $"Sắp hết hạn ({Math.Floor(daysRemaining)} ngày)" : "Hợp lệ");
                     customerName = ticket.CustomerName;
                     plateNumber = ticket.RegisterPlate;
-                    vehicleType = ticket.VehicleType != null ? ticket.VehicleType.TypeName : (ticket.VehicleTypeID == 2 ? "Ô tô" : "Xe máy");
+                    vehicleType = ticket.VehicleTypeID == 2 ? "Ô tô" : (ticket.VehicleTypeID == 1 ? "Xe máy" : (ticket.VehicleType != null ? ticket.VehicleType.TypeName : "Khác"));
                     expiryDate = ticket.EndDate.ToString("dd/MM/yyyy");
                     finalVehicleTypeId = ticket.VehicleTypeID;
 
@@ -364,7 +364,7 @@ namespace VisionPark.API.Controllers
                     CardType = s.Card != null ? s.Card.CardType : "Guest",
                     PlateNumberIn = s.LicensePlateIn ?? "---",
                     PlateNumberOut = s.LicensePlateOut ?? "---",
-                    VehicleType = s.VehicleType != null ? s.VehicleType.TypeName : (s.VehicleTypeID == 2 ? "Ô tô" : "Xe máy"),
+                    VehicleType = s.VehicleTypeID == 2 ? "Ô tô" : (s.VehicleTypeID == 1 ? "Xe máy" : (s.VehicleType != null ? s.VehicleType.TypeName : "Khác")),
                     CheckInTime = s.CheckInTime,
                     CheckOutTime = s.CheckOutTime,
                     FaceImageUrlIn = s.FaceImageUrlIn,

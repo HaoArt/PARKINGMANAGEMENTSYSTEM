@@ -29,7 +29,7 @@
         <div class="card-body">
           <div class="form-group mt-2">
             <label>MÃ THẺ UID (NFC)</label>
-            <div class="premium-input readonly-input">
+            <div class="premium-input">
               <ion-icon name="scan-outline" class="input-icon"></ion-icon>
               <input
                 type="text"
@@ -60,12 +60,12 @@
               <label>LOẠI XE</label>
               <div class="premium-input select-wrapper">
                 <ion-icon
-                  name="car-sport-outline"
+                  [name]="regData.vehicleTypeID == 1 ? 'bicycle-outline' : 'car-sport-outline'"
                   class="input-icon"
                 ></ion-icon>
               <select [(ngModel)]="regData.vehicleTypeID">
-                <option [value]="1">Ô tô</option>
-                <option [value]="2">Xe máy</option>
+                <option [value]="1">Xe máy</option>
+                <option [value]="2">Ô tô</option>
               </select>
               <ion-icon name="chevron-down-outline" class="dropdown-icon"></ion-icon>
               </div>

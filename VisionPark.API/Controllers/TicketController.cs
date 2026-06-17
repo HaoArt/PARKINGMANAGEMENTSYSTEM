@@ -243,7 +243,7 @@ namespace VisionPark.API.Controllers
                     CustomerName = t.CustomerName,
                     PhoneNumber = t.PhoneNumber,
                     RegisterPlate = t.RegisterPlate,
-                    VehicleType = t.VehicleType != null ? t.VehicleType.TypeName : (t.VehicleTypeID == 2 ? "Ô tô" : "Xe máy"),
+                    VehicleType = t.VehicleTypeID == 2 ? "Ô tô" : (t.VehicleTypeID == 1 ? "Xe máy" : (t.VehicleType != null ? t.VehicleType.TypeName : "Khác")),
                     CardUID = t.Card != null ? t.Card.CardUID : "Không có thẻ",
                     StartDate = t.StartDate,
                     EndDate = t.EndDate,

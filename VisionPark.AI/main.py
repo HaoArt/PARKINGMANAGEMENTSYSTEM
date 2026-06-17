@@ -169,7 +169,7 @@ def process_and_format_plate(raw_text, vehicle_type):
         if chars[i] in {'D':'0','L':'1','S':'5','G':'6','B':'8','P':'9','A':'4','T':'7','Z':'2'}:
             chars[i] = {'D':'0','L':'1','S':'5','G':'6','B':'8','P':'9','A':'4','T':'7','Z':'2'}[chars[i]]
 
-    if str(vehicle_type) == "1":
+    if str(vehicle_type) == "2": # Logic định dạng biển số cho Ô tô
         if chars[2] in {'0':'D','1':'L','2':'Z','4':'A','5':'S','6':'G','7':'T','8':'B','9':'P'}:
             chars[2] = {'0':'D','1':'L','2':'Z','4':'A','5':'S','6':'G','7':'T','8':'B','9':'P'}[chars[2]]
         text_str = "".join(chars)
@@ -225,7 +225,7 @@ async def recognize_plate(
         nparr = np.frombuffer(image_bytes, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-        print(f"\n--- BẮT ĐẦU PHÂN TÍCH ẢNH (Loại xe: {'Ô tô' if str(vehicleType) == '1' else 'Xe máy'}) ---")
+        print(f"\n--- BẮT ĐẦU PHÂN TÍCH ẢNH (Loại xe: {'Ô tô' if str(vehicleType) == '2' else 'Xe máy'}) ---")
         
         results = yolo_model(img, verbose=False)
         boxes = results[0].boxes
