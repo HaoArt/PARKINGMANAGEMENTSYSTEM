@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -25,6 +25,10 @@ import {
   IonNote,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
+import { Api } from '../../services/api';
+import { NFC, Ndef } from '@awesome-cordova-plugins/nfc/ngx';
+import { Platform } from '@ionic/angular/standalone';
+
 import {
   idCardOutline,
   carOutline,
@@ -39,6 +43,9 @@ import {
   warningOutline,
   carSportOutline,
   fileTrayOutline, // Thêm icons cho UI mới & Toast
+  cameraOutline,
+  apertureOutline,
+  closeOutline,
 } from 'ionicons/icons';
 
 // Giao diện dữ liệu chuẩn hóa theo thiết kế Database của bạn
@@ -78,8 +85,9 @@ interface CheckInRecord {
     CommonModule,
     FormsModule,
   ],
+  providers: [NFC, Ndef]
 })
-export class CheckInPage implements OnInit {
+export class CheckInPage implements OnInit, OnDestroy {
   // Model liên kết với Form
   CheckInData = {
     CardUid: '',
@@ -88,6 +96,19 @@ export class CheckInPage implements OnInit {
   };
 
   private toastCtrl = inject(ToastController);
+  private api = inject(Api);
+  private nfc = inject(NFC);
+  private platform = inject(Platform);
+  private cdr = inject(ChangeDetectorRef);
+
+  // --- CAMERA ---
+  @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
+  @ViewChild('canvasElement') canvasElement!: ElementRef<HTMLCanvasElement>;
+  isCameraOn = false;
+  stream: MediaStream | null = null;
+  plateImageBase64: string | null = null;
+  isLoading = false;
+  requiresForcePass = false;
 
   // Danh sách lịch sử Check-in tạm thời
   RecentCheckIns: CheckInRecord[] = [];
@@ -108,25 +129,86 @@ export class CheckInPage implements OnInit {
       warningOutline,
       carSportOutline,
       fileTrayOutline,
+      cameraOutline,
+      apertureOutline,
+      closeOutline,
     });
   }
 
   ngOnInit() {
-    // Khởi tạo một vài dữ liệu mẫu để bạn dễ hình dung giao diện
-    this.RecentCheckIns = [
-      {
-        CardUid: 'NFC_88291A',
-        PlateNumber: '75A-123.45',
-        VehicleType: 'Ô tô',
-        TimeIn: new Date(),
-      },
-      {
-        CardUid: 'NFC_33928B',
-        PlateNumber: '75F1-888.88',
-        VehicleType: 'Xe máy',
-        TimeIn: new Date(Date.now() - 300000),
-      },
-    ];
+    this.startNFC();
+  }
+
+  ngOnDestroy() {
+    this.stopCamera();
+  }
+
+  startNFC() {
+    if (this.platform.is('capacitor') || this.platform.is('cordova')) {
+      this.nfc.addTagDiscoveredListener().subscribe((event: any) => this.handleTagEvent(event));
+      this.nfc.addNdefListener().subscribe((event: any) => this.handleTagEvent(event));
+    }
+  }
+
+  handleTagEvent(event: any) {
+    if (event && event.tag && event.tag.id) {
+      this.CheckInData.CardUid = this.nfc.bytesToHexString(event.tag.id).toUpperCase();
+      this.cdr.detectChanges();
+      this.showToast('Đã nhận mã thẻ: ' + this.CheckInData.CardUid, 'success');
+      
+      if (this.isCameraOn) this.capturePlate();
+    }
+  }
+
+  async startCamera() {
+    if (this.isCameraOn) return;
+    try {
+      this.stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+      this.isCameraOn = true;
+      setTimeout(() => {
+        if (this.videoElement) this.videoElement.nativeElement.srcObject = this.stream;
+      }, 100);
+    } catch (err) {
+      this.showToast('Không thể mở Camera!', 'danger');
+    }
+  }
+
+  stopCamera() {
+    if (this.stream) {
+      this.stream.getTracks().forEach(track => track.stop());
+      this.isCameraOn = false;
+      this.stream = null;
+    }
+  }
+
+  capturePlate() {
+    if (!this.isCameraOn || !this.videoElement || !this.canvasElement) return;
+    const video = this.videoElement.nativeElement;
+    const canvas = this.canvasElement.nativeElement;
+    const context = canvas.getContext('2d');
+    if (context) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      this.plateImageBase64 = canvas.toDataURL('image/jpeg');
+      this.showToast('Đã chụp ảnh biển số!', 'success');
+    }
+  }
+
+  clearPlate() {
+    this.plateImageBase64 = null;
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.plateImageBase64 = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+    event.target.value = '';
   }
 
   async showToast(
@@ -149,30 +231,56 @@ export class CheckInPage implements OnInit {
   }
 
   // Hàm xử lý khi bấm nút "Xác nhận vào bãi"
-  onSubmit() {
-    if (!this.CheckInData.CardUid || !this.CheckInData.PlateNumber) {
-      this.showToast('Vui lòng nhập đầy đủ Mã thẻ và Biển số!', 'warning');
+  onSubmit(forcePass: boolean = false) {
+    if (!this.CheckInData.CardUid) {
+      this.showToast('Vui lòng nhập hoặc quẹt Mã thẻ!', 'warning');
       return;
     }
 
-    // Tạo record mới
-    const newRecord: CheckInRecord = {
-      CardUid: this.CheckInData.CardUid,
-      PlateNumber: this.CheckInData.PlateNumber,
-      VehicleType: this.CheckInData.VehicleType,
-      TimeIn: new Date(),
-    };
+    this.isLoading = true;
+    const vehicleTypeId = this.CheckInData.VehicleType === 'Ô tô' ? 1 : 2;
+    
+    // Gọi AI Backend thực tế để nhận diện biển số & đối chiếu thẻ
+    this.api.scanCard(
+      this.CheckInData.CardUid, 
+      undefined, 
+      undefined, 
+      this.plateImageBase64 || undefined, 
+      vehicleTypeId, 
+      forcePass
+    ).subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+        this.requiresForcePass = false;
+        this.showToast(res.message, 'success');
+        
+        this.RecentCheckIns.unshift({
+          CardUid: this.CheckInData.CardUid,
+          PlateNumber: res.data?.plateNumber || 'N/A',
+          VehicleType: res.data?.vehicleType || this.CheckInData.VehicleType,
+          TimeIn: new Date()
+        });
 
-    // Đẩy record mới lên đầu danh sách
-    this.RecentCheckIns.unshift(newRecord);
+        this.CheckInData.CardUid = '';
+        this.CheckInData.PlateNumber = '';
+        this.clearPlate();
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.isLoading = false;
+        const errData = err.error || {};
+        this.showToast(errData.message || 'Lỗi xử lý thẻ!', 'danger');
+        
+        // Nếu AI phát hiện biển số không khớp, Backend sẽ yêu cầu Force Pass
+        if (errData.requiresForcePass || errData.RequiresForcePass) {
+           this.requiresForcePass = true;
+        }
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
-    this.showToast('Ghi nhận vào bãi thành công!', 'success');
-
-    // Xóa trắng form để chuẩn bị cho xe tiếp theo
-    this.CheckInData = {
-      CardUid: '',
-      PlateNumber: '',
-      VehicleType: 'Xe máy', // Giữ mặc định là xe máy cho tiện
-    };
+  forcePass() {
+    this.onSubmit(true);
   }
 }
