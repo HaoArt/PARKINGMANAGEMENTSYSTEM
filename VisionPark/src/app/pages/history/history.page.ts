@@ -20,6 +20,7 @@ import {
   ToastController,
   Platform,
 } from '@ionic/angular/standalone';
+import { Subscription } from 'rxjs';
 import { addIcons } from 'ionicons';
 import {
   scanOutline,
@@ -141,6 +142,9 @@ export class HistoryPage implements OnInit, OnDestroy {
 
   fullScreenImage: string | null = null;
 
+  private nfcSub1?: Subscription;
+  private nfcSub2?: Subscription;
+
   constructor(
     private nfc: NFC, // Tiêm NFC
     private cdr: ChangeDetectorRef, // Tiêm ChangeDetectorRef để chống đơ màn hình
@@ -155,19 +159,21 @@ export class HistoryPage implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.stopCamera();
+    if (this.nfcSub1) this.nfcSub1.unsubscribe();
+    if (this.nfcSub2) this.nfcSub2.unsubscribe();
   }
 
   // 👉 HÀM LẮNG NGHE THẺ NFC CHẠM VÀO ĐIỆN THOẠI
   startNFC() {
     if (this.platform.is('capacitor') || this.platform.is('cordova')) {
       // 1. Lắng nghe thẻ NFC cơ bản (Thẻ trắng)
-      this.nfc.addTagDiscoveredListener().subscribe({
+      this.nfcSub1 = this.nfc.addTagDiscoveredListener().subscribe({
         next: (event: any) => this.handleTagEvent(event),
         error: (err) => console.error('Lỗi NFC Tag:', err),
       });
 
       // 2. BẮT BUỘC: Lắng nghe thẻ có chứa dữ liệu NDEF để chặn Android chuyển hướng
-      this.nfc.addNdefListener().subscribe({
+      this.nfcSub2 = this.nfc.addNdefListener().subscribe({
         next: (event: any) => this.handleTagEvent(event),
         error: (err) => console.error('Lỗi NFC NDEF:', err),
       });

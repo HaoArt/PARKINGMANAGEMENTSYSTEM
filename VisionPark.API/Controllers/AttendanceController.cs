@@ -52,8 +52,8 @@ namespace VisionPark.API.Controllers
                         {
                             fullName = a.User != null ? a.User.FullName : "Không xác định",
                             faceImageUrl = a.User?.FaceImageUrl,
-                            checkInTime = a.CheckInTime,
-                            checkOutTime = a.CheckOutTime,
+                            checkInTime = a.CheckInTime.ToString("yyyy-MM-ddTHH:mm:ss"),
+                            checkOutTime = a.CheckOutTime.HasValue ? a.CheckOutTime.Value.ToString("yyyy-MM-ddTHH:mm:ss") : null,
                             workDuration = a.CheckOutTime.HasValue
                                 ? $"{(a.CheckOutTime.Value - a.CheckInTime).Hours}h {(a.CheckOutTime.Value - a.CheckInTime).Minutes}m"
                                 : null

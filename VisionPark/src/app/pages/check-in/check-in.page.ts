@@ -28,6 +28,7 @@ import { addIcons } from 'ionicons';
 import { Api } from '../../services/api';
 import { NFC, Ndef } from '@awesome-cordova-plugins/nfc/ngx';
 import { Platform } from '@ionic/angular/standalone';
+import { Subscription } from 'rxjs';
 
 import {
   idCardOutline,
@@ -113,6 +114,9 @@ export class CheckInPage implements OnInit, OnDestroy {
   // Danh sách lịch sử Check-in tạm thời
   RecentCheckIns: CheckInRecord[] = [];
 
+  private nfcSub1?: Subscription;
+  private nfcSub2?: Subscription;
+
   constructor() {
     // Đăng ký các icon sẽ dùng trên giao diện
     addIcons({
@@ -141,12 +145,14 @@ export class CheckInPage implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.stopCamera();
+    if (this.nfcSub1) this.nfcSub1.unsubscribe();
+    if (this.nfcSub2) this.nfcSub2.unsubscribe();
   }
 
   startNFC() {
     if (this.platform.is('capacitor') || this.platform.is('cordova')) {
-      this.nfc.addTagDiscoveredListener().subscribe((event: any) => this.handleTagEvent(event));
-      this.nfc.addNdefListener().subscribe((event: any) => this.handleTagEvent(event));
+      this.nfcSub1 = this.nfc.addTagDiscoveredListener().subscribe((event: any) => this.handleTagEvent(event));
+      this.nfcSub2 = this.nfc.addNdefListener().subscribe((event: any) => this.handleTagEvent(event));
     }
   }
 
