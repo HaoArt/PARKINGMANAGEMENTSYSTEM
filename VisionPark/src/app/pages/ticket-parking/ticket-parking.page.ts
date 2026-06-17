@@ -5,7 +5,7 @@ import {
   inject,
   ChangeDetectorRef,
   ViewChild,
-  ElementRef
+  ElementRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -109,7 +109,7 @@ export class TicketParkingPage implements OnInit, OnDestroy {
 
   selectedImageFile: File | null = null;
   imagePreview: string | ArrayBuffer | null = null;
-  
+
   faceImageBase64: string | null = null;
   facePreview: string | ArrayBuffer | null = null;
 
@@ -143,7 +143,7 @@ export class TicketParkingPage implements OnInit, OnDestroy {
       searchTerm: this.searchTerm,
       status: this.filterStatus,
       pageNumber: this.currentPage,
-      pageSize: this.itemsPerPage
+      pageSize: this.itemsPerPage,
     };
 
     this.api.getMonthlyTickets(params).subscribe({
@@ -182,7 +182,7 @@ export class TicketParkingPage implements OnInit, OnDestroy {
     }
     try {
       this.stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: isFace ? 'user' : 'environment' }
+        video: { facingMode: isFace ? 'user' : 'environment' },
       });
       this.isCameraActive = true;
       this.isFaceCaptureMode = isFace;
@@ -194,7 +194,10 @@ export class TicketParkingPage implements OnInit, OnDestroy {
       }, 100);
     } catch (err: any) {
       console.error('Lỗi truy cập webcam: ', err);
-      this.showToast('Không thể truy cập camera! Vui lòng kiểm tra quyền.', 'danger');
+      this.showToast(
+        'Không thể truy cập camera! Vui lòng kiểm tra quyền.',
+        'danger',
+      );
     }
   }
 
@@ -203,7 +206,8 @@ export class TicketParkingPage implements OnInit, OnDestroy {
   }
 
   async captureImage() {
-    if (!this.isCameraActive || !this.videoElement || !this.canvasElement) return;
+    if (!this.isCameraActive || !this.videoElement || !this.canvasElement)
+      return;
 
     const video = this.videoElement.nativeElement;
     const canvas = this.canvasElement.nativeElement;
@@ -280,7 +284,10 @@ export class TicketParkingPage implements OnInit, OnDestroy {
       return;
     }
     if (!this.faceImageBase64) {
-      this.showToast('Vui lòng chụp khuôn mặt để dự phòng quên thẻ!', 'warning');
+      this.showToast(
+        'Vui lòng chụp khuôn mặt để dự phòng quên thẻ!',
+        'warning',
+      );
       return;
     }
     if (!this.regData.customerName) {
@@ -337,21 +344,38 @@ export class TicketParkingPage implements OnInit, OnDestroy {
         };
 
         // LOGIC CHỐNG SAO CHÉP THẺ: Ghi Token bảo mật vào chip NFC
-        if (newCardToken && (this.platform.is('capacitor') || this.platform.is('cordova'))) {
-          this.showToast('Vui lòng GIỮ NGUYÊN THẺ ở mặt lưng để ghi dữ liệu bảo mật...', 'warning');
-          
-          const message = [this.ndef.textRecord(newCardToken)];
-          
+        if (
+          newCardToken &&
+          (this.platform.is('capacitor') || this.platform.is('cordova'))
+        ) {
+          this.showToast(
+            'Vui lòng GIỮ NGUYÊN THẺ ở mặt lưng để ghi dữ liệu bảo mật...',
+            'warning',
+          );
+
+          const message = [
+            this.ndef.textRecord(newCardToken),
+            // 👉 Thêm AAR: Ép Android CHỈ được phép mở thẻ này bằng ứng dụng của bạn.
+            // (Hãy thay 'com.yourcompany.visionpark' bằng ID/Package Name thực tế của app bạn trong file capacitor.config.ts)
+            this.ndef.androidApplicationRecord('com.yourcompany.visionpark'),
+          ];
+
           this.nfc.write(message).then(
             () => {
-              this.showToast(`Đăng ký và ghi dữ liệu thẻ thành công!\nBiển số: ${plate}`, 'success');
+              this.showToast(
+                `Đăng ký và ghi dữ liệu thẻ thành công!\nBiển số: ${plate}`,
+                'success',
+              );
               handleSuccessQR();
             },
             (err) => {
-              this.showToast('Lỗi khi ghi thẻ! Thẻ có thể không được hỗ trợ hoặc bị lấy ra quá sớm.', 'danger');
+              this.showToast(
+                'Lỗi khi ghi thẻ! Thẻ có thể không được hỗ trợ hoặc bị lấy ra quá sớm.',
+                'danger',
+              );
               this.isSubmitting = false;
               this.cdr.detectChanges();
-            }
+            },
           );
         } else {
           this.showToast(
