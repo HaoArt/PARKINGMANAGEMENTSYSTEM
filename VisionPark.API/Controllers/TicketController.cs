@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿using Microsoft.AspNetCore.Mvc;
+﻿﻿﻿﻿﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VisionPark.API.Data;
 using VisionPark.API.Models;
@@ -243,7 +243,7 @@ namespace VisionPark.API.Controllers
                     CustomerName = t.CustomerName,
                     PhoneNumber = t.PhoneNumber,
                     RegisterPlate = t.RegisterPlate,
-                    VehicleType = t.VehicleType != null ? t.VehicleType.TypeName : "Không xác định",
+                    VehicleType = t.VehicleType != null ? t.VehicleType.TypeName : (t.VehicleTypeID == 2 ? "Ô tô" : "Xe máy"),
                     CardUID = t.Card != null ? t.Card.CardUID : "Không có thẻ",
                     StartDate = t.StartDate,
                     EndDate = t.EndDate,

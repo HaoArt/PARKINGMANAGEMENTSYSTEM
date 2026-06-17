@@ -45,7 +45,7 @@ namespace VisionPark.API.Controllers
                     .Select(x => new 
                     {
                         Plate = string.IsNullOrEmpty(x.LicensePlateIn) ? "Chưa nhận diện" : x.LicensePlateIn,
-                        Type = x.VehicleTypeID == 1 ? "Ô tô" : "Xe máy",
+                        Type = x.VehicleTypeID == 2 ? "Ô tô" : "Xe máy",
                         TimeIn = x.CheckInTime.ToString("HH:mm - dd/MM/yyyy"),
                         Status = "Đang trong bãi"
                     })
@@ -147,7 +147,7 @@ namespace VisionPark.API.Controllers
                     .Select(x => new 
                     {
                         Plate = string.IsNullOrEmpty(x.LicensePlateIn) ? "Chưa nhận diện" : x.LicensePlateIn,
-                        Type = x.VehicleTypeID == 1 ? "Ô tô" : "Xe máy",
+                        Type = x.VehicleTypeID == 2 ? "Ô tô" : "Xe máy",
                         TimeIn = x.CheckInTime.ToString("HH:mm - dd/MM/yyyy"),
                         Status = x.CheckOutTime == null ? "Đang trong bãi" : "Đã xuất bến"
                     })
