@@ -135,7 +135,7 @@ export class HistoryPage implements OnInit, OnDestroy {
   stream: MediaStream | null = null;
   plateImageBase64: string | null = null;
   faceImageBase64: string | null = null;
-  selectedVehicleType: number = 2; // 1: Ô tô, 2: Xe máy mặc định
+  selectedVehicleType: number = 1; // 1: Xe máy, 2: Ô tô
   requiresForcePass = false;
   lastFailedCardInfo: { nfcId: string, cardToken?: string } | null = null;
 

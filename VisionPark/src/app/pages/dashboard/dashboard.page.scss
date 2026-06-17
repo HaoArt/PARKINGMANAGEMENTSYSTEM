@@ -1696,6 +1696,7 @@ table {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     border-bottom: 2px solid #f1f5f9;
+    white-space: nowrap;
   }
 
   .table-row {
@@ -1714,6 +1715,7 @@ table {
       vertical-align: middle;
       border-top: 1px solid transparent;
       border-bottom: 1px solid transparent;
+      white-space: nowrap;
 
       &:first-child {
         border-radius: 12px 0 0 12px;
@@ -1903,12 +1905,18 @@ table {
 @media (max-width: 768px) {
   .main-wrapper {
     padding: 1rem;
+    overflow-x: hidden;
   }
 
   .dashboard-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1.25rem;
+    gap: 1rem;
+    
+    h1 {
+      font-size: 1.6rem;
+    }
+    
     .header-actions,
     .btn-primary {
       width: 100%;
@@ -1918,28 +1926,47 @@ table {
 
   .stats-container {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .stat-card {
+    padding: 1.2rem;
+    .value {
+      font-size: 1.8rem;
+    }
+  }
+
+  .table-container {
+    padding: 1rem;
   }
 
   .table-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 1rem;
   }
   .table-tools {
     width: 100%;
     flex-direction: column;
+    gap: 0.8rem;
   }
   .search-input-group,
   .filter-dropdown {
     width: 100%;
+    box-sizing: border-box;
   }
   .search-input-group input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .filter-dropdown select {
     width: 100%;
   }
 
   .responsive-table-wrapper {
-    margin: 0 -1.5rem;
-    padding: 0 1.5rem;
-    width: calc(100% + 3rem);
+    margin: 0 -1rem;
+    padding: 0 1rem;
+    width: calc(100% + 2rem);
   }
 
   .pagination-footer {

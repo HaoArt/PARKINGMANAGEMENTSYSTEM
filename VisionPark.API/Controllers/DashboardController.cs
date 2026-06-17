@@ -64,7 +64,7 @@ namespace VisionPark.API.Controllers
 
             if (!string.IsNullOrEmpty(searchTerm))
             {
- ao               query = query.Where(p => p.LicensePlateIn.Contains(searchTerm) || (p.LicensePlateOut != null && p.LicensePlateOut.Contains(searchTerm)));
+                query = query.Where(p => p.LicensePlateIn.Contains(searchTerm) || (p.LicensePlateOut != null && p.LicensePlateOut.Contains(searchTerm)));
             }
 
             if (!string.IsNullOrEmpty(status) && status != "all")

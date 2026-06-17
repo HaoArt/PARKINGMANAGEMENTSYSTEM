@@ -69,9 +69,9 @@ namespace VisionPark.API.Controllers
                 string customerName = "Khách vãng lai";
                 string ticketStatus = "Hợp lệ";
                 string expiryDate = "---";
-                int aiVehicleTypeId = request.VehicleTypeID ?? 2; // Lấy trực tiếp từ Frontend để đảm bảo AI đọc đúng thuật toán
+                int aiVehicleTypeId = request.VehicleTypeID ?? 1; // Lấy trực tiếp từ Frontend (1: Xe máy, 2: Ô tô)
                 int finalVehicleTypeId = aiVehicleTypeId; // Mã dùng để lưu CSDL
-                string vehicleType = aiVehicleTypeId == 1 ? "Ô tô" : "Xe máy";
+                string vehicleType = aiVehicleTypeId == 2 ? "Ô tô" : "Xe máy";
 
                 var activeSession = await _context.ParkingSessions
                     .FirstOrDefaultAsync(s => s.CardID == card.CardID && s.CheckOutTime == null);
@@ -89,7 +89,7 @@ namespace VisionPark.API.Controllers
                     ticketStatus = isCurrentlyExpired ? "Đã hết hạn" : (daysRemaining <= 7 ? $"Sắp hết hạn ({Math.Floor(daysRemaining)} ngày)" : "Hợp lệ");
                     customerName = ticket.CustomerName;
                     plateNumber = ticket.RegisterPlate;
-                    vehicleType = ticket.VehicleType?.TypeName ?? "Ô tô";
+                    vehicleType = ticket.VehicleType != null ? ticket.VehicleType.TypeName : (ticket.VehicleTypeID == 2 ? "Ô tô" : "Xe máy");
                     expiryDate = ticket.EndDate.ToString("dd/MM/yyyy");
                     finalVehicleTypeId = ticket.VehicleTypeID;
 
@@ -273,8 +273,8 @@ namespace VisionPark.API.Controllers
                         decimal basePriceBike = decimal.TryParse(GetConfig("GuestPrice_BikeBasePrice", "5000"), out var bbp) ? bbp : 5000m;
                         decimal extraPerHourBike = decimal.TryParse(GetConfig("GuestPrice_BikeExtraPerHour", "2000"), out var beph) ? beph : 2000m;
 
-                        decimal basePrice = activeSession.VehicleTypeID == 1 ? basePriceCar : basePriceBike;
-                        decimal extraPerHour = activeSession.VehicleTypeID == 1 ? extraPerHourCar : extraPerHourBike;
+                        decimal basePrice = activeSession.VehicleTypeID == 2 ? basePriceCar : basePriceBike;
+                        decimal extraPerHour = activeSession.VehicleTypeID == 2 ? extraPerHourCar : extraPerHourBike;
 
                         if (totalHours <= 4)
                         {
@@ -293,6 +293,12 @@ namespace VisionPark.API.Controllers
                     }
 
                     await _context.SaveChangesAsync();
+
+                    // Phục hồi lại đúng loại xe lúc vào của khách vãng lai để hiển thị lên thông báo thay vì lấy Toggle hiện tại trên màn hình
+                    if (card.CardType == "Guest")
+                    {
+                        vehicleType = activeSession.VehicleTypeID == 2 ? "Ô tô" : "Xe máy";
+                    }
 
                     displayInfo = new
                     {
@@ -358,7 +364,7 @@ namespace VisionPark.API.Controllers
                     CardType = s.Card != null ? s.Card.CardType : "Guest",
                     PlateNumberIn = s.LicensePlateIn ?? "---",
                     PlateNumberOut = s.LicensePlateOut ?? "---",
-                    VehicleType = s.VehicleType != null ? s.VehicleType.TypeName : (s.VehicleTypeID == 1 ? "Ô tô" : "Xe máy"),
+                    VehicleType = s.VehicleType != null ? s.VehicleType.TypeName : (s.VehicleTypeID == 2 ? "Ô tô" : "Xe máy"),
                     CheckInTime = s.CheckInTime,
                     CheckOutTime = s.CheckOutTime,
                     FaceImageUrlIn = s.FaceImageUrlIn,

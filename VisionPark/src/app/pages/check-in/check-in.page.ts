@@ -238,7 +238,7 @@ export class CheckInPage implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
-    const vehicleTypeId = this.CheckInData.VehicleType === 'Ô tô' ? 1 : 2;
+    const vehicleTypeId = this.CheckInData.VehicleType === 'Ô tô' ? 2 : 1;
     
     // Gọi AI Backend thực tế để nhận diện biển số & đối chiếu thẻ
     this.api.scanCard(
