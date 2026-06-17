@@ -96,4 +96,19 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 app.MapControllers();
+// Tự động áp dụng Migration để tạo bảng trên Somee khi Render khởi động
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        db.Database.Migrate();
+        Console.WriteLine("Đã đồng bộ Database thành công!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Lỗi khi chạy Migration: " + ex.Message);
+    }
+}
+
 app.Run();

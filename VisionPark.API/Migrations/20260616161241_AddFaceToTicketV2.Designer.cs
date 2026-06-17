@@ -12,8 +12,8 @@ using VisionPark.API.Data;
 namespace VisionPark.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260616053506_AddTicketPrice")]
-    partial class AddTicketPrice
+    [Migration("20260616161241_AddFaceToTicketV2")]
+    partial class AddFaceToTicketV2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -140,6 +140,9 @@ namespace VisionPark.API.Migrations
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("FaceImageUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");

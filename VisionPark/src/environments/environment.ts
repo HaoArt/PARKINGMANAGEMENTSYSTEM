@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'http://192.168.1.14:5295/api',
+  apiUrl: 'http://localhost:5295/api', // Thay bằng IP LAN thực tế (vd: 192.168.1.x:5295) nếu build ra điện thoại
 };
 
 /*
