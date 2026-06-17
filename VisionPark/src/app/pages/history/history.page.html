@@ -231,9 +231,11 @@
                 <ion-icon name="warning-outline" style="font-size: 1.5rem;"></ion-icon>
                 <span class="font-bold text-sm uppercase">Yêu cầu xác nhận bảo vệ</span>
               </div>
-              <button class="btn-warning full-width" (click)="forcePass()" [disabled]="isLoading" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; border-radius: 8px; font-weight: bold; background: linear-gradient(135deg, var(--ion-color-warning) 0%, #ff9800 100%); color: #000; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(255, 196, 9, 0.3);">
-                <ion-icon name="checkmark-circle-outline" style="font-size: 1.2rem;"></ion-icon> BỎ QUA CẢNH BÁO & MỞ BARIE
-              </button>
+              <div class="flex justify-center">
+                <button class="btn-warning" (click)="forcePass()" [disabled]="isLoading" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 24px; border-radius: 8px; font-weight: bold; background: linear-gradient(135deg, var(--ion-color-warning) 0%, #ff9800 100%); color: #000; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(255, 196, 9, 0.3);">
+                  <ion-icon name="checkmark-circle-outline" style="font-size: 1.2rem;"></ion-icon> BỎ QUA CẢNH BÁO & MỞ BARIE
+                </button>
+              </div>
               <p class="text-xs text-muted mt-3 mb-0 text-center italic" style="opacity: 0.8;">
                 *Hành động này sẽ ghi đè cảnh báo AI và ép hệ thống lưu dữ liệu.
               </p>
